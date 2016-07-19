@@ -1,9 +1,10 @@
 import numpy as np
 import scipy
 from scipy.ndimage.morphology import binary_dilation, binary_erosion
+import matplotlib.pyplot as plt
 
-
-
+import logging
+import sys
 
 def find_peaks(y, thres=0.0, min_dist=1):
     '''Peak detection routine.
@@ -51,140 +52,87 @@ def find_peaks(y, thres=0.0, min_dist=1):
 
     return peaks
 
-
-def db(power):
-
-    return 10*np.log10(power)
-def steeringVector(theta):
-    phase_diff = distance_between_rx*np.cos(theta)*2*np.pi*frequency/speedoflight
-    return angle2c(np.array([rx*phase_diff for rx in range(rx_num)]))
-def genSteeringVectors():
-
-    return np.vstack( [ steeringVector(theta) for theta in np.linspace(0,np.pi,180) ] ).T
-def angle2c(theta):
-
-    return 1j*np.sin(theta)+np.cos(theta)
-def detectSignal(signal, burn_initial_samples=200):
-    # thres = np.max(np.abs(signal))/10
-    # thres = np.max(np.abs(signal[burn_initial_samples:burn_initial_samples*3]))*5
-    thres  = 5e-3
+def detectSignal(signal, burn_initial_samples=200, thres = 5e-3):
+    ''' Returns indexes of samples that are above the threshold (in terms of magnitude)'''
     t = np.abs(signal) > thres 
     t = binary_dilation(t,iterations=200)
-    # t = binary_dilation(binary_erosion(binary_dilation(t,iterations=10),iterations=25),iterations=100)
     return np.where(t!=0)[0]
-def angleDiff(signal1, signal2):
-    return np.mod(np.angle(signal1)-np.angle(signal2)+np.pi, 2*np.pi)-np.pi
-    # return np.minimum(np.angle(signal1)-np.angle(signal2),6.28-(np.angle(signal1)-np.angle(signal2)))
-def readSamples(filename, size = -1):
-    # print 'reading file: {0}'.format(filename)
+
+def readSamples(filename, maxsize = -1):
+    ''' Read samples from file
+        The file format is [n0.re, n0.im, n1.re, n1.im, ... ]
+    '''
+    print 'reading file: {0}'.format(filename)
     dat = np.fromfile(open(filename), dtype=scipy.float32)
-    if size == -1:
-        size = len(dat)
-    dat = dat[:size*2]
+    if maxsize == -1:
+        maxsize = len(dat)
+    dat = dat[:maxsize]
     dat_complex = dat[0::2] + dat[1::2]*1j
     return dat_complex
+
 def writeSamples(filename, samples):
+    ''' Write samples to file
+        The file format is [n0.re, n0.im, n1.re, n1.im, ... ]
+    '''    
     print 'writing file: {0}'.format(filename)
     raw_seq = np.vstack([np.real(samples),np.imag(samples)]).T.ravel()
     raw_seq.astype(scipy.float32).tofile(open(filename,'w'))
-def plotComplex(samples):
-    plt.plot(np.real(samples),np.imag(samples),'.')
 
+def trim_samples(raw_samples, burst_size = 1000, number_of_bursts = 3):
 
-def feedback(samples, seq_len = 1000):
-    shifted_samples = np.zeros(samples.size)
-    shifted_samples[seq_len:] = np.abs(samples[:-seq_len])
+    # Find samples with larger magnitude
+    trimmed_samples_id = detectSignal( raw_samples[0] )
+    
+    if( len(trimmed_samples_id) < number_of_bursts*burst_size ):
+        logging.error('Number of samples over the signal detection threshold = {}, Expected at least {}'.format(
+            len(trimmed_samples_id), number_of_bursts*burst_size ))
+        sys.exit(1)
 
-    return np.maximum(np.abs(samples) - shifted_samples, 0)
-
-def trim_samples(raw_samples, ref):
-
-    ref = np.ones(1000)
-
-    trimmed_samples_id = np.array(list( set.union(*[ set(detectSignal(x)) for x in raw_samples])))
-    print "number of samples = {0}".format(len(trimmed_samples_id))
-    trimmed_samples_id = np.sort(trimmed_samples_id)
+    # Extract samples with larger magnitude
     trimmed_samples = [ x[trimmed_samples_id] for x in raw_samples ]
 
 
+    # Convolve with a square function to find the exact location of the bursts
+    match = np.convolve(np.ones(burst_size), np.abs( trimmed_samples[0] ),mode='valid')
+    peaks = find_peaks(match, thres=0, min_dist=burst_size)
 
-    match = (np.convolve(ref[::-1], np.abs( feedback(trimmed_samples[0]) ),mode='valid'))
-    # match = np.abs(np.convolve(np.conjugate(ref[::-1]), np.abs(trimmed_samples[0]),mode='valid'))
-    # match = np.abs(np.convolve(np.conjugate(ref[::-1]), (trimmed_samples[0]),mode='valid'))
+    if( len(peaks) != number_of_bursts):
+        logging.error('Found {} bursts\n, Expected {}'.format( len(peaks), number_of_bursts ))
+        sys.exit(1)
 
-    # ref[:100] = 0
-    # ref[-100:] = 0
+    # find the indexes of the samples we want to keep
+    mask = np.zeros(match.size); mask[peaks] = 1
+    idx = np.convolve(np.ones(burst_size), mask)
 
-    # This is a hack --- find 1 peak in the first half and another peak in the second half
-    # peaks = np.array([np.argmax( match[:match.size/2]),match.size/2+np.argmax( match[match.size/2:])])
-    # peaks = np.argsort( match )[-2:]
-    # peaks = findpeak(match, np.arange(1, 20))
+    if(sum( idx!=0 ) != burst_size*number_of_bursts):
+        logging.error('Number of samples after trimming = {}\n, Expected {}'.format( 
+            sum( idx!=0 ), burst_size*number_of_bursts ))
+        sys.exit(1)
 
-    peaks = find_peaks(match, thres=0, min_dist=1000)
-
-    print 'peaks: '+str(peaks)
-
-    mask = np.zeros(match.size)
-    mask[peaks] = 1
-    ref_expanded = np.convolve(ref, mask)
-    _trimmed_samples = [ x*np.conjugate(ref_expanded) for x in trimmed_samples]
-    # trimmed_samples = [ x/ref_expanded for x in trimmed_samples]
-    # trimmed_samples = trimmed_samples[ref_expanded!=0]
-    print 'ref_expanded: '+str( sum(ref_expanded!=0)  )
-
-    # if(ref_expanded[ref_expanded.size/2] != 0):
-    if(sum( ref_expanded!=0 ) != 2000):
-        print 'The number of samples after trimming ({}) does not seem right'.format(sum( ref_expanded!=0 ))
-        assert(0)
-
-    # print np.where(ref_expanded!=0)[0]
-    return [ x[ref_expanded!=0] for x in _trimmed_samples]
-
-def calibration(trimmed_samples):
-    # This assumes the first half of samples are coming from reference Tx
-
-    # separate calibration signal
-    calibration_samples = [ x[:x.size/2] for x in trimmed_samples ]
-    samples = [ x[x.size/2:] for x in trimmed_samples ]
-
-    calib_ang_diff = [angleDiff( calibration_samples[i+1], calibration_samples[0] ) for i in range(rx_num-1) ]
-    calib_ang_diff_avg = [0]+[ np.median(x[x.size/4:x.size*3/4]) for x in calib_ang_diff]
-
-    synced_calibration_samples = [ x*angle2c(-y) for x,y in zip(calibration_samples,calib_ang_diff_avg)]
-    synced_samples = [ x*angle2c(-y) for x,y in zip(samples,calib_ang_diff_avg)]
-
-    return synced_samples, synced_calibration_samples
-def angular_diff(samples):
-
-    return [angleDiff( samples[i+1], samples[i] ) for i in range(len(samples)-1) ]
+    return [ x[idx!=0] for x in trimmed_samples]
 
 ######################################################################################################
 # Plot received signals
 ######################################################################################################
 
-import sys 
+import argparse
 
-if len(sys.argv) == 3:
-    run_id = sys.argv[1]
-    ref_file = sys.argv[2]
-else:
-    print """
-            please provide run id and reference_file
+parser = argparse.ArgumentParser(description='Extract bursts of signals from raw sample files')
+parser.add_argument('--run', type=str, default='0', help='run identifier')
+parser.add_argument('--bursts', type=int, default=2, help='number of bursts in the signal')
+parser.add_argument('--burst_size', type=int, default=1000, help='samples per burst')
+parser.add_argument('--rx', type=int, default=4, help='number of antennas')
+parser.add_argument('--path', type=str, default='/root/aoa/data/', help='path to the data folder')
 
-          """
+args = parser.parse_args()
 
-print sys.argv     
+# Read samples from raw data files
+raw_samples = [ readSamples(args.path+'rx'+str(rx+1)+'_'+str(args.run)+'.dat') for rx in range(args.rx) ] 
 
-aoa_path = '/root/aoa/'
-RX = 4
+# Extract the parts that correspond to the bursts
+trimmed_samples = trim_samples(raw_samples, burst_size = args.burst_size, number_of_bursts = args.bursts)
 
-raw_samples = [ readSamples(aoa_path+'data/rx'+str(rx)+'_'+str(run_id)+'.dat', 1e7) for rx in range(1,RX+1) ] 
-
-
-ref = readSamples(ref_file)
-trimmed_samples = trim_samples(raw_samples, ref)
-
-for rx in range(1,RX+1):
-    writeSamples(aoa_path+'data/trimmed_rx'+str(rx)+'_'+str(run_id)+'.dat', trimmed_samples[rx-1])
+for rx in range(args.rx):
+    writeSamples(args.path+'/trimmed_rx'+str(rx+1)+'_'+str(args.run)+'.dat', trimmed_samples[rx])
     
 
