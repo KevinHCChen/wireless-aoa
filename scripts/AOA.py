@@ -13,7 +13,7 @@ import argparse
 parser = argparse.ArgumentParser(description='plot signal strength for different AOA.')
 parser.add_argument('--run', type=str, default = None, help='run identifier')
 parser.add_argument('--rx', type=int, default=4, help='number of antennas')
-parser.add_argument('--path', type=str, default='../data/raw3peaks/', help='path to the data folder')
+parser.add_argument('--path', type=str, default='../data/testdata/', help='path to the data folder')
 parser.add_argument('--method', type=str, default='Music', choices=['Music','Correlation'],help='algorithm for AOA detection')
 parser.add_argument('--dRxRx', type=float, default = -0.15, help='distance between rx antennas (meters)')
 parser.add_argument('--dRxTx', type=float, default = 2.44, help='distance between rx and Tx (meters)')
@@ -61,7 +61,7 @@ def angle2c(theta):
 def angleDiff(signal1, signal2):
     return np.mod(np.angle(signal1)-np.angle(signal2)+np.pi, 2*np.pi)-np.pi
 def readSamples(filename, size = -1):
-    dat = np.fromfile(open(filename), dtype=scipy.float32)
+    dat = np.fromfile(open(filename, 'rb'), dtype=scipy.float32)
     if size == -1:
         size = len(dat)
     dat = dat[:size*2]
@@ -69,7 +69,7 @@ def readSamples(filename, size = -1):
     return dat_complex
 def writeSamples(filename, samples):
     raw_seq = np.vstack([np.real(samples),np.imag(samples)]).T.ravel()
-    raw_seq.astype(scipy.float32).tofile(open(filename,'w'))
+    raw_seq.astype(scipy.float32).tofile(open(filename,'wb'))
 def plotComplex(samples):
     plt.plot(np.real(samples),np.imag(samples),'.')
 
@@ -134,15 +134,15 @@ for run_iterator, run in enumerate(RUNS):
     pmax = np.max(angular_power)
     plt.plot([0,pmax*np.cos(theta)], [0, pmax*np.sin(theta)], _colors[run_iterator],label=str(run), alpha=0.7)
 
-    angle = int(re.split('-|\.', run)[1])
-    runid = int(re.split('-|\.', run)[1])
+#     angle = int(re.split('-|\.', run)[1])
+#     runid = int(re.split('-|\.', run)[1])
 
-    labels.append([angle, np.linspace(0,np.pi,180)[np.argmax(angular_power)]/np.pi*180 ])
+#     labels.append([angle, np.linspace(0,np.pi,180)[np.argmax(angular_power)]/np.pi*180 ])
 
-_labels = np.vstack(labels)
-error = _labels[:,0]- _labels[:,1]
-error_traditional = np.abs(error)
-print error_traditional.mean()
+# _labels = np.vstack(labels)
+# error = _labels[:,0]- _labels[:,1]
+# error_traditional = np.abs(error)
+# print error_traditional.mean()
 
 ######################################################################################################
 # Plot auxiliary stuff
@@ -172,5 +172,11 @@ plt.legend()
 if len(RUNS)==1:
     plt.figure(figsize=(8,4));
     plt.title('signal magnitude ('+str(run)+')')
-    plt.plot(np.abs(trimmed_samples[0]))
+    for i,x in enumerate(trimmed_samples):
+        plt.plot(np.abs(x), label='RX'+str(i+1))
+    plt.legend()
+
+    t = input('')
+
+
 

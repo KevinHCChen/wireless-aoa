@@ -150,9 +150,9 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
 	std::string ip1, ip2, ip3, ip4, ip5, ip6, ip7;
 	// ip1 = "addr=192.168.11.14";
 	ip1 = "addr=192.168.11.14";
-	ip2 = "addr=192.168.11.18";
-	ip3 = "addr=192.168.11.15";
-    ip4 = "addr=192.168.11.16";
+	ip2 = "addr=192.168.11.15";
+	ip3 = "addr=192.168.11.16";
+    ip4 = "addr=192.168.11.18";
     ip5 = "addr=192.168.11.20";
     ip6 = "addr=192.168.11.21";
     ip7 = "addr=192.168.11.22";

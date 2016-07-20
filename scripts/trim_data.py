@@ -76,16 +76,15 @@ def writeSamples(filename, samples):
     '''    
     print 'writing file: {0}'.format(filename)
     raw_seq = np.vstack([np.real(samples),np.imag(samples)]).T.ravel()
-    raw_seq.astype(scipy.float32).tofile(open(filename,'w'))
+    raw_seq.astype(scipy.float32).tofile(open(filename,'wb'))
 
 def trim_samples(raw_samples, burst_size = 1000, number_of_bursts = 3):
 
     # Find samples with larger magnitude
-    trimmed_samples_id = detectSignal( raw_samples[0] )
+    trimmed_samples_id = detectSignal( raw_samples[0][ :max([len(x) for x in raw_samples]) ] )
     
     if( len(trimmed_samples_id) < number_of_bursts*burst_size ):
-        logging.error('Number of samples over the signal detection threshold = {}, Expected at least {}'.format(
-            len(trimmed_samples_id), number_of_bursts*burst_size ))
+        logging.error('Number of samples over the signal detection threshold = {0}, Expected at least {1}'.format(len(trimmed_samples_id), number_of_bursts*burst_size ))
         sys.exit(1)
 
     # Extract samples with larger magnitude
@@ -97,7 +96,7 @@ def trim_samples(raw_samples, burst_size = 1000, number_of_bursts = 3):
     peaks = find_peaks(match, thres=0, min_dist=burst_size)
 
     if( len(peaks) != number_of_bursts):
-        logging.error('Found {} bursts\n, Expected {}'.format( len(peaks), number_of_bursts ))
+        logging.error('Found {0} bursts\n, Expected {1}'.format( len(peaks), number_of_bursts ))
         sys.exit(1)
 
     # find the indexes of the samples we want to keep
@@ -105,9 +104,13 @@ def trim_samples(raw_samples, burst_size = 1000, number_of_bursts = 3):
     idx = np.convolve(np.ones(burst_size), mask)
 
     if(sum( idx!=0 ) != burst_size*number_of_bursts):
-        logging.error('Number of samples after trimming = {}\n, Expected {}'.format( 
+        logging.error('Number of samples after trimming = {0}\n, Expected {1}'.format( 
             sum( idx!=0 ), burst_size*number_of_bursts ))
         sys.exit(1)
+
+    if len( np.unique( [len(x) for x in trimmed_samples]) ) != 1:
+        logging.error('Number of samples inconsistent')
+        sys.exit(1)        
 
     return [ x[idx!=0] for x in trimmed_samples]
 
@@ -115,16 +118,24 @@ def trim_samples(raw_samples, burst_size = 1000, number_of_bursts = 3):
 # Plot received signals
 ######################################################################################################
 
-import argparse
+try:
+    import argparse
+    parser = argparse.ArgumentParser(description='Extract bursts of signals from raw sample files')
+    parser.add_argument('--run', type=str, default='0', help='run identifier')
+    parser.add_argument('--bursts', type=int, default=2, help='number of bursts in the signal')
+    parser.add_argument('--burst_size', type=int, default=1000, help='samples per burst')
+    parser.add_argument('--rx', type=int, default=4, help='number of antennas')
+    parser.add_argument('--path', type=str, default='/root/aoa/data/', help='path to the data folder')
 
-parser = argparse.ArgumentParser(description='Extract bursts of signals from raw sample files')
-parser.add_argument('--run', type=str, default='0', help='run identifier')
-parser.add_argument('--bursts', type=int, default=2, help='number of bursts in the signal')
-parser.add_argument('--burst_size', type=int, default=1000, help='samples per burst')
-parser.add_argument('--rx', type=int, default=4, help='number of antennas')
-parser.add_argument('--path', type=str, default='/root/aoa/data/', help='path to the data folder')
-
-args = parser.parse_args()
+    args = parser.parse_args()
+except:
+    args = type('empty_object', (object,), {})()
+    args.run = sys.argv[1]
+    args.bursts = int(sys.argv[2])
+    args.rx = int(sys.argv[3])
+    args.burst_size = 1000
+    args.path = '/root/aoa/data/'
+    
 
 # Read samples from raw data files
 raw_samples = [ readSamples(args.path+'rx'+str(rx+1)+'_'+str(args.run)+'.dat') for rx in range(args.rx) ] 
@@ -133,6 +144,6 @@ raw_samples = [ readSamples(args.path+'rx'+str(rx+1)+'_'+str(args.run)+'.dat') f
 trimmed_samples = trim_samples(raw_samples, burst_size = args.burst_size, number_of_bursts = args.bursts)
 
 for rx in range(args.rx):
-    writeSamples(args.path+'/trimmed_rx'+str(rx+1)+'_'+str(args.run)+'.dat', trimmed_samples[rx])
+    writeSamples(args.path+'trimmed_rx'+str(rx+1)+'_'+str(args.run)+'.dat', trimmed_samples[rx])
     
 
