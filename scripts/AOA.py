@@ -194,11 +194,10 @@ for run_iterator, run in enumerate(RUNS):
 
         # extract frequencies ((note that there a minus sign since Yn are
         # defined as [y(n), y(n-1),y(n-2),..].T))
-        angle = -np.angle(component_roots)
-
-        # frequency normalisation
-        angular_power = Fe * angle / (2. * np.pi)
-        print(angular_power)
+        angle = (np.pi/2)+np.angle(component_roots)
+        degrees = np.round(angle[0]/np.pi*180)
+        angular_power = np.zeros(180)
+        angular_power[degrees] = 1
 
 
     # Normalize angular power
@@ -207,26 +206,25 @@ for run_iterator, run in enumerate(RUNS):
     ##########################################################################
     # Plot the angular power
     ##########################################################################
-    # angular_power_pt = np.vstack([power * np.array([np.cos(theta), np.sin(theta)])
-    #                               for power, theta in zip(angular_power, np.linspace(0, np.pi, 180))])
-    # plt.plot(angular_power_pt[:, 0], angular_power_pt[
-    #          :, 1], _colors[run_iterator],  alpha=0.7)
-    # theta = np.linspace(0, np.pi, 180)[np.argmax(angular_power)]
-    theta=angular_power
+    angular_power_pt = np.vstack([power * np.array([np.cos(theta), np.sin(theta)])
+                                  for power, theta in zip(angular_power, np.linspace(0, np.pi, 180))])
+    plt.plot(angular_power_pt[:, 0], angular_power_pt[
+             :, 1], _colors[run_iterator],  alpha=0.7)
+    theta = np.linspace(0, np.pi, 180)[np.argmax(angular_power)]
     pmax = np.max(angular_power)
     plt.plot
     plt.plot([0, pmax * np.cos(theta)], [0, pmax * np.sin(theta)],
              _colors[run_iterator], label=str(run), alpha=0.7)
 
-#     angle = int(re.split('-|\.', run)[1])
-#     runid = int(re.split('-|\.', run)[1])
+    angle = int(re.split('-|\.', run)[1])
+    runid = int(re.split('-|\.', run)[1])
 
-#     labels.append([angle, np.linspace(0,np.pi,180)[np.argmax(angular_power)]/np.pi*180 ])
+    labels.append([angle, np.linspace(0,np.pi,180)[np.argmax(angular_power)]/np.pi*180 ])
 
-# _labels = np.vstack(labels)
-# error = _labels[:,0]- _labels[:,1]
-# error_traditional = np.abs(error)
-# print error_traditional.mean()
+_labels = np.vstack(labels)
+error = _labels[:,0]- _labels[:,1]
+error_traditional = np.abs(error)
+print error_traditional.mean()
 
 ##########################################################################
 # Plot auxiliary stuff
