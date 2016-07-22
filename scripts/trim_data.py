@@ -52,7 +52,7 @@ def find_peaks(y, thres=0.0, min_dist=1):
 
     return peaks
 
-def detectSignal(signal, burn_initial_samples=200, thres = 5e-3):
+def detectSignal(signal, burn_initial_samples=200, thres = 1e-3):
     ''' Returns indexes of samples that are above the threshold (in terms of magnitude)'''
     t = np.abs(signal) > thres 
     t = binary_dilation(t,iterations=200)
@@ -82,6 +82,9 @@ def trim_samples(raw_samples, burst_size = 1000, number_of_bursts = 3):
 
     # Find samples with larger magnitude
     trimmed_samples_id = detectSignal( raw_samples[0][ :max([len(x) for x in raw_samples]) ] )
+
+    # do we really need this?  the selected id should always be in the overlapping part
+    trimmed_samples_id = trimmed_samples_id[ trimmed_samples_id < min([x.size for x in raw_samples]) ]
     
     if( len(trimmed_samples_id) < number_of_bursts*burst_size ):
         logging.error('Number of samples over the signal detection threshold = {0}, Expected at least {1}'.format(len(trimmed_samples_id), number_of_bursts*burst_size ))
@@ -135,11 +138,13 @@ except:
     args.rx = int(sys.argv[3])
     args.burst_size = 1000
     args.path = '/root/aoa/data/'
-    
+
+print 'version 2'    
 
 # Read samples from raw data files
 raw_samples = [ readSamples(args.path+'rx'+str(rx+1)+'_'+str(args.run)+'.dat') for rx in range(args.rx) ] 
 
+print 'measurement length:', [x.size for x in raw_samples]
 # Extract the parts that correspond to the bursts
 trimmed_samples = trim_samples(raw_samples, burst_size = args.burst_size, number_of_bursts = args.bursts)
 

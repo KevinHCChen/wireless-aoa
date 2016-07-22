@@ -150,9 +150,9 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
 	std::string ip1, ip2, ip3, ip4;
 	// ip1 = "addr=192.168.11.14";
 	ip1 = "addr=192.168.11.14";
-	ip2 = "addr=192.168.11.18";
-	ip3 = "addr=192.168.11.15";
-    ip4 = "addr=192.168.11.16";
+	ip2 = "addr=192.168.11.15";
+	ip3 = "addr=192.168.11.16";
+    ip4 = "addr=192.168.11.18";
     
     rate = 100e6/decimation;//  780000;
     freq = 916e6;//463e6;//916000000;
