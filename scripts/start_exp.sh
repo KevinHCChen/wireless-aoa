@@ -20,7 +20,7 @@ echo "Starting RX - Run $1"
 ssh root@$DELL_RX "sh -c 'nohup  /root/aoa/7rx_to_file --freq=$FREQ --rate=$RATE --gain=25 --run=$1 --runtime 4 > /dev/null 2>&1 &'"
 
 
-sleep 4
+sleep 5
 echo "Start TX"
 ssh root@$DELL_TX "/root/aoa/start_tx.sh $FREQ $RATE $REF $REF" 
 sleep 3
