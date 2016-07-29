@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy import matlib as ml
 import scipy
 from scipy.ndimage.morphology import binary_dilation, binary_erosion
 from matplotlib import colors
@@ -129,11 +130,16 @@ labels = []
 ALLsamples = []
 for run_iterator, run in enumerate(RUNS):
 
-    trimmed_samples = [readSamples(
-        args.path + 'trimmed_rx' + str(rx + 1) + '_' + str(run) + '.dat') for rx in range(args.rx)]
-    synced_samples, synced_calibration_samples = calibration(trimmed_samples)
+    # trimmed_samples = [readSamples(
+        # args.path + 'trimmed_rx' + str(rx + 1) + '_' + str(run) + '.dat') for rx in range(args.rx)]
+
+    # trimmed_samples = [trimmed_samples[0], trimmed_samples[3], trimmed_samples[1], trimmed_samples[2]]
+    # trimmed_samples=genSteeringVectors()
+    # synced_samples, synced_calibration_samples = calibration(trimmed_samples)
+    # aggregated_samples = np.vstack(synced_samples)
+    aggregated_samples = ml.repmat(steeringVector(110), 1000, 1)
+    trimmed_samples = aggregated_samples
     steeringvectors = genSteeringVectors()
-    aggregated_samples = np.vstack(synced_samples)
     ALLsamples.append(aggregated_samples)
 
     if args.method == 'Correlation':
@@ -194,9 +200,20 @@ for run_iterator, run in enumerate(RUNS):
 
         # extract frequencies ((note that there a minus sign since Yn are
         # defined as [y(n), y(n-1),y(n-2),..].T))
-        angle = (np.pi/2)+np.angle(component_roots)
-        degrees = np.round(angle[0]/np.pi*180)
+        angle = np.angle(component_roots)
+        wavelength = speedoflight/Fe
+        adjusted_angle = np.arccos((wavelength*angle)/(2*np.pi*args.dRxRx))
+        if np.isnan(adjusted_angle):
+            print(str(run) + " is nan")
+
+            # continue
+        degrees = np.round(adjusted_angle[0]/np.pi*180)
+        print(str(run) + " returned: " + str(degrees))
         angular_power = np.zeros(180)
+        if degrees>180 or degrees<0:
+            # degrees=degrees-180
+            print(str(run) + " returned " + str(degrees))
+            # continue
         angular_power[degrees] = 1
 
 
