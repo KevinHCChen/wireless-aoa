@@ -18,7 +18,7 @@ parser.add_argument('--rx', type=int, default=4, help='number of antennas')
 parser.add_argument('--path', type=str,
                     default='../data/testdata/', help='path to the data folder')
 parser.add_argument('--method', type=str, default='Music',
-                    choices=['Music', 'Correlation', "rMusic"], help='algorithm for AOA detection')
+                    choices=['Music', 'Correlation', "rMusic", "espirit"], help='algorithm for AOA detection')
 parser.add_argument('--dRxRx', type=float, default=-0.15,
                     help='distance between rx antennas (meters)')
 parser.add_argument('--dRxTx', type=float, default=2.44,
@@ -124,23 +124,17 @@ def angular_diff(samples):
 # Plot received signals
 ##########################################################################
 
-
 plt.figure(figsize=(8, 4))
 labels = []
 ALLsamples = []
 for run_iterator, run in enumerate(RUNS):
 
-    # trimmed_samples = [readSamples(
-        # args.path + 'trimmed_rx' + str(rx + 1) + '_' + str(run) + '.dat') for rx in range(args.rx)]
-
-    # trimmed_samples = [trimmed_samples[0], trimmed_samples[3], trimmed_samples[1], trimmed_samples[2]]
-    # trimmed_samples=genSteeringVectors()
-    # synced_samples, synced_calibration_samples = calibration(trimmed_samples)
-    # aggregated_samples = np.vstack(synced_samples)
-    aggregated_samples = ml.repmat(steeringVector(110), 1000, 1)
-    trimmed_samples = aggregated_samples
+    trimmed_samples = [ readSamples(args.path+'trimmed_rx'+str(rx+1)+'_'+str(run)+'.dat') for rx in range(args.rx) ]
+    synced_samples, synced_calibration_samples =  calibration(trimmed_samples)
     steeringvectors = genSteeringVectors()
+    aggregated_samples = np.vstack(synced_samples)
     ALLsamples.append(aggregated_samples)
+
 
     if args.method == 'Correlation':
 
@@ -201,20 +195,76 @@ for run_iterator, run in enumerate(RUNS):
         # extract frequencies ((note that there a minus sign since Yn are
         # defined as [y(n), y(n-1),y(n-2),..].T))
         angle = np.angle(component_roots)
-        wavelength = speedoflight/Fe
-        adjusted_angle = np.arccos((wavelength*angle)/(2*np.pi*args.dRxRx))
+        wavelength = speedoflight / Fe
+        adjusted_angle = np.arccos(
+            (wavelength * angle) / (2 * np.pi * args.dRxRx))
         if np.isnan(adjusted_angle):
             print(str(run) + " is nan")
 
             # continue
-        degrees = np.round(adjusted_angle[0]/np.pi*180)
+        degrees = np.round(adjusted_angle[0] / np.pi * 180)
         print(str(run) + " returned: " + str(degrees))
         angular_power = np.zeros(180)
-        if degrees>180 or degrees<0:
+        if degrees > 180 or degrees < 0:
             # degrees=degrees-180
             print(str(run) + " returned " + str(degrees))
             # continue
         angular_power[degrees] = 1
+    elif args.method == "espirit":
+        r""" This function estimate the frequency components based on the ESPRIT algorithm [ROY89]_
+
+        The frequencies are related to the roots as :math:`z=e^{-2j\pi f/Fe}`. See [STO97]_ section 4.7 for more information about the implementation.
+
+        :param x: ndarray of size N
+        :param L: int. Number of components to be extracted.
+        :param M:  int, optional. Size of signal block.
+        :param Fe: float. Sampling Frequency.
+        :returns: ndarray ndarray containing the L frequencies
+
+        >>> import numpy as np
+        >>> import spectral_analysis.spectral_analysis as sa
+        >>> Fe=500
+        >>> t=1.*np.arange(100)/Fe
+        >>> x=np.exp(2j*np.pi*55.2*t)
+        >>> f=sa.Esprit(x,1,None,Fe)
+        >>> print(f)
+        """
+        Fe = args.freq
+        L = args.targets
+        M = args.burst_size
+        x = aggregated_samples
+        N = x.shape[0]
+
+        if M==None:
+            M=N//2
+
+        # extract signal subspace
+        # covariance = np.dot(aggregated_samples, np.conjugate(
+        # aggregated_samples).T) / aggregated_samples.shape[1]
+        covariance = np.dot(aggregated_samples, np.conjugate(
+            aggregated_samples).T) / aggregated_samples.shape[1]
+        U, S, V = np.linalg.svd(covariance)
+        S=U[:,:L]
+
+        # Remove last row
+        S1=S[:-1,:L]
+        # Remove first row
+        S2=S[1:,:L]
+
+        # Compute matrix Phi (Stoica 4.7.12)
+        Phi=np.linalg.inv(S1.conj().T.dot(S1)).dot(S1.conj().T).dot(S2)
+        # Perform eigenvalue decomposition
+        V,U=np.linalg.eig(Phi)
+
+        # extract frequencies ((note that there a minus sign since Yn are defined as [y(n), y(n-1),y(n-2),..].T))
+        angle=-np.angle(V)
+        wavelength = speedoflight / Fe
+        adjusted_angle = np.arccos((wavelength * angle) / (2 * np.pi* args.dRxRx))
+        print(adjusted_angle)
+        degrees = adjusted_angle[0] / np.pi * 180
+        # frequency normalisation
+
+        print("angle " + str(degrees))
 
 
     # Normalize angular power
@@ -224,9 +274,9 @@ for run_iterator, run in enumerate(RUNS):
     # Plot the angular power
     ##########################################################################
     angular_power_pt = np.vstack([power * np.array([np.cos(theta), np.sin(theta)])
-                                  for power, theta in zip(angular_power, np.linspace(0, np.pi, 180))])
+    for power, theta in zip(angular_power, np.linspace(0, np.pi, 180))])
     plt.plot(angular_power_pt[:, 0], angular_power_pt[
-             :, 1], _colors[run_iterator],  alpha=0.7)
+    :, 1], _colors[run_iterator],  alpha=0.7)
     theta = np.linspace(0, np.pi, 180)[np.argmax(angular_power)]
     pmax = np.max(angular_power)
     plt.plot
