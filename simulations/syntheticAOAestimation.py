@@ -59,7 +59,7 @@ _colors = ['b','g','r','m','c','k']
 
 regressors = []
 regressors.append( KNNR(n_neighbors=3))
-regressors.append( MLPRegressor(hidden_layer_sizes=(200, 50, 50), activation='relu', verbose=False,
+regressors.append( MLPRegressor(hidden_layer_sizes=(1000,50), activation='relu', verbose=False,
     algorithm='adam', alpha=0.000, tol=1e-5, early_stopping=True))
 
 
