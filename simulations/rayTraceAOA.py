@@ -48,13 +48,13 @@ _colors = ['b','g','r','m','c','k']
 
 regressors = []
 regressors.append( KNNR(n_neighbors=3))
-regressors.append( MLPRegressor(hidden_layer_sizes=(400,50), activation='relu', verbose=False,
+regressors.append( MLPRegressor(hidden_layer_sizes=(1200,100), activation='relu', verbose=False,
     algorithm='adam', alpha=0.000, tol=1e-5, early_stopping=True))
 
 
 
 ########################################################################################
-#### Load Data 
+#### Load Data
 ########################################################################################
 
 #X, Y = loadData('','')
@@ -63,6 +63,8 @@ Y = np.load('Y.npy')
 
 #print X.shape, Y.shape
 X = np.angle(X)
+X = X[:400,:]
+Y = Y[:400]
 
 X = X[:,1:] - X[:,:-1]
 
@@ -72,7 +74,7 @@ X = X[:,1:] - X[:,:-1]
 
 
 # expand data (corresponds to nonlinear kernels)
-X = np.hstack([X**p for p in range(1,4)])
+#X = np.hstack([X**p for p in range(1,4)])
 
 trainX, testX, trainY, testY = train_test_split(X,Y, test_size=0.1)
 
