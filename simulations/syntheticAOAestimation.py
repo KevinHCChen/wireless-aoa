@@ -74,6 +74,7 @@ Y = np.random.randint(800,1200, size=(1200))/10.
 # expected phase difference of received samples
 X = np.vstack( [ angular_diff(steeringVector(theta)) for theta in Y/180.*np.pi ] )
 X = X + np.random.randn(X.shape[0], X.shape[1])*5e-2
+print X.shape, Y.shape
 
 
 ########################################################################################

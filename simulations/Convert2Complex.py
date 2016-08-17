@@ -6,7 +6,7 @@ def toa2Complex(toa, db, freq = 2.4e9):
     radian = toa*freq*2*np.pi
     return (10**(db/10.))*(np.cos(radian)+1j*np.sin(radian) )
 
-def parseTOALog(fname):
+def parseTOALog(fname, num_paths=1):
 
     with open(fname) as f:
         content = f.readlines()
@@ -19,10 +19,19 @@ def parseTOALog(fname):
     signal = np.zeros(rx_num, dtype = np.complex)
     for rx in range(rx_num):
         paths = int(content.pop(0).split()[1])
+        if num_paths > paths:
+            num_paths = paths
 
-        for path in range(paths):
+        #for path in range(paths):
+        #    pathid, toa, db = [float(x) for x in content.pop(0).split()]
+        #    signal[rx] += toa2Complex(toa, db)
+
+        for i in range(num_paths):
             pathid, toa, db = [float(x) for x in content.pop(0).split()]
             signal[rx] += toa2Complex(toa, db)
+        for path in range(paths-num_paths):
+            content.pop(0)
+
 
 
     # signal is the output (complex number)
@@ -49,20 +58,21 @@ def getTxId(path):
     return int(tx_info.split('_')[0][1:])
 
 
-def loadData(base_dir, file_format):
+def loadData(base_dir, file_format, num_paths=1):
 
-    base_dir = '/Users/mcrouse/Google Drive/MMWave/1800tx/'
+    #base_dir = '/Users/mcrouse/Google Drive/MMWave/1800tx/'
 
     file_format = 'AOA-Outdoor.%s.t%s_06.r003.p2m'
     toa_file_list = glob.glob(base_dir + file_format % ('toa', '*'))
     mdoa_file_list = glob.glob(base_dir + file_format % ('mdoa', '*'))
     file_format = 'AOA-Outdoor.%s.t%03d_06.r003.p2m'
+    print len(toa_file_list)
 
     phi_off = []
     label = []
     for idx, fname in enumerate(toa_file_list):
         txId = getTxId(fname)
-        phi_off.append(parseTOALog(fname))
+        phi_off.append(parseTOALog(fname, num_paths))
         angle =  parseMDOALog(base_dir + file_format % ('mdoa', txId))
         if angle:
             label.append(angle)
