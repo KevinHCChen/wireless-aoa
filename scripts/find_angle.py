@@ -24,3 +24,16 @@ def get_angle(mobile_loc, base_loc, base_theta):
     opp = euclidean(mobile_loc,perp_loc)
     #find the desired angle using arcsin on the known lengths
     return np.degrees(np.arcsin(opp/hyp))
+bases = [[[4,4],-45],[[4,-4],20], [[-4,-4],-45], [[-4,4],180]]
+mobiles = np.random.uniform(-3,3,(10000,2))
+mobile_angles = []
+for mobile_loc in mobiles:
+    base_angles = []
+    for base in bases:
+        base_angles.append(get_angle(mobile_loc, base[0], base[1]))
+    mobile_angles.append(base_angles)
+angles_output = np.vstack(mobile_angles)
+with open("mobile_angles.npy", mode="w+b") as out:
+    np.save(out, angles_output)
+with open("rand_mobiles.npy", mode="w+b") as out:
+    np.save(out, mobiles)
