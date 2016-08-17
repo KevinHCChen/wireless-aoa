@@ -24,9 +24,21 @@ def get_angle(mobile_loc, base_loc, base_theta):
     opp = euclidean(mobile_loc,perp_loc)
     #find the desired angle using arcsin on the known lengths
     return np.degrees(np.arcsin(opp/hyp))
-def get_angles(bases, mobile_range, num_samples=10000):
-
-    mobiles = np.random.uniform(mobile_range[0], mobile_range[1],(num_samples,2))
+# def get_angles(bases, mobile_range, num_samples=10000):
+#
+#     mobiles = np.random.uniform(mobile_range[0], mobile_range[1],(num_samples,2))
+#     mobile_angles = []
+#     for mobile_loc in mobiles:
+#         base_angles = []
+#         for base in bases:
+#             base_angles.append(get_angle(mobile_loc, base[0], base[1]))
+#         mobile_angles.append(base_angles)
+#     angles_output = np.vstack(mobile_angles)
+#     return angles_output, mobiles
+# bases = [[[4,4],-45],[[4,-4],20], [[-4,-4],-45], [[-4,4],180]]
+# print get_angles(bases, (-3,3))
+def get_angles(bases, mobiles):
+    assert mobiles.shape[1]==2, "Mobiles must have 2 columns!"
     mobile_angles = []
     for mobile_loc in mobiles:
         base_angles = []
@@ -36,4 +48,4 @@ def get_angles(bases, mobile_range, num_samples=10000):
     angles_output = np.vstack(mobile_angles)
     return angles_output, mobiles
 bases = [[[4,4],-45],[[4,-4],20], [[-4,-4],-45], [[-4,4],180]]
-print get_angles(bases, (-3,3))
+print get_angles(bases, np.random.uniform(-3, 3,(10000,2)))
