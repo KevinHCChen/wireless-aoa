@@ -26,27 +26,17 @@ def get_angle(mobile_loc, base_loc, base_theta):
     return np.degrees(np.arcsin(opp/hyp))
 
 
-def someFunc(baseStations, sample_range, num_samples=10000):
-
-    bases = [[[4,4],-45],[[4,-4],45], [[-4,-4],-45], [[-4,4],45]]
-    mobiles = np.random.uniform(-3,3,(10000,2))
-
-    mobile_angles = [[get_angle(mobile_loc, base[0], base[1]) for base in bases] for mobile_loc in mobiles]
-
-    angles_output = np.vstack(mobile_angles)
-    np.save("mobile_angles.npy", angles_output)
-    np.save("rand_mobiles.npy", mobiles)
-
 def get_angles(bases, mobiles):
     assert mobiles.shape[1]==2, "Mobiles must have 2 columns!"
-    mobile_angles = []
+    mobile_angles = [[get_angle(mobile_loc, base[0], base[1]) for base in bases] for mobile_loc in mobiles]
+    """
     for mobile_loc in mobiles:
         base_angles = []
         for base in bases:
             base_angles.append(get_angle(mobile_loc, base[0], base[1]))
         mobile_angles.append(base_angles)
+    """
     angles_output = np.vstack(mobile_angles)
     return angles_output, mobiles
 
-bases = [[[4,4],-45],[[4,-4],20], [[-4,-4],-45], [[-4,4],180]]
-print get_angles(bases, np.random.uniform(-3, 3,(10000,2)))
+
