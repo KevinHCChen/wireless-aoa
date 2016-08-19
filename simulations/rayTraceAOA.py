@@ -7,6 +7,7 @@ import sys
 import itertools
 from sklearn.cross_validation import LeavePOut, train_test_split
 from sklearn.svm import SVC as SVM
+from sklearn.svm import SVR 
 from sklearn.linear_model import LogisticRegression as LR
 from sklearn.neighbors import KNeighborsClassifier as KNN
 from sklearn.neighbors import KNeighborsRegressor as KNNR
@@ -55,7 +56,7 @@ X, Y = loadData('../data/1800TxTry2/','', 1)
 
 X = X[:800,:]
 Y = Y[:800]
-rep_factor = 10 
+rep_factor = 2
 X = np.repeat(X,rep_factor,axis=0)
 Y = np.repeat(Y,rep_factor,axis=0)
 X = X + norm.rvs(0, 1e-8, size=X.shape)
@@ -74,7 +75,9 @@ hl_sizes = [(1000,), (100,50), (200,50), (500,50), (1000,50), \
 
 regressors = []
 #regressors.append( KNNR(n_neighbors=3))
-regressors.append( MLPRegressor(hidden_layer_sizes=(500,100,20), activation='relu', verbose=False,
+regressors.append(SVR(kernel='linear', C=1e3, gamma=0.1))
+regressors.append(SVR(kernel='poly', C=1e3, degree=2))
+regressors.append( MLPRegressor(hidden_layer_sizes=(800,50), activation='relu', verbose=False,
                                 algorithm='adam', alpha=0.000, tol=1e-8, early_stopping=True))
 #for hl_size in hl_sizes:
 #    regressors.append( MLPRegressor(hidden_layer_sizes=hl_size, activation='relu', verbose=False,
@@ -88,23 +91,37 @@ regressors.append( MLPRegressor(hidden_layer_sizes=(500,100,20), activation='rel
 
 # expand data (corresponds to nonlinear kernels)
 #X = np.hstack([X**p for p in range(1,4)])
+#Y = Y/360.
 
-trainX, testX, trainY, testY = train_test_split(X,Y, test_size=0.1)
+test_size=.2
 
 plt.figure(1); plt.clf();
 for i, regressor in enumerate(regressors):
-    regressor.fit(trainX, trainY)
 
-    #plt.plot(testY, regressor.predict(testX) , _colors[i]+'o', alpha=0.4, label=regressor.__class__.__name__)
-    #plt.plot(trainY, regressor.predict(trainX) , _colors[i]+'.', alpha=0.4)
-    plt.plot(testY, regressor.predict(testX) , 'o', alpha=0.4, label=regressor.__class__.__name__)
-    plt.plot(trainY, regressor.predict(trainX) ,'.', alpha=0.4)
+    if regressor.__class__.__name__ != "SVR":
+        Y = Y/360.
+        trainX, testX, trainY, testY = train_test_split(X,Y, test_size=test_size)
+        regressor.fit(trainX, trainY)
+        plt.plot(testY*360., regressor.predict(testX)*360. , _colors[i]+'o', alpha=0.8, label=regressor.__class__.__name__)
+        #plt.plot(trainY*360., regressor.predict(trainX)*360. , _colors[i]+'.', alpha=0.4)
+    else:
+        trainX, testX, trainY, testY = train_test_split(X,Y, test_size=test_size)
+        regressor.fit(trainX, trainY)
+        plt.plot(testY, regressor.predict(testX) , _colors[i]+'o', alpha=0.8, label=regressor.__class__.__name__)
+        #plt.plot(trainY, regressor.predict(trainX) , _colors[i]+'.', alpha=0.4)
+
+    #plt.plot(testY, regressor.predict(testX) , 'o', alpha=0.4, label=regressor.__class__.__name__)
+    #plt.plot(trainY, regressor.predict(trainX) ,'.', alpha=0.4)
 
     print "{} precision = {:.4f}".format(regressor.__class__.__name__, regressor.score(testX, testY))
-    print "sizes: %s" % (regressor.hidden_layer_sizes,)
+    #print "sizes: %s" % (regressor.hidden_layer_sizes,)
 
-plt.plot(testY, testY, 'k-.', alpha=1, label='ground truth')
+plt.plot(testY*360., testY*360., 'k-.', alpha=1, label='ground truth')
 plt.legend(loc='best')
+plt.xlim([260,370])
+plt.ylim([260,370])
+plt.xlabel("Ground Truth AOA")
+plt.ylabel("Predicted AOA")
 
 
 
