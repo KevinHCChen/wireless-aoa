@@ -67,7 +67,7 @@ def plotLine(eq, center):
     x2 = center[0] - .2
     y1 =  (eq[1] - eq[0][0]*x1)/(eq[0][1])
     y2 =  (eq[1] - eq[0][0]*x2)/(eq[0][1])
-    plt.plot([x1,x2], [y1,y2], '-o')
+    plt.plot([x1,x2], [y1,y2], '-', linewidth=10., markersize=12)
 
 
 

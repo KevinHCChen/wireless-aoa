@@ -7,6 +7,9 @@ import sys
 import itertools
 from sklearn.cross_validation import LeavePOut, train_test_split
 from sklearn.svm import SVC as SVM
+from sklearn.svm import SVR
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LogisticRegression as LR
 from sklearn.neighbors import KNeighborsClassifier as KNN
 from sklearn.neighbors import KNeighborsRegressor as KNNR
@@ -32,7 +35,7 @@ def generateData(num_bases, num_pts=20000, r=5):
 
     #t = np.random.uniform(0,2*np.pi,num_bases)
     t  = np.arange(0,2*np.pi, (2*np.pi)/num_bases)
-    t = t+(np.pi/4.)
+    #t = t+(np.pi/4.)
 
     # point on the circle with radius r
     #random point and random angle
@@ -63,19 +66,23 @@ def generateData(num_bases, num_pts=20000, r=5):
 #### Classifier Initialization
 ########################################################################################
 
-hl_sizes = [(1000,), (100,50), (200,50), (500,50), (1000,50), \
-            (100,100), (200,100), (500,100), (1000,100), \
-            (200,100,20), (500,100,20), (1000,100,20)]
+hl_sizes = [(100,), (200,), (500,),(1000,), (100,50), (200,50), (500,50) ]
+            #(100,100), (200,100), (500,100),
+            #(200,100,20), (500,100,20), (1000,100,20)]
 
 
 regressors = []
 #regressors.append( KNNR(n_neighbors=3))
-regressors.append( MLPRegressor(hidden_layer_sizes=(1000,50,20), activation='relu', verbose=False,
-                                algorithm='adam', alpha=0.000, tol=1e-8, early_stopping=True))
-
-#for hl_size in hl_sizes:
-#    regressors.append( MLPRegressor(hidden_layer_sizes=hl_size, activation='relu', verbose=False,
+#regressors.append(SVR(kernel='linear', C=1e3, gamma=0.1))
+#regressors.append(SVR(kernel='poly', C=1e3, degree=2))
+#regressors.append(DecisionTreeRegressor(max_depth=5))
+#regressors.append(RandomForestRegressor(n_estimators=4, max_depth=5 ))
+#regressors.append( MLPRegressor(hidden_layer_sizes=(500,50), activation='relu', verbose=False,
 #                                algorithm='adam', alpha=0.000, tol=1e-8, early_stopping=True))
+
+for hl_size in hl_sizes:
+    regressors.append( MLPRegressor(hidden_layer_sizes=hl_size, activation='relu', verbose=False,
+                                algorithm='adam', alpha=0.000, tol=1e-8, early_stopping=True))
 
 
 ########################################################################################
@@ -88,12 +95,12 @@ regressors.append( MLPRegressor(hidden_layer_sizes=(1000,50,20), activation='rel
 
 
 #plt.figure(1); plt.clf();
-base_range = (2,10)
+base_range = (3,4)
 results = []
 for i, regressor in enumerate(regressors):
     for num_bases in range(*base_range):
         print "Generating for %d Stations" % (num_bases+1)
-        X, Y, bases = generateData(num_bases+1, num_pts=1000)
+        X, Y, bases = generateData(num_bases+1, num_pts=5000)
         X = X/360.
         trainX, testX, trainY, testY = train_test_split(X,Y, test_size=0.1)
         print "Training and Testing - MLP"
@@ -142,5 +149,12 @@ for i, regressor in enumerate(regressors):
 #plt.show()
 
 
+plt.figure()
+plt.plot([np.prod(hl) for hl in hl_sizes], results, '-o')
 
+#for xy in zip([np.prod(hl) for hl in hl_sizes], ["{0:.2f}".format(r) for r in results]):
+#    plt.annotate('(%s, %s)' % xy, xy=xy, textcoords='data')
 
+plt.xlabel('# Hidden Units')
+plt.ylabel('Prediction Accuracy (MSE)')
+plt.title('Accuracy with Increasing Hidden Units')
