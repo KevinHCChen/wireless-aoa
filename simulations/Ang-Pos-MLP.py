@@ -22,19 +22,31 @@ plt.ion()
 
 _colors = ['b','g','r','m','c','k']
 
-def generateData(num_bases, num_pts=20000, r=4):
-    t = np.random.uniform(0,2*np.pi,num_bases)
-    angles = np.random.randint(0,180,num_bases)
+
+def generatePts():
+    pass
+
+
+
+def generateData(num_bases, num_pts=20000, r=5):
+
+    #t = np.random.uniform(0,2*np.pi,num_bases)
+    t  = np.arange(0,2*np.pi, (2*np.pi)/num_bases)
+    t = t+(np.pi/4.)
 
     # point on the circle with radius r
-    bases = zip(zip(r*np.cos(t), r*np.sin(t)), angles)
+    #random point and random angle
+    #angles = np.random.randint(0,180,num_bases)
+    #bases = zip(zip(r*np.cos(t), r*np.sin(t)), angles)
+    base_pts  = zip(r*np.cos(t), r*np.sin(t))
 
-    #bases = [[[4,4],-45],[[4,-4],45], [[-4,-4],-45], [[-4,4],45],\
-    #         [[4,0],90], [[0,4], 180], [[0,-4],180]]
-    #bases = [[[0,4], 0], [[0,-4],180]]
+    # random point with parallel angle
+    base_angles = [np.degrees(np.sign(y)*np.arccos(x/np.linalg.norm([x,y])))+90 for x, y in base_pts]
+    bases = zip(base_pts, base_angles)
 
     #thetas = np.random.uniform(0,2*np.pi, num_pts)
     #points = [[r*np.cos(thetas[i]), r*np.sin(thetas[i])] for i, r in enumerate(np.random.uniform(0,r, num_pts))]
+
     points = np.random.uniform(-3,3,size=(num_pts,2))
 
     points = np.array(points)
@@ -57,8 +69,8 @@ hl_sizes = [(1000,), (100,50), (200,50), (500,50), (1000,50), \
 
 
 regressors = []
-#regressors.append( KNNR(n_neighbors=1000))
-regressors.append( MLPRegressor(hidden_layer_sizes=(500,50,20), activation='relu', verbose=False,
+#regressors.append( KNNR(n_neighbors=3))
+regressors.append( MLPRegressor(hidden_layer_sizes=(1000,50,20), activation='relu', verbose=False,
                                 algorithm='adam', alpha=0.000, tol=1e-8, early_stopping=True))
 
 #for hl_size in hl_sizes:
@@ -76,12 +88,12 @@ regressors.append( MLPRegressor(hidden_layer_sizes=(500,50,20), activation='relu
 
 
 #plt.figure(1); plt.clf();
-base_range = 5
+base_range = (2,10)
 results = []
 for i, regressor in enumerate(regressors):
-    for num_bases in range(base_range):
+    for num_bases in range(*base_range):
         print "Generating for %d Stations" % (num_bases+1)
-        X, Y, bases = generateData(num_bases+1, num_pts=5000)
+        X, Y, bases = generateData(num_bases+1, num_pts=1000)
         X = X/360.
         trainX, testX, trainY, testY = train_test_split(X,Y, test_size=0.1)
         print "Training and Testing - MLP"
@@ -106,6 +118,7 @@ for i, regressor in enumerate(regressors):
         plt.show()
         """
         plt.figure()#;plt.clf()
+        plt.subplot(2,1,1)
         plt.scatter(testY[:,0], testY[:,1], c=error)
         plotStations(bases, 2)
         plt.colorbar()
@@ -114,7 +127,8 @@ for i, regressor in enumerate(regressors):
         plt.title("Num Stations: %d" % (num_bases+1))
         plt.show()
 
-        plt.figure()#;plt.clf()
+        #plt.figure()#;plt.clf()
+        plt.subplot(2,1,2)
         plt.scatter(predY[:,0], predY[:,1], c=error)
         plotStations(bases, 2)
         plt.colorbar()

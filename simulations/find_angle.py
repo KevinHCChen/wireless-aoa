@@ -56,20 +56,17 @@ def get_angles(bases, mobiles):
 
 def plotStations(baseStations, station_len):
     for bs in baseStations:
+        #plt.plot(bs[0][0], bs[0][1], marker=(4, 0, bs[1]), markersize=40)
         cords = np.array(bs[0])
         slope = np.tan(np.radians(bs[1]))
         eq = to_coef(slope, cords)
-        print eq, bs[0]
         plotLine(eq, bs[0])
-
 
 def plotLine(eq, center):
     x1 = center[0] + .2
     x2 = center[0] - .2
     y1 =  (eq[1] - eq[0][0]*x1)/(eq[0][1])
     y2 =  (eq[1] - eq[0][0]*x2)/(eq[0][1])
-    print x1,y1
-    print x2,y2
     plt.plot([x1,x2], [y1,y2], '-o')
 
 
