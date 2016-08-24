@@ -39,6 +39,15 @@ def get3D_angles(mobile_loc, base_loc, base_angles):
 
     return [get_angle(mobile_arr[list(idx)], base_arr[list(idx)], base_angles_arr[idx[0]]) for idx in idxs]
 
+def build_3D_data(bases, mobile_locs):
+    mobile_angles = [[get3D_angles(mobile_loc, base[0], base[1]) for base in bases] for mobile_loc in mobile_locs]
+
+    mobile_angles = np.array(mobile_angles)
+    angles_output = mobile_angles.reshape(mobile_angles.shape[0], -1)
+    print angles_output.shape
+    #angles_output = np.vstack(mobile_angles)
+    return angles_output, mobile_locs
+
 def test3D_angles():
     num_pts = 10
     t = np.linspace(0,2*np.pi, num_pts)
@@ -91,13 +100,6 @@ def plt3d(xs,ys,zs,c):
 def get_angles(bases, mobiles):
     assert mobiles.shape[1]==2, "Mobiles must have 2 columns!"
     mobile_angles = [[get_angle(mobile_loc, base[0], base[1]) for base in bases] for mobile_loc in mobiles]
-    """
-    for mobile_loc in mobiles:
-        base_angles = []
-        for base in bases:
-            base_angles.append(get_angle(mobile_loc, base[0], base[1]))
-        mobile_angles.append(base_angles)
-    """
     angles_output = np.vstack(mobile_angles)
     return angles_output, mobiles
 

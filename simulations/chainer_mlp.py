@@ -103,22 +103,25 @@ print('# epoch: {}'.format(args.epoch))
 print('')
 
 
-smlp = True
-bmlp = False
+smlp = False 
+bmlp = True 
 
 # LOAD TRAINING DATA!
 if smlp:
     bases_set = [[((4,0), 90), ((0,-4), 0)],[((4,0), 90), ((0,4), 0)]]
 elif bmlp:
-    bases_set = [[((4,0), 90), ((0,-4), 0), ((0,4), 0)]]
-num_pts = 5000
+    #bases_set = [[((4,0), 90), ((0,-4), 0), ((0,4), 0)]]
+    bases_set = [[((4,0,0), (90,90)), ((0,-4,0), (0,0)), ((0,4,0), (0,0))]]
+num_pts = 500
 trainXs = []
 testXs = []
-points = np.random.uniform(-3,3,size=(num_pts,2))
+ndim = 3
+points = np.random.uniform(-3,3,size=(num_pts,ndim))
 points = np.array(points)
 
 for bases in bases_set:
-    X, Y = get_angles(bases,points)
+    #X, Y = get_angles(bases,points)
+    X, Y = build_3D_data(bases,points)
     X = X/360.
     trainXs.append( X[:X.shape[0]*.8,:].astype(np.float32))
     testXs.append( X[X.shape[0]*.8:,:].astype(np.float32))
@@ -132,7 +135,7 @@ if smlp:
     model = StructuredMLP(trainXs[0].shape[1], (500,50), (200,50))
 elif bmlp:
     # model = BaseMLP(np.hstack(trainXs).shape[1], (500,50,200,50), 2)
-    model = BaseMLP(np.hstack(trainXs).shape[1], [500,50,200,50], 2)
+    model = BaseMLP(np.hstack(trainXs).shape[1], [500,50], ndim)
 
 # Setup optimizer
 optimizer = optimizers.Adam()
@@ -232,7 +235,7 @@ plt.ylim([-5,5])
 plt.xlim([-5,5])
 plt.title("Num Stations: %d" % (3))
 plt.clim([0,1])
-plt.show()
+#plt.show()
 
 
 #plt.figure()#;plt.clf()
