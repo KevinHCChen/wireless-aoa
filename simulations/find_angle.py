@@ -38,7 +38,7 @@ def get3D_angles(mobile_loc, base_loc, base_angles):
     base_angles_arr = np.array(base_angles)
     idxs = [[0,1], [1,2], [0,2]]
 
-    return [get_angle(mobile_arr[list(idx)], base_arr[list(idx)], base_angles_arr[idx[1]]) for idx in idxs]
+    return [get_angle(mobile_arr[list(idx)], base_arr[list(idx)], base_angles_arr[idx[0]]) for idx in idxs]
 
 
 
