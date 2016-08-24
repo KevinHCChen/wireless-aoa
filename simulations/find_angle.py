@@ -2,6 +2,7 @@ import numpy as np
 import numpy.linalg as lg
 from scipy.spatial.distance import euclidean
 import matplotlib.pyplot as plt
+import itertools
 
 def to_coef(m, p):
     #conversion from point/slope form of line to standard form. Do on paper if confused.
@@ -14,6 +15,7 @@ def get_angle(mobile_loc, base_loc, base_theta):
     y = mobile_loc[1] -  base_loc[1]
     x = mobile_loc[0] -  base_loc[0]
     hyp = euclidean(mobile_loc, base_loc)
+    print hyp
 
     #print np.degrees(np.arccos(x/hyp))
     if y < 0:
@@ -22,6 +24,22 @@ def get_angle(mobile_loc, base_loc, base_theta):
         k = 1
     angle = np.degrees(k*np.arccos(x/hyp)) % 360
     return angle+base_theta
+
+
+#mobile_loc - (x,y,z)
+# base_lco - (x,y,z)
+# base_angles - (alpha, beta, gamma)
+def get3D_angles(mobile_loc, base_loc, base_angles):
+
+    pos_idx = range(3)
+
+    mobile_arr = np.array(mobile_loc)
+    base_arr = np.array(base_loc)
+    base_angles_arr = np.array(base_angles)
+    idxs = [[0,1], [1,2], [0,2]]
+
+    return [get_angle(mobile_arr[list(idx)], base_arr[list(idx)], base_angles_arr[idx[1]]) for idx in idxs]
+
 
 
 def get_angles(bases, mobiles):
