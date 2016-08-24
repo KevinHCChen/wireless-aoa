@@ -16,14 +16,14 @@ import math
 import time
 from Convert2Complex import *
 from find_angle import *
-plt.ion()
+#plt.ion()
 
 
 # Network definition
-class MLP(chainer.Chain):
+class StructuredMLP(chainer.Chain):
 
     def __init__(self, n_in, n_units1, n_units2):
-        super(MLP, self).__init__(
+        super(StructuredMLP, self).__init__(
             l1a=L.Linear(n_in, n_units1[0]),  # first layer
             l1b=L.Linear(n_in, n_units1[0]),  # first layer
             l2a=L.Linear(n_units1[0],n_units1[1]),  # first layer
@@ -46,6 +46,31 @@ class MLP(chainer.Chain):
         #self.accuracy = F.accuracy(y, t)
         self.y = y
         return self.loss
+
+
+# Network definition
+class BaseMLP(chainer.Chain):
+
+    def __init__(self, n_in, n_units1, n_out):
+        super(BaseMLP, self).__init__(
+            l1=L.Linear(n_in, n_units1[0]),  # first layer
+            l2=L.Linear(n_units1[0],n_units1[1]),  # first layer
+            # l3=L.Linear(n_units1[1], n_units1[2]),  # second layer
+            # l4=L.Linear(n_units1[2], n_units1[3]),  # output layer
+            l5=L.Linear(n_units1[1], n_out),  # output layer
+        )
+
+    def __call__(self, x, t):
+        h1 = F.relu(self.l1(x))
+        h2 = F.relu(self.l2(h1))
+        # h3 = F.relu(self.l3(h2))
+        # h4 = F.relu(self.l4(h3))
+        y = self.l5(h2)
+        self.loss = F.mean_squared_error(y, t)
+        #self.accuracy = F.accuracy(y, t)
+        self.y = y
+        return self.loss
+
 
 
 #r = [ model(x,y) for x,y in ]
@@ -79,11 +104,15 @@ print('# epoch: {}'.format(args.epoch))
 print('')
 
 
-
+smlp = False
+bmlp = True
 
 # LOAD TRAINING DATA!
-bases_set = [[((4,0), 90), ((0,-4), 0)],[((4,0), 90), ((0,4), 0)]]
-num_pts = 10000
+if smlp:
+    bases_set = [[((4,0), 90), ((0,-4), 0)],[((4,0), 90), ((0,4), 0)]]
+elif bmlp:
+    bases_set = [[((4,0), 90), ((0,-4), 0), ((0,4), 0)]]
+num_pts = 500
 trainXs = []
 testXs = []
 points = np.random.uniform(-3,3,size=(num_pts,2))
@@ -100,7 +129,10 @@ trainY = Y[:Y.shape[0]*.8,:].astype(np.float32)
 testY = Y[Y.shape[0]*.8:,:].astype(np.float32)
 
 
-model = MLP(trainXs[0].shape[1], (500,50), (200,50))
+if smlp:
+    model = StructuredMLP(trainXs[0].shape[1], (500,50), (200,50))
+elif bmlp:
+    model = BaseMLP(np.hstack(trainXs).shape[1], (500,50,200,50), 2)
 
 # Setup optimizer
 optimizer = optimizers.Adam()
@@ -121,7 +153,10 @@ for epoch in six.moves.range(1, n_epoch + 1):
     for i in six.moves.range(0, N, batchsize):
 
         #x = chainer.Variable(np.asarray(x_train[perm[i:i + batchsize]]))
-        x = chainer.Variable(np.asarray([x[perm[i:i + batchsize]] for x in trainXs]))
+        if smlp:
+            x = chainer.Variable(np.asarray([x[perm[i:i + batchsize]] for x in trainXs]))
+        elif bmlp:
+            x = chainer.Variable(np.asarray(np.hstack(trainXs)[perm[i:i + batchsize]]))
         t = chainer.Variable(trainY[perm[i:i + batchsize]])
 
         # Pass the loss function (Classifier defines it) and its arguments
@@ -151,7 +186,11 @@ for epoch in six.moves.range(1, n_epoch + 1):
     sum_loss = 0
     for i in six.moves.range(0, N_test, batchsize):
 
-        x = chainer.Variable(np.asarray([x[i:i + batchsize] for x in testXs]),
+        if smlp:
+            x = chainer.Variable(np.asarray([x[i:i + batchsize] for x in testXs]),
+                             volatile='on')
+        elif bmlp:
+            x = chainer.Variable(np.asarray(np.hstack(testXs)[i:i + batchsize]),
                              volatile='on')
         t = chainer.Variable(testY[i:i + batchsize],
                              volatile='on')
@@ -164,11 +203,18 @@ for epoch in six.moves.range(1, n_epoch + 1):
         sum_loss / N_test, 10./ N_test))
         #sum_loss / N_test, sum_accuracy / N_test))
 
-x = chainer.Variable(np.asarray([x for x in testXs]),
+
+if smlp:
+    x = chainer.Variable(np.asarray([x for x in testXs]),
+                        volatile='on')
+elif bmlp:
+    x = chainer.Variable(np.asarray(np.hstack(testXs)),
                         volatile='on')
 t = chainer.Variable(testY,
                         volatile='on')
 
+print(x.shape)
+print(t.shape)
 model(x,t)
 predY = model.y.data
 error  = np.linalg.norm(predY - testY, axis=1)
@@ -177,8 +223,10 @@ plt.figure()#;plt.clf()
 plt.subplot(2,1,1)
 #plt.scatter(testY[:,0], testY[:,1], c=error)
 plt.scatter(testY[:,0], testY[:,1], c=error)
+
 plotStations(bases_set[0], 2)
-plotStations(bases_set[1], 2)
+if smlp:
+    plotStations(bases_set[1], 2)
 plt.colorbar()
 plt.ylim([-5,5])
 plt.xlim([-5,5])
@@ -191,7 +239,8 @@ plt.show()
 plt.subplot(2,1,2)
 plt.scatter(predY[:,0], predY[:,1], c=error)
 plotStations(bases_set[0], 2)
-plotStations(bases_set[1], 2)
+if smlp:
+    plotStations(bases_set[1], 2)
 plt.colorbar()
 plt.ylim([-5,5])
 plt.xlim([-5,5])

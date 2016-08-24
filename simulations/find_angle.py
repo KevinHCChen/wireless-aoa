@@ -3,6 +3,7 @@ import numpy.linalg as lg
 from scipy.spatial.distance import euclidean
 import matplotlib.pyplot as plt
 import itertools
+from mpl_toolkits.mplot3d import Axes3D
 
 def to_coef(m, p):
     #conversion from point/slope form of line to standard form. Do on paper if confused.
@@ -39,13 +40,26 @@ def get3D_angles(mobile_loc, base_loc, base_angles):
     return [get_angle(mobile_arr[list(idx)], base_arr[list(idx)], base_angles_arr[idx[0]]) for idx in idxs]
 
 def test3D_angles():
-    num_pts = 100
+    num_pts = 10
     t = np.linspace(0,2*np.pi, num_pts)
     #y = np.linspace(-4,4,100)
     #z = np.zeroes(100)
     r = 4
 
-    mobile_pts  = zip(r*np.cos(t), r*np.sin(t), np.ones(num_pts))
+    # u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
+    u = np.linspace(0,2*np.pi, num_pts)
+    v = np.linspace(0,2*np.pi, num_pts)
+    x=np.cos(u)*np.sin(v)
+    y=np.sin(u)*np.sin(v)
+    z=np.cos(v)
+
+    mobile_pts = [(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v)) for u,v in itertools.product(u,v)]
+
+    # mobile_pts = zip(x,y,z)
+
+    # mobile_pts  = zip(r*np.cos(t), r*np.sin(t), r*np.cos(t))
+
+
     #mobile_pts  = zip(np.zeros(num_pts),r*np.cos(t), r*np.sin(t))
     #mobile_pts  = zip(r*np.cos(t), np.zeros(num_pts),r*np.sin(t))
     base_loc = [0,0,0]
@@ -54,9 +68,25 @@ def test3D_angles():
     res = [get3D_angles(mobile_loc, base_loc, base_angle) for mobile_loc in mobile_pts]
     res = np.array(res)
     mobile_pts = np.array(mobile_pts)
-    plt.scatter(mobile_pts[:,0], mobile_pts[:,1], c=res[:,2])
+    plt.scatter(mobile_pts[:,0], mobile_pts[:,1], c=res[:,0])
     plt.axis('equal')
+
+
+    plt3d(mobile_pts[:,0], mobile_pts[:,1], mobile_pts[:,2], res[:,0])
+
     return res
+
+
+def plt3d(xs,ys,zs,c):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(xs, ys, zs, c=c)
+    ax.set_xlabel('X Label')
+    ax.set_ylabel('Y Label')
+    ax.set_zlabel('Z Label')
+
+    plt.show()
+
 
 def get_angles(bases, mobiles):
     assert mobiles.shape[1]==2, "Mobiles must have 2 columns!"
@@ -88,3 +118,4 @@ def plotLine(eq, center):
 
 
 
+# test3D_angles()
