@@ -15,9 +15,7 @@ def get_angle(mobile_loc, base_loc, base_theta):
     y = mobile_loc[1] -  base_loc[1]
     x = mobile_loc[0] -  base_loc[0]
     hyp = euclidean(mobile_loc, base_loc)
-    print hyp
 
-    #print np.degrees(np.arccos(x/hyp))
     if y < 0:
         k = -1
     else:
@@ -40,7 +38,25 @@ def get3D_angles(mobile_loc, base_loc, base_angles):
 
     return [get_angle(mobile_arr[list(idx)], base_arr[list(idx)], base_angles_arr[idx[0]]) for idx in idxs]
 
+def test3D_angles():
+    num_pts = 100
+    t = np.linspace(0,2*np.pi, num_pts)
+    #y = np.linspace(-4,4,100)
+    #z = np.zeroes(100)
+    r = 4
 
+    mobile_pts  = zip(r*np.cos(t), r*np.sin(t), np.ones(num_pts))
+    #mobile_pts  = zip(np.zeros(num_pts),r*np.cos(t), r*np.sin(t))
+    #mobile_pts  = zip(r*np.cos(t), np.zeros(num_pts),r*np.sin(t))
+    base_loc = [0,0,0]
+    base_angle = [0,0]
+
+    res = [get3D_angles(mobile_loc, base_loc, base_angle) for mobile_loc in mobile_pts]
+    res = np.array(res)
+    mobile_pts = np.array(mobile_pts)
+    plt.scatter(mobile_pts[:,0], mobile_pts[:,1], c=res[:,2])
+    plt.axis('equal')
+    return res
 
 def get_angles(bases, mobiles):
     assert mobiles.shape[1]==2, "Mobiles must have 2 columns!"
