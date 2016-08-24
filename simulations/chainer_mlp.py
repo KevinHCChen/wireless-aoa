@@ -49,26 +49,62 @@ class StructuredMLP(chainer.Chain):
 
 
 # Network definition
-class BaseMLP(chainer.Chain):
+class BaseMLP(chainer.ChainList):
 
-    def __init__(self, n_in, n_units1, n_out):
-        super(BaseMLP, self).__init__(
-            l1=L.Linear(n_in, n_units1[0]),  # first layer
-            l2=L.Linear(n_units1[0],n_units1[1]),  # first layer
-            # l3=L.Linear(n_units1[1], n_units1[2]),  # second layer
-            # l4=L.Linear(n_units1[2], n_units1[3]),  # output layer
-            l5=L.Linear(n_units1[1], n_out),  # output layer
-        )
+    def __init__(self, n_in, n_units, n_out):
+        # layers_l = [] # list holding layers two through n-1 
+        # for i in range(len(n_units)-1):
+            # layers_l.append(L.Linear(n_units[i], n_units[i+1]))
+            # layers_l[i] = L.Linear(n_units[i], n_units[i+1])
+        # super(BaseMLP, self).__init__(
+        #     l1=L.Linear(n_in, n_units[0]),  # first layer
+        #     # layers_l = layers_l,
+        #     **layers_l,
+        #     ln=L.Linear(n_units[-1], n_out),  # output (n) layer
+        # )
+        super(BaseMLP, self).__init__()
+        self.add_link(L.Linear(n_in, n_units[0]))
+        for i in range(len(n_units)-1):
+            # layers_l.append(L.Linear(n_units[i], n_units[i+1]))
+            self.add_link(L.Linear(n_units[i], n_units[i+1]))
+        self.add_link(L.Linear(n_units[-1], n_out))
+        self.num_layers = len(n_units) + 2
+        '''
+        self._children = []
+        self.add_link('l1', L.Linear(n_in, n_units[0]))
+        for i in range(len(n_units)-1):
+            # layers_l.append(L.Linear(n_units[i], n_units[i+1]))
+            self.add_link('l%d' % (i+2), L.Linear(n_units[i], n_units[i+1]))
+        self.add_link('ln', L.Linear(n_units[-1], n_out))
+        '''
 
     def __call__(self, x, t):
-        h1 = F.relu(self.l1(x))
-        h2 = F.relu(self.l2(h1))
-        # h3 = F.relu(self.l3(h2))
-        # h4 = F.relu(self.l4(h3))
-        y = self.l5(h2)
+        # d = self.__dict__
+        # for name in self._children:
+            # for link in d[name].links():
+                # yield link
+
+        h_i = x
+        for i in range(self.num_layers-2):
+            h_i = F.relu(self[i](h_i))
+
+        y = self[-1](h_i)
+
+        '''
+        h_i = x
+        for link in self.links():
+            h_i = F.relu(link(h_i))
+
+        h_i = F.relu(self.l1(x))
+        for i in range(len(self._children)):
+
+            h_i = F.relu(d['l%d' % (i+2)].links()[0](h_i))
+        y = self.ln(h_i)
+        '''
+
         self.loss = F.mean_squared_error(y, t)
-        #self.accuracy = F.accuracy(y, t)
         self.y = y
+
         return self.loss
 
 
@@ -112,7 +148,7 @@ if smlp:
     bases_set = [[((4,0), 90), ((0,-4), 0)],[((4,0), 90), ((0,4), 0)]]
 elif bmlp:
     bases_set = [[((4,0), 90), ((0,-4), 0), ((0,4), 0)]]
-num_pts = 500
+num_pts = 5000
 trainXs = []
 testXs = []
 points = np.random.uniform(-3,3,size=(num_pts,2))
@@ -132,7 +168,8 @@ testY = Y[Y.shape[0]*.8:,:].astype(np.float32)
 if smlp:
     model = StructuredMLP(trainXs[0].shape[1], (500,50), (200,50))
 elif bmlp:
-    model = BaseMLP(np.hstack(trainXs).shape[1], (500,50,200,50), 2)
+    # model = BaseMLP(np.hstack(trainXs).shape[1], (500,50,200,50), 2)
+    model = BaseMLP(np.hstack(trainXs).shape[1], [500,50,200,50], 2)
 
 # Setup optimizer
 optimizer = optimizers.Adam()
