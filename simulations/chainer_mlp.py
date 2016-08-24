@@ -52,16 +52,6 @@ class StructuredMLP(chainer.Chain):
 class BaseMLP(chainer.ChainList):
 
     def __init__(self, n_in, n_units, n_out):
-        # layers_l = [] # list holding layers two through n-1 
-        # for i in range(len(n_units)-1):
-            # layers_l.append(L.Linear(n_units[i], n_units[i+1]))
-            # layers_l[i] = L.Linear(n_units[i], n_units[i+1])
-        # super(BaseMLP, self).__init__(
-        #     l1=L.Linear(n_in, n_units[0]),  # first layer
-        #     # layers_l = layers_l,
-        #     **layers_l,
-        #     ln=L.Linear(n_units[-1], n_out),  # output (n) layer
-        # )
         super(BaseMLP, self).__init__()
         self.add_link(L.Linear(n_in, n_units[0]))
         for i in range(len(n_units)-1):
@@ -69,38 +59,13 @@ class BaseMLP(chainer.ChainList):
             self.add_link(L.Linear(n_units[i], n_units[i+1]))
         self.add_link(L.Linear(n_units[-1], n_out))
         self.num_layers = len(n_units) + 2
-        '''
-        self._children = []
-        self.add_link('l1', L.Linear(n_in, n_units[0]))
-        for i in range(len(n_units)-1):
-            # layers_l.append(L.Linear(n_units[i], n_units[i+1]))
-            self.add_link('l%d' % (i+2), L.Linear(n_units[i], n_units[i+1]))
-        self.add_link('ln', L.Linear(n_units[-1], n_out))
-        '''
 
     def __call__(self, x, t):
-        # d = self.__dict__
-        # for name in self._children:
-            # for link in d[name].links():
-                # yield link
-
         h_i = x
         for i in range(self.num_layers-2):
             h_i = F.relu(self[i](h_i))
 
         y = self[-1](h_i)
-
-        '''
-        h_i = x
-        for link in self.links():
-            h_i = F.relu(link(h_i))
-
-        h_i = F.relu(self.l1(x))
-        for i in range(len(self._children)):
-
-            h_i = F.relu(d['l%d' % (i+2)].links()[0](h_i))
-        y = self.ln(h_i)
-        '''
 
         self.loss = F.mean_squared_error(y, t)
         self.y = y
@@ -108,8 +73,6 @@ class BaseMLP(chainer.ChainList):
         return self.loss
 
 
-
-#r = [ model(x,y) for x,y in ]
 
 parser = argparse.ArgumentParser(description='Chainer example: MNIST')
 parser.add_argument('--initmodel', '-m', default='',
@@ -140,8 +103,8 @@ print('# epoch: {}'.format(args.epoch))
 print('')
 
 
-smlp = False
-bmlp = True
+smlp = True
+bmlp = False
 
 # LOAD TRAINING DATA!
 if smlp:
