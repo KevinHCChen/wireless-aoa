@@ -9,36 +9,19 @@ def to_coef(m, p):
     #return the left side coefficients and the right side constant. these represent the equation.
     return ([-m, 1], const)
 
-"""
-def get_angle(mobile_loc, base_loc, base_theta):
-    #get slope of line with angle of base_theta
-    m = np.tan(np.radians(base_theta))
-    #Slope of line perpendicular to line created by
-    mPerp = -1/m
-    #get the perpendicular line created by the mobile location and the perpendicular slope in standard form
-    mobile_eq = to_coef(mPerp,mobile_loc)
-    #get the line created by the base location and the angle's slope in standard form
-    base_eq = to_coef(m, base_loc)
-    #solve for the intersection of the two lines using a system of linear equations. This returns your 3rd point to make a triangle.
-    perp_loc = lg.solve([mobile_eq[0],base_eq[0]], [mobile_eq[1],base_eq[1]])
-    #find the lengths of two sides of the triangle.
-    hyp = euclidean(mobile_loc,base_loc)
-    #opp = euclidean(mobile_loc,perp_loc)
-    adj = euclidean(base_loc,perp_loc)
-
-    #find the desired angle using arcsin on the known lengths
-    #return np.degrees(np.arcsin(opp/hyp))
-    return np.degrees(np.arccos(adj/hyp))
-"""
 
 def get_angle(mobile_loc, base_loc, base_theta):
-    y = base_loc[1] - mobile_loc[1]
-    x =  base_loc[0] - mobile_loc[0]
+    y = mobile_loc[1] -  base_loc[1]
+    x = mobile_loc[0] -  base_loc[0]
     hyp = euclidean(mobile_loc, base_loc)
 
-    angle = np.degrees(np.sign(y)*np.arccos(x/hyp)) % 360
+    #print np.degrees(np.arccos(x/hyp))
+    if y < 0:
+        k = -1
+    else:
+        k = 1
+    angle = np.degrees(k*np.arccos(x/hyp)) % 360
     return angle+base_theta
-
 
 
 def get_angles(bases, mobiles):

@@ -29,13 +29,19 @@ _colors = ['b','g','r','m','c','k']
 def generatePts():
     pass
 
+def convertPt(x,ang, cords):
+    return (cords[0] - x)/np.cos(ang)
 
+
+def convertToSpherical(X, Y,bases):
+    return np.array([[convertPt(y[0], X[i,0], bases[0][0]),convertPt(y[0],X[i,1], bases[1][0])] for i,y in enumerate(Y)])
+    #return np.array([np.abs(y[0]/np.cos(X[i,0])) for i,y in enumerate(Y)])
 
 def generateData(num_bases, num_pts=20000, r=5):
 
     #t = np.random.uniform(0,2*np.pi,num_bases)
     t  = np.arange(0,2*np.pi, (2*np.pi)/num_bases)
-    #t = t+(np.pi/4.)
+    t = t+(np.pi/2.)
 
     # point on the circle with radius r
     #random point and random angle
@@ -47,15 +53,42 @@ def generateData(num_bases, num_pts=20000, r=5):
     base_angles = [np.degrees(np.sign(y)*np.arccos(x/np.linalg.norm([x,y])))+90 for x, y in base_pts]
     bases = zip(base_pts, base_angles)
 
+    bases = [((4,0), 90), ((0,4), 0), ((0,-4), 0)]
+    #bases = [((4,0), 90), ((0,4), 0)]
+    #bases = [((-4,0), 90), ((0,4), 0)]
+    #bases = [((-4,0), 90), ((0,-4), 0)]
+    #bases = [((4,0), 90), ((0,-4), 0)]
+
     #thetas = np.random.uniform(0,2*np.pi, num_pts)
     #points = [[r*np.cos(thetas[i]), r*np.sin(thetas[i])] for i, r in enumerate(np.random.uniform(0,r, num_pts))]
 
     points = np.random.uniform(-3,3,size=(num_pts,2))
-
     points = np.array(points)
+
+    #x = np.linspace(-3,3, int(np.sqrt(num_pts)))
+    #points = np.array(np.meshgrid(x, x))
+    #points = points.reshape(2,int(np.sqrt(num_pts))**2).T
 
     X, Y = get_angles(bases,points)
     return X,Y, bases
+
+# expand and only include sets of linearly independent base stations
+def expandFeatures(bases,X,Y, eps=5, n_stations=3):
+    indep = [base[1]%181 for base in bases]
+    Xmat = []
+    for j in range(len(bases)):
+        dist = np.abs(indep[j] - indep)
+        res = np.random.choice(np.where(dist > eps)[0], n_stations, replace=False)
+        Xmat.append(X[:,res])
+    return np.hstack(Xmat)
+
+
+def generateRandomData(bases, num_pts=20000):
+    points = np.random.uniform(-3,3,size=(num_pts,2))
+    points = np.array(points)
+    X, Y = get_angles(bases,points)
+    return X,Y, bases
+
 
 
 
@@ -77,12 +110,13 @@ regressors = []
 #regressors.append(SVR(kernel='poly', C=1e3, degree=2))
 #regressors.append(DecisionTreeRegressor(max_depth=5))
 #regressors.append(RandomForestRegressor(n_estimators=4, max_depth=5 ))
-#regressors.append( MLPRegressor(hidden_layer_sizes=(500,50), activation='relu', verbose=False,
-#                                algorithm='adam', alpha=0.000, tol=1e-8, early_stopping=True))
-
-for hl_size in hl_sizes:
-    regressors.append( MLPRegressor(hidden_layer_sizes=hl_size, activation='relu', verbose=False,
+regressors.append( MLPRegressor(hidden_layer_sizes=(500,50), activation='relu', verbose=False,
                                 algorithm='adam', alpha=0.000, tol=1e-8, early_stopping=True))
+
+# increasing network sizes:
+#for hl_size in hl_sizes:
+#    regressors.append( MLPRegressor(hidden_layer_sizes=hl_size, activation='relu', verbose=False,
+#                                algorithm='adam', alpha=0.000, tol=1e-8, early_stopping=True))
 
 
 ########################################################################################
@@ -95,44 +129,37 @@ for hl_size in hl_sizes:
 
 
 #plt.figure(1); plt.clf();
-base_range = (3,4)
+base_range = (2,3)
 results = []
 for i, regressor in enumerate(regressors):
     for num_bases in range(*base_range):
         print "Generating for %d Stations" % (num_bases+1)
-        X, Y, bases = generateData(num_bases+1, num_pts=5000)
+        # X = AOA for n base stations
+        # Y = labels (x,y) position of mobile nodes
+        # bases = base stations position and angle facing
+        X, Y, bases = generateData(num_bases+1, num_pts=8000)
+        #assert False
+        #X = expandFeatures(bases, X, Y, n_stations=3)
+        #Y = convertToSpherical(X, Y, bases)
         X = X/360.
         trainX, testX, trainY, testY = train_test_split(X,Y, test_size=0.1)
         print "Training and Testing - MLP"
         results.append(regressor.fit(trainX, trainY).score(testX,testY))
         print results[-1]
 
-    #plt.plot(testY, regressor.predict(testX) , _colors[i]+'o', alpha=0.4, label=regressor.__class__.__name__)
-    #plt.plot(trainY, regressor.predict(trainX) , _colors[i]+'.', alpha=0.4)
-    #plt.plot(testY, regressor.predict(testX) , 'o', alpha=0.4, label=regressor.__class__.__name__)
-    #plt.plot(trainY, regressor.predict(trainX) ,'.', alpha=0.4)
-
-    #print "{} precision = {:.4f}".format(regressor.__class__.__name__, regressor.score(testX, testY))
         predY = regressor.predict(testX)
         error  = np.linalg.norm(predY - testY, axis=1)
-
-        """
-        plt.figure()#;plt.clf()
-        plt.plot(np.arange(base_range)+1, results, '-o')
-        plt.xlabel('Num Base Stations')
-        plt.ylabel('1-Layer MLP - Precision')
-        #plt.savefig('MLP_IncreasingBaseStations_500')
-        plt.show()
-        """
         plt.figure()#;plt.clf()
         plt.subplot(2,1,1)
+        #plt.scatter(testY[:,0], testY[:,1], c=error)
         plt.scatter(testY[:,0], testY[:,1], c=error)
         plotStations(bases, 2)
         plt.colorbar()
         plt.ylim([-5,5])
         plt.xlim([-5,5])
-        plt.title("Num Stations: %d" % (num_bases+1))
+        plt.title("Num Stations: %d" % (len(bases)))
         plt.show()
+
 
         #plt.figure()#;plt.clf()
         plt.subplot(2,1,2)
@@ -141,20 +168,32 @@ for i, regressor in enumerate(regressors):
         plt.colorbar()
         plt.ylim([-5,5])
         plt.xlim([-5,5])
-        plt.title("Num Stations: %d" % (num_bases+1))
+        plt.title("Num Stations: %d" % (len(bases)))
         plt.show()
 
-#plt.plot(testY, testY, 'k-.', alpha=1, label='ground truth')
-#plt.legend(loc='best')
-#plt.show()
+        """
+        X,Y, bases = generateRandomData(bases, 500)
+        X = X/360.
+        predY = regressor.predict(X)
+        error  = np.linalg.norm(predY - Y, axis=1)
+        plt.figure()#;plt.clf()
+        #plt.subplot(3,1,3)
+        #plt.scatter(testY[:,0], testY[:,1], c=error)
+        plt.scatter(Y[:,0], Y[:,1], c=error)
+        plotStations(bases, 2)
+        plt.colorbar()
+        plt.ylim([-5,5])
+        plt.xlim([-5,5])
+        plt.title("Num Stations: %d" % (num_bases+1))
+        plt.show()
+        """
+
+# increasing # of units
+if False:
+    plt.figure()
+    plt.plot([np.prod(hl) for hl in hl_sizes], results, '-o')
+    plt.xlabel('# Hidden Units')
+    plt.ylabel('Prediction Accuracy (MSE)')
+    plt.title('Accuracy with Increasing Hidden Units')
 
 
-plt.figure()
-plt.plot([np.prod(hl) for hl in hl_sizes], results, '-o')
-
-#for xy in zip([np.prod(hl) for hl in hl_sizes], ["{0:.2f}".format(r) for r in results]):
-#    plt.annotate('(%s, %s)' % xy, xy=xy, textcoords='data')
-
-plt.xlabel('# Hidden Units')
-plt.ylabel('Prediction Accuracy (MSE)')
-plt.title('Accuracy with Increasing Hidden Units')
