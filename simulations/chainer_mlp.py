@@ -108,6 +108,8 @@ bmlp = True
 
 casedim = '3D'
 
+casedim = '3D'
+
 # LOAD TRAINING DATA!
 if smlp:
     bases_set = [[((4,0), 90), ((0,-4), 0)],[((4,0), 90), ((0,4), 0)]]
