@@ -2,6 +2,7 @@ import numpy as np
 import numpy.linalg as lg
 from scipy.spatial.distance import euclidean
 import matplotlib.pyplot as plt
+from matplotlib import animation
 import itertools
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -44,18 +45,15 @@ def build_3D_data(bases, mobile_locs):
 
     mobile_angles = np.array(mobile_angles)
     angles_output = mobile_angles.reshape(mobile_angles.shape[0], -1)
-    print angles_output.shape
-    #angles_output = np.vstack(mobile_angles)
     return angles_output, mobile_locs
 
 def test3D_angles():
-    num_pts = 10
+    num_pts = 30
     t = np.linspace(0,2*np.pi, num_pts)
     #y = np.linspace(-4,4,100)
     #z = np.zeroes(100)
     r = 4
 
-    # u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
     u = np.linspace(0,2*np.pi, num_pts)
     v = np.linspace(0,2*np.pi, num_pts)
     x=np.cos(u)*np.sin(v)
@@ -64,38 +62,35 @@ def test3D_angles():
 
     mobile_pts = [(np.cos(u)*np.sin(v), np.sin(u)*np.sin(v), np.cos(v)) for u,v in itertools.product(u,v)]
 
-    # mobile_pts = zip(x,y,z)
-
-    # mobile_pts  = zip(r*np.cos(t), r*np.sin(t), r*np.cos(t))
-
-
-    #mobile_pts  = zip(np.zeros(num_pts),r*np.cos(t), r*np.sin(t))
-    #mobile_pts  = zip(r*np.cos(t), np.zeros(num_pts),r*np.sin(t))
     base_loc = [0,0,0]
     base_angle = [0,0]
 
     res = [get3D_angles(mobile_loc, base_loc, base_angle) for mobile_loc in mobile_pts]
     res = np.array(res)
     mobile_pts = np.array(mobile_pts)
-    plt.scatter(mobile_pts[:,0], mobile_pts[:,1], c=res[:,0])
-    plt.axis('equal')
-
+    #plt.scatter(mobile_pts[:,0], mobile_pts[:,1], c=res[:,0])
+    #plt.axis('equal')
 
     plt3d(mobile_pts[:,0], mobile_pts[:,1], mobile_pts[:,2], res[:,0])
+    #return fig, ax
+    return ()
 
-    return res
 
 
 def plt3d(xs,ys,zs,c):
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    #fig = plt.figure()
+    #ax = fig.add_subplot(111, projection='3d')
     ax.scatter(xs, ys, zs, c=c)
     ax.set_xlabel('X Label')
     ax.set_ylabel('Y Label')
     ax.set_zlabel('Z Label')
 
-    plt.show()
+    #plt.show()
+    #return fig, ax
 
+def animate(i):
+        ax.view_init(elev=10., azim=i)
+        return ()
 
 def get_angles(bases, mobiles):
     assert mobiles.shape[1]==2, "Mobiles must have 2 columns!"
