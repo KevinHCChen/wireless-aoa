@@ -106,6 +106,8 @@ print('')
 smlp = False
 bmlp = True
 
+casedim = '3D'
+
 # LOAD TRAINING DATA!
 if smlp:
     bases_set = [[((4,0), 90), ((0,-4), 0)],[((4,0), 90), ((0,4), 0)]]
@@ -222,31 +224,61 @@ model(x,t)
 predY = model.y.data
 error  = np.linalg.norm(predY - testY, axis=1)
 
-plt.figure()#;plt.clf()
-plt.subplot(2,1,1)
-#plt.scatter(testY[:,0], testY[:,1], c=error)
-plt.scatter(testY[:,0], testY[:,1], c=error)
 
-plotStations(bases_set[0], 2)
-if smlp:
-    plotStations(bases_set[1], 2)
-plt.colorbar()
-plt.ylim([-5,5])
-plt.xlim([-5,5])
-plt.title("Num Stations: %d" % (3))
-plt.clim([0,1])
-#plt.show()
+if casedim == '3D':
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(testY[:,0], testY[:,1], testY[:,2], c=error)
+    ax.set_xlabel('X Plane')
+    ax.set_ylabel('Y Plane')
+    ax.set_zlabel('Z Plane')
+    plotStations3D(bases_set[0], 2, fig)
+    # ax.colorbar()
+    # fig.ylim([-5,5])
+    # fig.xlim([-5,5])
+    plt.title("Num Stations: %d" % (3))
+    # plt.clim([0,1])
+    plt.show()
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(testY[:,0], predY[:,1], predY[:,2], c=error)
+    ax.set_xlabel('X Plane')
+    ax.set_ylabel('Y Plane')
+    ax.set_zlabel('Z Plane')
+    plotStations3D(bases_set[0], 2, fig)
+    plt.title("Num Stations: %d" % (3))
+    plt.show()
 
 
-#plt.figure()#;plt.clf()
-plt.subplot(2,1,2)
-plt.scatter(predY[:,0], predY[:,1], c=error)
-plotStations(bases_set[0], 2)
-if smlp:
-    plotStations(bases_set[1], 2)
-plt.colorbar()
-plt.ylim([-5,5])
-plt.xlim([-5,5])
-plt.title("Num Stations: %d" % (3))
-plt.clim([0,1])
-plt.show()
+
+
+elif casedim == '2D':
+    plt.figure()#;plt.clf()
+    plt.subplot(2,1,1)
+    #plt.scatter(testY[:,0], testY[:,1], c=error)
+    plt.scatter(testY[:,0], testY[:,1], c=error)
+
+    plotStations(bases_set[0], 2)
+    if smlp:
+        plotStations(bases_set[1], 2)
+    plt.colorbar()
+    plt.ylim([-5,5])
+    plt.xlim([-5,5])
+    plt.title("Num Stations: %d" % (3))
+    plt.clim([0,1])
+    #plt.show()
+
+
+    #plt.figure()#;plt.clf()
+    plt.subplot(2,1,2)
+    plt.scatter(predY[:,0], predY[:,1], c=error)
+    plotStations(bases_set[0], 2)
+    if smlp:
+        plotStations(bases_set[1], 2)
+    plt.colorbar()
+    plt.ylim([-5,5])
+    plt.xlim([-5,5])
+    plt.title("Num Stations: %d" % (3))
+    plt.clim([0,1])
+    plt.show()
