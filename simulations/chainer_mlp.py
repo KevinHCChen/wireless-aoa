@@ -239,21 +239,15 @@ if casedim == '3D':
     plt.title("Num Stations: %d" % (3))
     # plt.clim([0,1])
     plt.show()
-    assert False
 
-    plt.subplot(2,1,1)
-    ax = plt.add_subplot(111, projection='3d')
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
     ax.scatter(testY[:,0], predY[:,1], predY[:,2], c=error)
-    ax.set_xlabel('X Label')
-    ax.set_ylabel('Y Label')
-    ax.set_zlabel('Z Label')
-    plotStations3D(bases_set[0], 2)
-    plotStations3D(bases_set[1], 2)
-    plt.colorbar()
-    plt.ylim([-5,5])
-    plt.xlim([-5,5])
+    ax.set_xlabel('X Plane')
+    ax.set_ylabel('Y Plane')
+    ax.set_zlabel('Z Plane')
+    plotStations3D(bases_set[0], 2, fig)
     plt.title("Num Stations: %d" % (3))
-    plt.clim([0,1])
     plt.show()
 
 
