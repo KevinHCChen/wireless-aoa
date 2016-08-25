@@ -103,16 +103,16 @@ print('# epoch: {}'.format(args.epoch))
 print('')
 
 
-smlp = False 
-bmlp = True 
+smlp = False
+bmlp = True
 
 # LOAD TRAINING DATA!
 if smlp:
     bases_set = [[((4,0), 90), ((0,-4), 0)],[((4,0), 90), ((0,4), 0)]]
 elif bmlp:
     #bases_set = [[((4,0), 90), ((0,-4), 0), ((0,4), 0)]]
-    bases_set = [[((4,0,0), (90,90)), ((0,-4,0), (0,0)), ((0,4,0), (0,0))]]
-num_pts = 500
+    bases_set = [[((4,0,0), (90,90)), ((0,-4,0), (0,0)), ((0,4,0), (0,0)), ((0,0,4), (0,0))]]
+num_pts = 10000
 trainXs = []
 testXs = []
 ndim = 3

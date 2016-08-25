@@ -88,6 +88,17 @@ def plt3d(xs,ys,zs,c):
     #plt.show()
     #return fig, ax
 
+def plt3d_anim(xs,ys,zs,c):
+    #fig = plt.figure()
+    #ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(xs, ys, zs, c=c)
+    ax.set_xlabel('X Label')
+    ax.set_ylabel('Y Label')
+    ax.set_zlabel('Z Label')
+
+    #plt.show()
+    #return fig, ax
+
 def animate(i):
         ax.view_init(elev=10., azim=i)
         return ()
