@@ -4,6 +4,9 @@ from scipy.spatial.distance import euclidean
 import matplotlib.pyplot as plt
 import itertools
 from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 def to_coef(m, p):
     #conversion from point/slope form of line to standard form. Do on paper if confused.
@@ -111,12 +114,53 @@ def plotStations(baseStations, station_len):
         eq = to_coef(slope, cords)
         plotLine(eq, bs[0])
 
+
+def plotStations3D(baseStations, station_len, fig):
+    for bs in baseStations:
+        cords = np.array(bs[0])
+        slope = np.tan(np.radians(bs[1]))
+        eq = to_coef(slope, cords)
+        plotPlane(eq, bs[0], fig)
+
+
 def plotLine(eq, center):
     x1 = center[0] + .2
     x2 = center[0] - .2
     y1 =  (eq[1] - eq[0][0]*x1)/(eq[0][1])
     y2 =  (eq[1] - eq[0][0]*x2)/(eq[0][1])
     plt.plot([x1,x2], [y1,y2], '-', linewidth=10., markersize=12)
+
+
+
+def plotPlane(eq, center, fig):    
+    x1 = center[0] + .2
+    x2 = center[0] - .2
+    y1 =  (eq[1] - eq[0][0]*x1)/(eq[0][1])
+    y2 =  (eq[1] - eq[0][0]*x2)/(eq[0][1])
+
+    # print x1
+    # print x2
+    # print y1[0]
+    # print y2[0]
+    # assert False
+    
+    # '''
+    x = [x1,x2,x2,x1]
+    y = [y1[0],y2[0],y2[0],y1[0]]
+    z = [-1,-1,1,1]
+    verts = [zip(x,y,z)]
+    # '''
+    
+    '''
+    x = [1,0,0,1]
+    y = [3,0,0,3]
+    z = [0,0,1,1]
+    verts = [zip(x,y,z)]
+    '''
+
+    # fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.add_collection3d(Poly3DCollection(verts))
 
 
 
