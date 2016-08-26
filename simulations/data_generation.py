@@ -17,7 +17,6 @@ def gen_points(num_pts, ndim, r=3):
 
 
 
-
 def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
     # point on the circle with radius r
     #random point and random angle

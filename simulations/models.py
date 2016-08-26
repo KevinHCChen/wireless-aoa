@@ -5,6 +5,7 @@ from chainer import training
 from chainer import computational_graph
 from chainer import optimizers
 from chainer import serializers
+import copy
 
 import six
 import numpy as np
@@ -13,38 +14,56 @@ import time
 from Convert2Complex import *
 #plt.ion()
 
-def fun():
-
-    pass
 
 # Network definition
-class StructuredMLP(chainer.Chain):
+class StructuredMLP(chainer.ChainList):
 
-    def __init__(self, n_in, n_lower, n_upper, n_out, col_idxs):
-        super(StructuredMLP, self).__init__(
-            l1a=L.Linear(n_in, n_units1[0]),  # first layer
-            l1b=L.Linear(n_in, n_units1[0]),  # first layer
-            l2a=L.Linear(n_units1[0],n_units1[1]),  # first layer
-            l2b=L.Linear(n_units1[0],n_units1[1]),  # first layer
-            l3=L.Linear(n_units1[1]*2, n_units2[0]),  # second layer
-            l4=L.Linear(n_units2[0], n_units2[1]),  # output layer
-            l5=L.Linear(n_units2[1], 2),  # output layer
-        )
+    def __init__(self, n_in, n_lower, n_upper, n_out, col_idxs_l):
+
+        super(StructuredMLP, self).__init__()
+
+        for col_idxs in col_idxs_l:
+            self.add_link(L.Linear(len(col_idxs), n_lower[0]))
+            for i in range(len(n_lower)-1):
+                self.add_link(L.Linear(n_lower[i], n_lower[i+1]))
+        self.add_link(L.Linear(n_lower[-1]*len(col_idxs_l), n_upper[0]))
+
+        for i in range(len(n_upper)-1):
+            self.add_link(L.Linear(n_upper[i], n_upper[i+1]))
+        self.add_link(L.Linear(n_upper[-1], n_out))
+        self.num_layers_lower = len(n_lower)
+        self.num_layers_upper = len(n_upper)
+
+        self.col_idxs_l = col_idxs_l
+
         self.name = 'smlp'
 
     def __call__(self, x, t):
+
         x = x[0]
-        h1a = F.relu(self.l1a(x[:,0:2]))
-        h1b = F.relu(self.l1b(x[:,2:4]))
-        h2a = F.relu(self.l2a(h1a))
-        h2b = F.relu(self.l2b(h1b))
-        h_conc = F.concat((h2a,h2b))
-        h3 = F.relu(self.l3(h_conc))
-        h4 = F.relu(self.l4(h3))
-        y = self.l5(h4)
+        h_i = x
+
+        cnt = 0
+        lower_levels = []
+        for col_idxs in self.col_idxs_l:
+            h_i = F.relu(self[cnt](h_i[:,col_idxs]))
+            cnt +=1
+            for i in range(1,self.num_layers_lower):
+                h_i = F.relu(self[cnt](h_i))
+                cnt += 1
+            lower_levels.append(copy.deepcopy(h_i))
+
+        h_i = F.concat(tuple(lower_levels))
+        for i in range(self.num_layers_upper):
+            h_i = F.relu(self[cnt](h_i))
+            cnt += 1
+
+
+        y = self[-1](h_i)
         self.loss = F.mean_squared_error(y, t)
         self.y = y
         return self.loss
+
 
 
 # Network definition
