@@ -57,5 +57,7 @@ def create_param_dict(config):
 	params['data__bs_type'] = config.get("data", "bs_type")
 	params['exp_details__save'] = ast.literal_eval(config.get("exp_details", "save"))
 
+	return params
+
 
 
