@@ -12,7 +12,7 @@ from chainer import optimizers
 
 plt.ion()
 
-cfg_fn = "noise_model.ini"
+cfg_fn = "config_files/noise_model.ini"
 
 config = util.load_configuration(cfg_fn)
 
