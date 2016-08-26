@@ -13,13 +13,14 @@ import time
 from Convert2Complex import *
 #plt.ion()
 
+def fun():
 
+	pass
 
 # Network definition
 class StructuredMLP(chainer.Chain):
 
-    def __init__(self, n_in, n_units1, n_units2):
-        
+    def __init__(self, n_in, n_lower, n_upper, n_out, col_idxs):
         super(StructuredMLP, self).__init__(
             l1a=L.Linear(n_in, n_units1[0]),  # first layer
             l1b=L.Linear(n_in, n_units1[0]),  # first layer
@@ -33,9 +34,6 @@ class StructuredMLP(chainer.Chain):
 
     def __call__(self, x, t):
         x = x[0]
-        # print x[:,0:2].shape
-        # print x[:,2:4].shape
-        # assert False
         h1a = F.relu(self.l1a(x[:,0:2]))
         h1b = F.relu(self.l1b(x[:,2:4]))
         h2a = F.relu(self.l2a(h1a))
@@ -45,34 +43,18 @@ class StructuredMLP(chainer.Chain):
         h4 = F.relu(self.l4(h3))
         y = self.l5(h4)
         self.loss = F.mean_squared_error(y, t)
-        #self.accuracy = F.accuracy(y, t)
         self.y = y
         return self.loss
-
-
-        # h1a = F.relu(self.l1a(x[0]))
-        # h1b = F.relu(self.l1b(x[1]))
-        # h2a = F.relu(self.l2a(h1a))
-        # h2b = F.relu(self.l2b(h1b))
-        # h_conc = F.concat((h2a,h2b))
-        # h3 = F.relu(self.l3(h_conc))
-        # h4 = F.relu(self.l4(h3))
-        # y = self.l5(h4)
-        # self.loss = F.mean_squared_error(y, t)
-        # #self.accuracy = F.accuracy(y, t)
-        # self.y = y
-        # return self.loss
 
 
 # Network definition
 class BaseMLP(chainer.ChainList):
 
     def __init__(self, n_in, n_units, n_out):
-        
+
         super(BaseMLP, self).__init__()
         self.add_link(L.Linear(n_in, n_units[0]))
         for i in range(len(n_units)-1):
-            # layers_l.append(L.Linear(n_units[i], n_units[i+1]))
             self.add_link(L.Linear(n_units[i], n_units[i+1]))
         self.add_link(L.Linear(n_units[-1], n_out))
         self.num_layers = len(n_units) + 2
