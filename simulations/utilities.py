@@ -11,6 +11,9 @@ def load_configuration(cfg_fn):
 	config = ConfigParser.ConfigParser()
 
 	config.read(cfg_fn)
+
+	if not os.path.exists("experiment_results"):
+		os.makedirs("experiment_results")
 	
 	dir_name = "experiment_results/%s__%s/" % (config.get("exp_details", "name"), datetime.datetime.now().strftime("%m_%d_%Y_%I:%M%p"))
 	
@@ -28,6 +31,7 @@ def load_configuration(cfg_fn):
 	# print config.get("NN", "type")
 	# print json.loads(config.get("NN", "network_size"))
 	# print config.get("exp_details", "name")
+
 
 def test_train_split(X, Y, training_size=0.8):
 	X = X/360.
