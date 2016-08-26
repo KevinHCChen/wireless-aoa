@@ -20,7 +20,7 @@ config = util.load_configuration(cfg_fn)
 params = util.create_param_dict(config)
 
 
-# hi marcus
+
 # generate mobile points, base stations, and angles
 mobiles, bases, angles = data_generation.generate_data(params['data__num_pts'], params['data__num_stations'], params['data__ndims'], pts_r=3.9, bs_r=4, bs_type=params['data__bs_type'])
 
