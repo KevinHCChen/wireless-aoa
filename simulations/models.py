@@ -15,7 +15,7 @@ from Convert2Complex import *
 
 def fun():
 
-	pass
+    pass
 
 # Network definition
 class StructuredMLP(chainer.Chain):
