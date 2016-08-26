@@ -117,15 +117,14 @@ def generate_data(num_pts, num_stations, ndim, pts_r=3, bs_r=4, bs_type="random"
     return mobiles, bases, angles
 
 def add_noise(data,col_idxs=[-1], noise_type="gaussian", noise_params={'mean': 0, 'std':1}):
+
     if noise_type == "gaussian":
-        assert data.shape[1] >= len(col_idx), "Bad Noise shape selection!"
+        assert data.shape[1] >= len(col_idxs), "Bad Noise shape selection!"
         gauss_noise = np.random.normal(loc=noise_params['mean'],\
                                        scale=noise_params['std'],\
                                        size=(data.shape[0],len(col_idxs)))
-        data[:,col_idx] += gauss_noise
+        data[:,col_idxs] += gauss_noise
     return data
-
-
 
 
 
@@ -139,6 +138,7 @@ def test_datagen():
         mobiles = gen_points(num_pts, ndim, r=3)
         bases = gen_basestations(num_stations, ndim, bs_type=bs_type)
         angles = get_mobile_angles(bases, mobiles, ndim)
+        print "pre noise: ", angles
         angles = add_noise(angles)
 
         print "************* NDIM=%d ***************" % (ndim)
