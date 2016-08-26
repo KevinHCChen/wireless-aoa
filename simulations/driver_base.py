@@ -27,12 +27,6 @@ params['data__bs_type'] = config.get("data", "bs_type")
 params['exp_details__save'] = ast.literal_eval(config.get("exp_details", "save"))
 
 
-# TODO: params (for now, we'll get from config file after)
-bs_type = "colinear"
-ndims = 2
-num_pts = 2000
-num_stations = 3
-
 # generate mobile points, base stations, and angles
 mobiles, bases, angles = data_generation.generate_data(params['data__num_pts'], params['data__num_stations'], params['data__ndims'], pts_r=3.9, bs_r=4, bs_type=params['data__bs_type'])
 
@@ -52,7 +46,7 @@ optimizer.setup(model)
 
 
 # train model
-model = models.train_model(model, trainXs, trainY, testXs, testY, n_epoch=1000, batchsize=200)
+model = models.train_model(model, trainXs, trainY, testXs, testY, n_epoch=10, batchsize=200)
 
 # test model
 predY, error = models.test_model(model, testXs, testY)

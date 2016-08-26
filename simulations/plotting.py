@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
-from find_angle import *
-
+import numpy as np
 
 def plotStations(baseStations, station_len):
     for bs in baseStations:
