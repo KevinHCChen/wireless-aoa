@@ -112,7 +112,7 @@ regressors = []
 #regressors.append(DecisionTreeRegressor(max_depth=5))
 #regressors.append(RandomForestRegressor(n_estimators=4, max_depth=5 ))
 regressors.append( MLPRegressor(hidden_layer_sizes=(500,50), activation='relu', verbose=False,
-                                algorithm='adam', alpha=0.000, tol=1e-8, early_stopping=True))
+                                algorithm='adam', alpha=0.000, tol=1e-10, early_stopping=False))
 
 # increasing network sizes:
 #for hl_size in hl_sizes:
@@ -138,7 +138,7 @@ points = np.array(points)
 #trainX, testX, trainY, testY = train_test_split(X,Y, test_size=0.1)
 #print trainX.shape
 
-for bases in bases_set:
+for i,bases in enumerate(bases_set):
     X, Y = get_angles(bases,points)
     X = X/360.
     trainX = X[:X.shape[0]*.8,:]
@@ -147,11 +147,13 @@ for bases in bases_set:
     testY = Y[Y.shape[0]*.8:,:]
 
     regressor = MLPRegressor(hidden_layer_sizes=(500,50), activation='relu', verbose=False,
-                                algorithm='adam', alpha=0.000, tol=1e-8, early_stopping=True)
+                                algorithm='adam', alpha=0.000, tol=1e-10, early_stopping=False)
+
     print regressor.fit(trainX, trainY).score(testX,testY)
     trained_Xs.append( regressor.get_layerk_act(trainX))
     test_Xs.append( regressor.get_layerk_act(testX))
     predY = regressor.predict(testX)
+    #error  = np.sqrt(np.linalg.norm(predY - testY, axis=1))
     error  = np.linalg.norm(predY - testY, axis=1)
     plt.figure()#;plt.clf()
     plt.subplot(2,1,1)
@@ -159,9 +161,11 @@ for bases in bases_set:
     plt.scatter(testY[:,0], testY[:,1], c=error)
     plotStations(bases, 2)
     #plotStations(bases_set[1], 2)
-    plt.colorbar()
+    plt.colorbar(label='error (meters)')
     plt.ylim([-5,5])
     plt.xlim([-5,5])
+    plt.xlabel('Position (in meters)')
+    plt.ylabel('Position (in meters)')
     plt.title("Num Stations: %d" % (len(bases)))
     plt.show()
 
@@ -171,11 +175,16 @@ for bases in bases_set:
     plt.scatter(predY[:,0], predY[:,1], c=error)
     plotStations(bases, 2)
     #plotStations(bases_set[1], 2)
-    plt.colorbar()
+    plt.colorbar(label='error (meters)')
     plt.ylim([-5,5])
     plt.xlim([-5,5])
+    plt.xlabel('Position (in meters)')
+    plt.ylabel('Position (in meters)')
     plt.title("Num Stations: %d" % (len(bases)))
     plt.show()
+    fig = plt.gcf() 
+    fig.set_size_inches(6.5, 10.5, forward=True)
+    plt.savefig('plots/baseModel-2Tx_%d_orig' % i )
 
 
 
@@ -189,6 +198,7 @@ regressor = MLPRegressor(hidden_layer_sizes=(200,50), activation='relu', verbose
 print regressor.fit(trainX, trainY).score(testX,testY)
 
 predY = regressor.predict(testX)
+#error  = np.sqrt( np.linalg.norm(predY - testY, axis=1))
 error  = np.linalg.norm(predY - testY, axis=1)
 
 #plt.scatter(testY[:,0], testY[:,1], c=error)
@@ -267,6 +277,7 @@ regressor = MLPRegressor(hidden_layer_sizes=(500,50), activation='relu', verbose
 print regressor.fit(trainX, trainY).score(testX,testY)
 
 predY = regressor.predict(testX)
+#error  = np.sqrt(np.linalg.norm(predY - testY, axis=1))
 error  = np.linalg.norm(predY - testY, axis=1)
 plt.figure()#;plt.clf()
 plt.subplot(2,1,1)
@@ -274,9 +285,11 @@ plt.subplot(2,1,1)
 plt.scatter(testY[:,0], testY[:,1], c=error)
 plotStations(bases_set[0], 2)
 plotStations(bases_set[1], 2)
-plt.colorbar()
+plt.colorbar(label='error (meters)')
 plt.ylim([-5,5])
 plt.xlim([-5,5])
+plt.xlabel('Position (in meters)')
+plt.ylabel('Position (in meters)')
 plt.title("Num Stations: %d" % (3))
 plt.show()
 
@@ -285,8 +298,13 @@ plt.subplot(2,1,2)
 plt.scatter(predY[:,0], predY[:,1], c=error)
 plotStations(bases_set[0], 2)
 plotStations(bases_set[1], 2)
-plt.colorbar()
+plt.colorbar(label='error (meters)')
 plt.ylim([-5,5])
 plt.xlim([-5,5])
 plt.title("Num Stations: %d" % (3))
+plt.xlabel('Position (in meters)')
+plt.ylabel('Position (in meters)')
 plt.show()
+fig = plt.gcf() 
+fig.set_size_inches(6.5, 10.5, forward=True)
+plt.savefig('plots/baseModel-3Tx_orig')

@@ -26,8 +26,6 @@ plt.ion()
 _colors = ['b','g','r','m','c','k']
 
 
-def generatePts():
-    pass
 
 def convertPt(x,ang, cords):
     return (cords[0] - x)/np.cos(ang)
@@ -110,8 +108,8 @@ regressors = []
 #regressors.append(SVR(kernel='poly', C=1e3, degree=2))
 #regressors.append(DecisionTreeRegressor(max_depth=5))
 #regressors.append(RandomForestRegressor(n_estimators=4, max_depth=5 ))
-regressors.append( MLPRegressor(hidden_layer_sizes=(500,50), activation='relu', verbose=False,
-                                algorithm='adam', alpha=0.000, tol=1e-8, early_stopping=True))
+regressors.append( MLPRegressor(hidden_layer_sizes=(500,50), activation='relu', verbose=True,
+                                algorithm='adam', alpha=0.000, tol=-float('inf'), early_stopping=False, max_iter=300))
 
 # increasing network sizes:
 #for hl_size in hl_sizes:
