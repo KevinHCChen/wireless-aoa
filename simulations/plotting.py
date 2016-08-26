@@ -39,34 +39,34 @@ def to_coef(m, p):
     return ([-m, 1], const)
 
 def plot_scatter(positions, error, title):
-	plt.scatter(positions[:,0], positions[:,1], c=error)
-	
-	plt.colorbar()
-	plt.ylim([-5,5])
-	plt.xlim([-5,5])
-	plt.title(title)
-	plt.clim([0,1])
+    plt.scatter(positions[:,0], positions[:,1], c=error)
+    
+    plt.colorbar()
+    plt.ylim([-5,5])
+    plt.xlim([-5,5])
+    plt.title(title)
+    plt.clim([0,1])
 
-	# plt.axis('equal')
+    # plt.axis('equal')
 
 
 # positions (x,y,z?) as numpy array
 def plot_error(true_pos, predicted_pos, error, bases, title):
-	if true_pos.shape[1] == 2:
-		plt.figure()
-		plt.subplot(2,1,1)
-		plot_scatter(true_pos, error, title)
-		plotStations(bases, 2)
-		
+    if true_pos.shape[1] == 2:
+        plt.figure()
+        plt.subplot(2,1,1)
+        plot_scatter(true_pos, error, title)
+        plotStations(bases, 2)
+        
 
-		#plt.figure()#;plt.clf()
-		plt.subplot(2,1,2)
-		plot_scatter(predicted_pos, error, title)
-		plotStations(bases, 2)
-		fig = plt.gcf() 
-		fig.set_size_inches(6.5, 10.5, forward=True)
-		plt.show()
+        #plt.figure()#;plt.clf()
+        plt.subplot(2,1,2)
+        plot_scatter(predicted_pos, error, title)
+        plotStations(bases, 2)
+        fig = plt.gcf() 
+        fig.set_size_inches(6.5, 10.5, forward=True)
+        plt.show()
 
-	if true_pos.shape[1] == 3:
-		print "Not implemented yet"
+    if true_pos.shape[1] == 3:
+        print "Not implemented yet"
 

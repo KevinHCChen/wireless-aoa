@@ -13,11 +13,13 @@ from chainer import optimizers
 
 #plt.ion()
 
-cfg_fn = "test1.ini"
+cfg_fn = "config_template.ini"
 
 config = util.load_configuration(cfg_fn)
 
 params = util.create_param_dict(config)
+
+print params
 
 
 
@@ -40,28 +42,28 @@ optimizer.setup(model)
 
 
 # train model
-model = models.train_model(model, trainXs, trainY, testXs, testY, n_epoch=10, batchsize=200)
+model = models.train_model(model, trainXs, trainY, testXs, testY, n_epoch=500, batchsize=200)
 
 # test model
 predY, error = models.test_model(model, testXs, testY)
 
 
 plotting.plot_error(testY, predY, error, bases, "Num Stations: %d" % (params['data__num_stations']))
-	
+    
 
 
 
 # TODO: write results file to directory
 if params['exp_details__save']:
-	print "****** NEED TO IMPLEMENT SAVING ********"
+    print "****** NEED TO IMPLEMENT SAVING ********"
 else:
-	print "****** Not saving!!!! ****** "
+    print "****** Not saving!!!! ****** "
 
 # TODO: save figures to directory
 if params['exp_details__save']:
-	print "****** NEED TO IMPLEMENT SAVING ********"
+    print "****** NEED TO IMPLEMENT SAVING ********"
 else:
-	print "****** Not saving!!!! ****** "
+    print "****** Not saving!!!! ****** "
 
 
 
