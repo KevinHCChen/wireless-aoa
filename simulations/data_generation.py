@@ -13,6 +13,8 @@ def gen_points(num_pts, ndim, r=3):
 	points = np.random.uniform(-r,r,size=(num_pts,ndim))
 	points = np.array(points)
 	return points
+ 
+
 
 
 
@@ -38,9 +40,9 @@ def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
 			# TODO: currently we are assuming z is always 0, may want to change
 			base_pts = zip(r*np.cos(t), r*np.sin(t), np.zeros((t.shape[0])))
 			# TOD: currently we are assuming 90 degrees for z angle, may want to change
-			
+
 			angles = [[np.degrees(np.sign(y)*np.arccos(x/np.linalg.norm([x,y])))+90, 90.] for x, y, z in base_pts]
-		
+
 		bases = zip(base_pts, angles)
 
 	elif bs_type=="colinear":
@@ -104,7 +106,7 @@ def get_mobile_angles(bases, mobiles, ndim):
 
 		mobile_angles = np.array(mobile_angles)
 		angles_output = mobile_angles.reshape(mobile_angles.shape[0], -1)
-	
+
 	return angles_output
 
 
@@ -113,6 +115,17 @@ def generate_data(num_pts, num_stations, ndim, pts_r=3, bs_r=4, bs_type="random"
 	bases = gen_basestations(num_stations, ndim, r=bs_r, bs_type=bs_type)
 	angles = get_mobile_angles(bases, mobiles, ndim)
 	return mobiles, bases, angles
+
+def add_noise(data,col_idxs=[-1], noise_type="gaussian", noise_params={'mean': 0, 'std':1}):
+        if noise_type == "gaussian":
+                assert data.shape[1] >= len(col_idx), "Bad Noise shape selection!"
+                gauss_noise = np.random.normal(loc=noise_params['mean'],\
+                                               scale=noise_params['std'],\
+                                               size=(data.shape[0],len(col_idxs)))
+                data[:,col_idx] += gauss_noise
+
+        return data
+
 
 
 
@@ -126,11 +139,12 @@ def test_datagen():
 		mobiles = gen_points(num_pts, ndim, r=3)
 		bases = gen_basestations(num_stations, ndim, bs_type=bs_type)
 		angles = get_mobile_angles(bases, mobiles, ndim)
+        angles = add_noise(angles)
 
 		print "************* NDIM=%d ***************" % (ndim)
 		print "Mobiles: ", mobiles
 		print "Bases: ", bases
 		print "Angles: ", angles
 
-# test_datagen()
+test_datagen()
 
