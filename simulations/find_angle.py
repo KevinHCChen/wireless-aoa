@@ -118,7 +118,8 @@ def plotStations(baseStations, station_len):
         cords = np.array(bs[0])
         slope = np.tan(np.radians(bs[1]))
         eq = to_coef(slope, cords)
-        plotLine(eq, bs[0])
+        #plotLine(eq, bs[0])
+        plotLine(eq, bs[0],bs[1])
 
 
 def plotStations3D(baseStations, station_len, fig):
@@ -129,11 +130,19 @@ def plotStations3D(baseStations, station_len, fig):
         plotPlane(eq, bs[0], fig)
 
 
-def plotLine(eq, center):
-    x1 = center[0] + .2
-    x2 = center[0] - .2
-    y1 =  (eq[1] - eq[0][0]*x1)/(eq[0][1])
-    y2 =  (eq[1] - eq[0][0]*x2)/(eq[0][1])
+def plotLine(eq, center, ang):
+
+    if ang % 180 < 45 or ang % 180 > 136:
+        x1 = center[0] + .2
+        x2 = center[0] - .2
+        y1 =  (eq[1] - eq[0][0]*x1)/(eq[0][1])
+        y2 =  (eq[1] - eq[0][0]*x2)/(eq[0][1])
+    else:
+        y1 = center[1] + .2
+        y2 = center[1] - .2
+        x1 =  (eq[1] - eq[0][1]*y1)/(eq[0][0])
+        x2 =  (eq[1] - eq[0][1]*y2)/(eq[0][0])
+
     plt.plot([x1,x2], [y1,y2], '-', linewidth=10., markersize=12)
 
 
