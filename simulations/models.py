@@ -46,7 +46,7 @@ class StructuredMLP(chainer.ChainList):
         cnt = 0
         lower_levels = []
         for col_idxs in self.col_idxs_l:
-            h_i = F.relu(self[cnt](h_i[:,col_idxs]))
+            h_i = F.relu(self[cnt](x[:,col_idxs]))
             cnt +=1
             for i in range(1,self.num_layers_lower):
                 h_i = F.relu(self[cnt](h_i))
