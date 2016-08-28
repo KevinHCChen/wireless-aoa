@@ -49,7 +49,7 @@ optimizer.setup(model)
 
 
 # train model
-model = models.train_model(model, trainXs, trainY, testXs, testY, n_epoch=params['NN__n_epochs'], batchsize=params['NN__batchsize'])
+model = models.train_model(model, trainXs, trainY, testXs, testY, n_epoch=params['NN__n_epochs'], batchsize=params['NN__batchsize'], max_flag=params['NN__take_max'])
 
 # test model
 predY, error = models.test_model(model, testXs, testY)
@@ -61,18 +61,17 @@ plotting.plot_error(testY, predY, error, bases, "Num Stations: %d" % (params['da
 #plotting.plot_error(testY, predY, error, bases, "Num Stations: %d" % (params['data__num_stations']))
 
 # TODO: write results file to directory
-'''
-if params['exp_details__save']:
-    print "****** NEED TO IMPLEMENT SAVING ********"
-else:
-    print "****** Not saving!!!! ****** "
+# if params['exp_details__save']:
+#     print "****** NEED TO IMPLEMENT SAVING ********"
+# else:
+#     print "****** Not saving!!!! ****** "
 
-# TODO: save figures to directory
+# print out warning if figures not saved 
 if params['exp_details__save']:
-    print "****** NEED TO IMPLEMENT SAVING ********"
+    print "****** Figures saved to directory %s ********" % (dir_name)
 else:
     print "****** Not saving!!!! ****** "
-'''
+    print "If you would like to save, change the config file"
 
 
 

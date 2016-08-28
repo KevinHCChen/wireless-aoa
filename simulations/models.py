@@ -93,7 +93,7 @@ class BaseMLP(chainer.ChainList):
 
 
 
-def train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100):
+def train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False):
     print "TrainX: ", trainXs[0].shape
     print "TrainY: ", trainY.shape
     # Setup optimizer
@@ -103,6 +103,9 @@ def train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=10
     max_acc = 0
 
     N = trainXs[0].shape[0]
+
+    best_model = None
+    min_metric = float('inf')
 
     for epoch in six.moves.range(1, n_epoch + 1):
 
@@ -159,11 +162,18 @@ def train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=10
             #sum_accuracy += float(model.accuracy.data) * len(t.data)
             #max_acc = max(max_acc, sum_accuracy / N_test)
 
+        if (sum_loss / N_test) < min_metric:
+            best_model = copy.deepcopy(model)
+            min_metric = (sum_loss / N_test)
+
         print('test  mean loss={}, accuracy={}'.format(
             sum_loss / N_test, 10./ N_test))
             #sum_loss / N_test, sum_accuracy / N_test))
 
-    return model
+    if max_flag:
+        return best_model
+    else:
+        return model
 
 
 def test_model(model, testXs, testY):
