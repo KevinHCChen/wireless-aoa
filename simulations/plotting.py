@@ -51,7 +51,7 @@ def plot_scatter(positions, error, title):
 
 
 # positions (x,y,z?) as numpy array
-def plot_error(true_pos, predicted_pos, error, bases, title):
+def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name):
     if true_pos.shape[1] == 2:
         plt.figure()
         plt.subplot(2,1,1)
@@ -65,7 +65,12 @@ def plot_error(true_pos, predicted_pos, error, bases, title):
         plotStations(bases, 2)
         fig = plt.gcf() 
         fig.set_size_inches(6.5, 10.5, forward=True)
+
+        plt.savefig(dir_name + 'error_fig.png', format = 'png')
+
         plt.show()
+
+
 
     if true_pos.shape[1] == 3:
         print "Not implemented yet"

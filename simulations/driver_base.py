@@ -14,7 +14,7 @@ from chainer import optimizers
 
 cfg_fn = "config_files/noise_model.ini"
 
-config = util.load_configuration(cfg_fn)
+config, dir_name = util.load_configuration(cfg_fn)
 
 params = util.create_param_dict(config)
 
@@ -55,12 +55,13 @@ model = models.train_model(model, trainXs, trainY, testXs, testY, n_epoch=params
 predY, error = models.test_model(model, testXs, testY)
 
 
-plotting.plot_error(testY, predY, error, bases, "Num Stations: %d" % (params['data__num_stations']))
+plotting.plot_error(testY, predY, error, bases, "Num Stations: %d" % (params['data__num_stations']), params['exp_details__save'], dir_name)
 
 #error = np.exp(error)
 #plotting.plot_error(testY, predY, error, bases, "Num Stations: %d" % (params['data__num_stations']))
 
 # TODO: write results file to directory
+'''
 if params['exp_details__save']:
     print "****** NEED TO IMPLEMENT SAVING ********"
 else:
@@ -71,7 +72,7 @@ if params['exp_details__save']:
     print "****** NEED TO IMPLEMENT SAVING ********"
 else:
     print "****** Not saving!!!! ****** "
-  
+'''
 
 
 

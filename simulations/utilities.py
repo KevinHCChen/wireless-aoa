@@ -25,7 +25,7 @@ def load_configuration(cfg_fn):
         # copy cfg file to experiment directory for record keeping purposes
         shutil.copy(cfg_fn, dir_name)
     
-    return config
+    return config, dir_name
 
     # print config.sections()
     # print config.get("NN", "type")
