@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from chainer import optimizers
 
-plt.ion()
+
 
 cfg_fn = "config_files/noise_model.ini"
 
@@ -19,6 +19,9 @@ config = util.load_configuration(cfg_fn)
 params = util.create_param_dict(config)
 
 print params
+
+if params['exp_details__interactive']:
+    plt.ion()
 
 
 
@@ -46,7 +49,7 @@ optimizer.setup(model)
 
 
 # train model
-model = models.train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=200)
+model = models.train_model(model, trainXs, trainY, testXs, testY, n_epoch=params['NN__n_epochs'], batchsize=params['NN__batchsize'])
 
 # test model
 predY, error = models.test_model(model, testXs, testY)

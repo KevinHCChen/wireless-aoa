@@ -51,11 +51,14 @@ def create_param_dict(config):
     params = {}
     params['NN__type'] = config.get("NN", "type")
     params['NN__network_size'] = json.loads(config.get("NN", "network_size"))
+    params['NN__n_epochs'] = int(config.get("NN", "n_epochs"))
+    params['NN__batchsize'] = int(config.get("NN", "batchsize"))
     params['data__num_pts'] = int(config.get("data", "num_pts"))
     params['data__ndims'] = int(config.get("data", "ndims"))
     params['data__num_stations'] = int(config.get("data", "num_stations"))
     params['data__bs_type'] = config.get("data", "bs_type")
     params['exp_details__save'] = ast.literal_eval(config.get("exp_details", "save"))
+    params['exp_details__interactive'] = ast.literal_eval(config.get("exp_details", "interactive"))
 
     return params
 
