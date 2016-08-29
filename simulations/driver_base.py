@@ -41,6 +41,8 @@ for cfg_fn in cfg_fns:
                                                            bs_type=params['data__bs_type'])
 
     #angles = data_generation.add_noise(angles, col_idxs=range(angles.shape[1]), noise_params={'mean': 0, 'std': 1} )
+# split data
+    trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles, 1.)
 
     # split data
     trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles)
@@ -60,12 +62,22 @@ for cfg_fn in cfg_fns:
 
     # train model
     model = models.train_model(model, trainXs, trainY, testXs, testY,
-                               n_epoch=params['NN__n_epochs'], batchsize=params['NN__batchsize'],
+                               n_epoch=params['NN__n_epochs'],
+                               batchsize=params['NN__batchsize'],
                                max_flag=params['NN__take_max'])
+
+
+    # generate mobile points, base stations, and angles
+    mobiles, bases, angles = data_generation.generate_data(10000,
+                                                           params['data__num_stations'],
+                                                           params ['data__ndims'],
+                                                           pts_r=3.9, bs_r=4,
+                                                           bs_type=params['data__bs_type'])
+
+    trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles, 0.)
 
     # test model
     predY, error = models.test_model(model, testXs, testY)
-
 
     plotting.plot_error(testY, predY, error, bases,
                         "Num Stations: %d" % (params['data__num_stations']),
