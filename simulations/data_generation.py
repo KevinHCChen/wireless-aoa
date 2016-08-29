@@ -101,6 +101,9 @@ def get_mobile_angles(bases, mobiles, ndim):
         # print "AO: ", angles_output.shape
         # assert False
     elif ndim == 3:
+        print "*****HERE******"
+        print "Mobiels: ", mobiles
+        print "BASES: ", bases 
         mobile_angles = [[get3D_angles(mobile_loc, base[0], base[1]) for base in bases] for mobile_loc in mobiles]
 
         mobile_angles = np.array(mobile_angles)
