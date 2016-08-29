@@ -14,17 +14,17 @@ def load_configuration(cfg_fn):
 
     if not os.path.exists("experiment_results"):
         os.makedirs("experiment_results")
-    
+
     dir_name = "experiment_results/%s__%s/" % (config.get("exp_details", "name"), datetime.datetime.now().strftime("%m_%d_%Y_%I:%M%p"))
-    
+
 
     if ast.literal_eval(config.get("exp_details", "save")):
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)
-        
+
         # copy cfg file to experiment directory for record keeping purposes
         shutil.copy(cfg_fn, dir_name)
-    
+
     return config, dir_name
 
     # print config.sections()
