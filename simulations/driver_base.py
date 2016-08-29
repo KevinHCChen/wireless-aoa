@@ -1,5 +1,7 @@
 import numpy as np
 
+import matplotlib
+matplotlib.use('Agg')
 import utilities as util
 import models as models
 import data_generation as data_generation
@@ -15,7 +17,7 @@ use_dir = True
 
 if use_dir:
     # cfg_fns = "config_files/noise_model.ini"
-    cfg_fns = glob.glob('dirhere/*')
+    cfg_fns = glob.glob('expset_08292016_1pm/*')
 else:
     cfg_fns = ["config_files/noise_model.ini"]
 
@@ -52,7 +54,7 @@ for cfg_fn in cfg_fns:
         model = models.BaseMLP(np.hstack(trainXs).shape[1], params['NN__network_size'],
                                params['data__ndims'])
     elif params['NN__type'] == 'smlp':
-        model = models.StructuredMLP(None, [500,50],[50,10], params['data__ndims'],
+        model = models.StructuredMLP(None, params['NN__network_size'][0],params['NN__network_size'][1], params['data__ndims'],
                                  [[0,1],[2,3],[0,3]])
 
     # Setup optimizer
