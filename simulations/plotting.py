@@ -66,7 +66,8 @@ def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name)
         fig = plt.gcf() 
         fig.set_size_inches(6.5, 10.5, forward=True)
 
-        plt.savefig(dir_name + 'error_fig.png', format = 'png')
+        if saveflag:
+            plt.savefig(dir_name + 'error_fig.png', format = 'png')
 
         plt.show()
 
