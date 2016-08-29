@@ -171,9 +171,9 @@ def train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=10
             #sum_loss / N_test, sum_accuracy / N_test))
 
     if max_flag:
-        return best_model
+        return best_model, min_metric
     else:
-        return model
+        return model, sum_loss / N_test
 
 
 def test_model(model, testXs, testY):

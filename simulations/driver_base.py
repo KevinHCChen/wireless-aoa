@@ -60,10 +60,14 @@ for cfg_fn in cfg_fns:
 
 
     # train model
-    model = models.train_model(model, trainXs, trainY, testXs, testY,
+    model, loss = models.train_model(model, trainXs, trainY, testXs, testY,
                                n_epoch=params['NN__n_epochs'],
                                batchsize=params['NN__batchsize'],
                                max_flag=params['NN__take_max'])
+
+    f = open(dir_name + 'loss.txt', 'w')
+    f.write("%f" % (loss))
+    f.close()
 
 
     # generate mobile points, base stations, and angles
