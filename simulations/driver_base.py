@@ -43,9 +43,6 @@ for cfg_fn in cfg_fns:
                                                            bs_type=params['data__bs_type'])
 
     #angles = data_generation.add_noise(angles, col_idxs=range(angles.shape[1]), noise_params={'mean': 0, 'std': 1} )
-# split data
-    trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles, 1.)
-
     # split data
     trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles)
 
@@ -55,7 +52,7 @@ for cfg_fn in cfg_fns:
                                params['data__ndims'])
     elif params['NN__type'] == 'smlp':
         model = models.StructuredMLP(None, params['NN__network_size'][0],params['NN__network_size'][1], params['data__ndims'],
-                                 [[0,1],[2,3],[0,3]])
+                                 [[0,1],[2,3]])
 
     # Setup optimizer
     optimizer = optimizers.Adam()
