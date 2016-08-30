@@ -1,17 +1,27 @@
 import numpy as np
+import json
+import ast
+import glob
+import argparse
+from chainer import optimizers
 
-import matplotlib
-matplotlib.use('Agg')
+parser = argparse.ArgumentParser(description='Driver for 5G Experiments')
+parser.add_argument('--showfig', '-g', dest='showfig', action='store_true',
+                    help='Show the figure')
+args = parser.parse_args()
+
+showfig = args.showfig
+if not showfig:
+    import matplotlib
+    matplotlib.use('Agg')
+
+import matplotlib.pyplot as plt
+
 import utilities as util
 import models as models
 import data_generation as data_generation
 import plotting as plotting
-import json
-import ast
-import matplotlib.pyplot as plt
-import glob
 
-from chainer import optimizers
 
 use_dir = False
 

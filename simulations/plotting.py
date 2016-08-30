@@ -112,7 +112,7 @@ def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name)
         ax.set_xlim((-6,6))
         ax.set_zlim((-6,6))
         plt.title("Ground Truth, Num Stations: %d" % (3))
-        # plt.show()
+        plt.show()
         if saveflag:
             plt.savefig(dir_name + 'error_true_fig.png', format = 'png')
 
@@ -127,7 +127,7 @@ def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name)
         ax.set_xlim((-6,6))
         ax.set_zlim((-6,6))
         plt.title("Predicted, Num Stations: %d" % (3))
-        # plt.show()
+        plt.show()
         if saveflag:
             plt.savefig(dir_name + 'error_predicted_fig.png', format = 'png')
 
