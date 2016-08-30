@@ -96,8 +96,8 @@ class NBPStructuredMLP():
 
             tmp_trainXs = []
             tmp_testXs = []
-            tmp_trainXs.append(trainXs[0][:,(i*self.ndim*2):(i*self.ndim*2)+self.ndim*2])
-            tmp_testXs.append(testXs[0][:,(i*self.ndim*2):(i*self.ndim*2)+self.ndim*2])
+            tmp_trainXs.append(trainXs[0][:,(i*self.ndim*(self.ndim-1)):(i*self.ndim*(self.ndim-1))+self.ndim*(self.ndim-1)])
+            tmp_testXs.append(testXs[0][:,(i*self.ndim*(self.ndim-1)):(i*self.ndim*(self.ndim-1))+self.ndim*(self.ndim-1)])
 
             print "HERE MARCUS: ", tmp_trainXs[0].shape
             print "HERE MARCUS: ", tmp_testXs[0].shape
@@ -141,7 +141,7 @@ class NBPStructuredMLP():
         output_testXs = []
         for i, model in enumerate(self.lower_models_l):
             tmp_testXs = []
-            tmp_testXs.append(X[0][:,(i*self.ndim*2):(i*self.ndim*2)+self.ndim*2])
+            tmp_testXs.append(X[0][:,(i*self.ndim*(self.ndim-1)):(i*self.ndim*(self.ndim-1))+self.ndim*(self.ndim-1)])
 
             x = chainer.Variable(np.asarray(tmp_testXs[0]))
             output_testXs.append( model.forward(x) )

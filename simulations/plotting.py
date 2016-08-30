@@ -96,7 +96,7 @@ def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name)
         if saveflag:
             plt.savefig(dir_name + 'error_fig.png', format = 'png')
 
-        # plt.show()
+        plt.show()
 
     # 3D case
     if true_pos.shape[1] == 3:

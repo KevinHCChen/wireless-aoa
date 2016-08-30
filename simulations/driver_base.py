@@ -8,10 +8,14 @@ from chainer import optimizers
 parser = argparse.ArgumentParser(description='Driver for 5G Experiments')
 parser.add_argument('--showfig', '-g', dest='showfig', action='store_true',
                     help='Show the figure')
+parser.add_argument('--configfile', '-c', dest='configfile', type=str,
+                    help='Which config file to use')
 args = parser.parse_args()
 
 showfig = args.showfig
+configfile = args.configfile
 if not showfig:
+    print "WILL NOT DISPLAY"
     import matplotlib
     matplotlib.use('Agg')
 
@@ -25,15 +29,17 @@ import plotting as plotting
 
 use_dir = False
 
-if use_dir:
+if configfile:
+    cfg_fns = [configfile]
+elif use_dir:
     # cfg_fns = "config_files/noise_model.ini"
     cfg_fns = glob.glob('expset_08292016_11pm/*')
 else:
     #cfg_fns = ["config_files/noise_baseModel.ini"]
     #cfg_fns = ["config_files/broken_structured.ini"]
-    cfg_fns = ["config_files/nbpstructured-3D.ini"]
+    cfg_fns = ["config_files/baseModel2D.ini"]
 
-
+    
 for cfg_fn in cfg_fns:
     print "CFG: ", cfg_fn
     config, dir_name = util.load_configuration(cfg_fn)
