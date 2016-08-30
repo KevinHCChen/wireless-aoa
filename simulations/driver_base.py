@@ -13,7 +13,7 @@ import glob
 
 from chainer import optimizers
 
-use_dir = False
+use_dir = True
 
 if use_dir:
     # cfg_fns = "config_files/noise_model.ini"
@@ -21,11 +21,11 @@ if use_dir:
 else:
     #cfg_fns = ["config_files/noise_baseModel.ini"]
     #cfg_fns = ["config_files/broken_structured.ini"]
-    cfg_fns = ["config_files/baseModel3D.ini"]
+    cfg_fns = ["config_files/nbpstructured-3D.ini"]
 
 
 for cfg_fn in cfg_fns:
-
+    print "CFG: ", cfg_fn
     config, dir_name = util.load_configuration(cfg_fn)
 
     params = util.create_param_dict(config)
@@ -45,7 +45,7 @@ for cfg_fn in cfg_fns:
                                                            bs_type=params['data__bs_type'])
 
     if params['data__addnoise']:
-      angles = data_generation.add_noise(angles, col_idxs=range(angles.shape[1]), noise_params={'mean': 0, 'std': 1} )
+        angles = data_generation.add_noise(angles, col_idxs=range(angles.shape[1]), noise_params={'mean': 0, 'std': 1} )
 
     # split data
     trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles)
@@ -60,6 +60,9 @@ for cfg_fn in cfg_fns:
                                      [[0,1],[2,3]])
     elif params['NN__type'] == 'snbp-mlp':
         #TODO: fix pass in data structure and n_in
+        # print trainXs[0].shape
+        # print trainXs[0]
+        # assert False
         model = models.NBPStructuredMLP(trainXs[0].shape[1], params['NN__network_size'][0],
                                         params['NN__network_size'][1], params['data__ndims'])
 

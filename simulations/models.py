@@ -74,17 +74,21 @@ class NBPStructuredMLP():
     def __init__(self, n_in, n_lower, n_upper, n_out):
 
         num_pairs = 2
-        ndim = n_out
+        self.ndim = n_out
         self.lower_models_l = []
-        self.lower_models_l.append(BaseMLP(n_in/num_pairs, n_lower, ndim))
-        self.lower_models_l.append(BaseMLP(n_in/num_pairs, n_lower, ndim))
+        # print "HERE: ", n_in
+        # assert False
+        self.lower_models_l.append(BaseMLP(n_in/num_pairs, n_lower, self.ndim))
+        self.lower_models_l.append(BaseMLP(n_in/num_pairs, n_lower, self.ndim))
 
-        self.upper_model = BaseMLP(n_lower[-1]*num_pairs, n_upper, ndim)
+        self.upper_model = BaseMLP(n_lower[-1]*num_pairs, n_upper, self.ndim)
+        
 
     def trainModel(self, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False):
 
         output_testXs = []
         output_trainXs= []
+        print "LEN: ", len(self.lower_models_l)
         for i, model in enumerate(self.lower_models_l):
             # Setup optimizer
             optimizer = optimizers.Adam()
@@ -92,8 +96,14 @@ class NBPStructuredMLP():
 
             tmp_trainXs = []
             tmp_testXs = []
-            tmp_trainXs.append(trainXs[0][:,(i*ndim):(i*ndim)+ndim])
-            tmp_testXs.append(testXs[0][:,(i*ndim):(i*ndim)+ndim])
+            tmp_trainXs.append(trainXs[0][:,(i*self.ndim*2):(i*self.ndim*2)+self.ndim*2])
+            tmp_testXs.append(testXs[0][:,(i*self.ndim*2):(i*self.ndim*2)+self.ndim*2])
+
+            print "HERE MARCUS: ", tmp_trainXs[0].shape
+            print "HERE MARCUS: ", tmp_testXs[0].shape
+            print "HERE MARCUS: ", trainY.shape
+            print "HERE MARCUS: ", testY.shape
+            # assert False
 
             model, loss = train_model(model, tmp_trainXs, trainY,
                                             tmp_testXs, testY,
@@ -131,7 +141,7 @@ class NBPStructuredMLP():
         output_testXs = []
         for i, model in enumerate(self.lower_models_l):
             tmp_testXs = []
-            tmp_testXs.append(X[0][:,(i*ndim):(i*ndim)+ndim])
+            tmp_testXs.append(X[0][:,(i*self.ndim*2):(i*self.ndim*2)+self.ndim*2])
 
             x = chainer.Variable(np.asarray(tmp_testXs[0]))
             output_testXs.append( model.forward(x) )
