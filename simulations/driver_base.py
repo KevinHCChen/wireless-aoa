@@ -1,7 +1,7 @@
 import numpy as np
 
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 import utilities as util
 import models as models
 import data_generation as data_generation
@@ -19,7 +19,8 @@ if use_dir:
     # cfg_fns = "config_files/noise_model.ini"
     cfg_fns = glob.glob('expset_08292016_1pm/*')
 else:
-    cfg_fns = ["config_files/noise_baseModel.ini"]
+    #cfg_fns = ["config_files/noise_baseModel.ini"]
+    cfg_fns = ["config_files/broken_structured.ini"]
 
 
 for cfg_fn in cfg_fns:
@@ -52,16 +53,17 @@ for cfg_fn in cfg_fns:
         model = models.BaseMLP(np.hstack(trainXs).shape[1], params['NN__network_size'],
                                params['data__ndims'])
     elif params['NN__type'] == 'smlp':
-        model = models.StructuredMLP(None, params['NN__network_size'][0],params['NN__network_size'][1], params['data__ndims'],
-                                 [[0,1],[2,3]])
-
-    # Setup optimizer
-    optimizer = optimizers.Adam()
-    optimizer.setup(model)
-
+        model = models.StructuredMLP(None, params['NN__network_size'][0],
+                                     params['NN__network_size'][1], params['data__ndims'],
+                                     [[0,1],[2,3]])
+    elif params['NN__type'] == 'snbp-mlp':
+        #TODO: fix pass in data structure and n_in
+        model = models.NBPStructuredMLP(trainXs[0].shape[1], params['NN__network_size'][0],
+                                        params['NN__network_size'][1], params['data__ndims'])
 
     # train model
-    model, loss = models.train_model(model, trainXs, trainY, testXs, testY,
+    #model, loss = models.train_model(model, trainXs, trainY, testXs, testY,
+    loss = model.trainModel(trainXs, trainY, testXs, testY,
                                n_epoch=params['NN__n_epochs'],
                                batchsize=params['NN__batchsize'],
                                max_flag=params['NN__take_max'])
@@ -81,7 +83,8 @@ for cfg_fn in cfg_fns:
     trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles, 0.)
 
     # test model
-    predY, error = models.test_model(model, testXs, testY)
+    #predY, error = models.test_model(model, testXs, testY)
+    predY, error = model.testModel(testXs, testY)
 
     plotting.plot_error(testY, predY, error, bases,
                         "Num Stations: %d" % (params['data__num_stations']),

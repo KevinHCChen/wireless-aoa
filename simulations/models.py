@@ -64,6 +64,11 @@ class StructuredMLP(chainer.ChainList):
         self.y = y
         return self.loss
 
+    def trainModel(self, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False):
+        self.model, loss = train_model(trainXs, trainY, testXs, testY, n_epoch=n_epoch,
+                                       batchsize=batchsize, max_flag=max_flag)
+
+
 class NBPStructuredMLP():
 
     def __init__(self, n_in, n_lower, n_upper, n_out):
@@ -119,6 +124,7 @@ class NBPStructuredMLP():
                                           batchsize=batchsize,
                                           max_flag=max_flag)
 
+        return loss
 
     def forward(self, X):
 
@@ -179,8 +185,20 @@ class BaseMLP(chainer.ChainList):
         for i in range(self.num_layers-2):
             h_i = F.relu(self[i](h_i))
 
-
         return h_i
+
+    def trainModel(self, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False):
+
+        self.model, loss = train_model(self, trainXs, trainY, testXs, testY,
+                                       n_epoch, batchsize, max_flag=max_flag)
+        return loss
+
+
+    def testModel(self, X, Y):
+        #res = self.forward(X)
+        predY, error = test_model(self, X, Y)
+        #predY, error = test_model(self.upper_model, res, Y)
+        return predY, error
 
 
 def train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False):

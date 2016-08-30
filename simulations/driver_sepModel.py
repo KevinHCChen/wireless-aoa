@@ -78,7 +78,6 @@ for cfg_fn in cfg_fns:
                         params['exp_details__save'], dir_name)
 
 
-
     # TODO: write results file to directory
     # if params['exp_details__save']:
     #     print "****** NEED TO IMPLEMENT SAVING ********"
