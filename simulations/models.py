@@ -76,8 +76,6 @@ class NBPStructuredMLP():
         num_pairs = 2
         self.ndim = n_out
         self.lower_models_l = []
-        # print "HERE: ", n_in
-        # assert False
         self.lower_models_l.append(BaseMLP(n_in/num_pairs, n_lower, self.ndim))
         self.lower_models_l.append(BaseMLP(n_in/num_pairs, n_lower, self.ndim))
 
@@ -88,7 +86,6 @@ class NBPStructuredMLP():
 
         output_testXs = []
         output_trainXs= []
-        print "LEN: ", len(self.lower_models_l)
         for i, model in enumerate(self.lower_models_l):
             # Setup optimizer
             optimizer = optimizers.Adam()
@@ -99,11 +96,6 @@ class NBPStructuredMLP():
             tmp_trainXs.append(trainXs[0][:,(i*self.ndim*(self.ndim-1)):(i*self.ndim*(self.ndim-1))+self.ndim*(self.ndim-1)])
             tmp_testXs.append(testXs[0][:,(i*self.ndim*(self.ndim-1)):(i*self.ndim*(self.ndim-1))+self.ndim*(self.ndim-1)])
 
-            print "HERE MARCUS: ", tmp_trainXs[0].shape
-            print "HERE MARCUS: ", tmp_testXs[0].shape
-            print "HERE MARCUS: ", trainY.shape
-            print "HERE MARCUS: ", testY.shape
-            # assert False
 
             model, loss = train_model(model, tmp_trainXs, trainY,
                                             tmp_testXs, testY,
@@ -212,10 +204,6 @@ class BaseMLP(chainer.ChainList):
 
 
 def train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False):
-    print "TrainX: ", trainXs[0].shape
-    print "TrainY: ", trainY.shape
-    print "Test:", testXs[0].shape
-
     # Setup optimizer
     optimizer = optimizers.Adam()
     optimizer.setup(model)
@@ -311,8 +299,6 @@ def test_model(model, testXs, testY):
     t = chainer.Variable(testY,
                             volatile='on')
 
-    print(x.shape)
-    print(t.shape)
     model(x,t)
     predY = model.y.data
     error  = np.linalg.norm(predY - testY, axis=1)
