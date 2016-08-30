@@ -20,7 +20,7 @@ def plotStations3D(baseStations, station_len, fig):
         print "CORDS: ", cords
         print "SLOPE: ", slope
         eq = to_coef(slope, cords)
-        plotPlane(eq, bs[0], fig)
+        plotPlane(eq, bs[0], bs[1][0], fig)
 
 
 def plotLine(eq, center, ang):
@@ -35,6 +35,24 @@ def plotLine(eq, center, ang):
         x1 =  (eq[1] - eq[0][1]*y1)/(eq[0][0])
         x2 =  (eq[1] - eq[0][1]*y2)/(eq[0][0])
     plt.plot([x1,x2], [y1,y2], '-', linewidth=10., markersize=12)
+
+def plotPlane(eq, center, ang, fig): 
+    if ang % 180 < 45 or ang % 180 > 135:
+        x1 = center[0] + .2
+        x2 = center[0] - .2
+        y1 =  (eq[1] - eq[0][0]*x1)/(eq[0][1])
+        y2 =  (eq[1] - eq[0][0]*x2)/(eq[0][1])
+    else:
+        y1 = center[1] + .2
+        y2 = center[1] - .2
+        x1 =  (eq[1] - eq[0][1]*y1)/(eq[0][0])
+        x2 =  (eq[1] - eq[0][1]*y2)/(eq[0][0])
+    x = [x1,x2,x2,x1]
+    y = [y1,y2,y2,y1]
+    z = [-1,-1,1,1]
+    verts = [zip(x,y,z)]
+    ax = fig.gca(projection='3d')
+    ax.add_collection3d(Poly3DCollection(verts))
 
 
 def to_coef(m, p):
@@ -84,12 +102,12 @@ def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name)
         fig = plt.figure()
 
         ax = fig.add_subplot(111, projection='3d')
-        ax.scatter(true_pos[:,0], true_pos[:,1], true_pos[:,2], c=error)
+        ax.scatter(true_pos[:,0], true_pos[:,1], true_pos[:,2], c=error, alpha=0.1)
         ax.set_xlabel('X Plane')
         ax.set_ylabel('Y Plane')
         ax.set_zlabel('Z Plane')
         # plotStations3D(bases[0], 2, fig)
-        # plotStations3D(bases, 3, fig)
+        plotStations3D(bases, 3, fig)
         # ax.colorbar()
         # ax.ylim([-5,5])
         # ax.xlim([-5,5])
@@ -98,8 +116,8 @@ def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name)
         ax.set_zlim((-6,6))
         plt.title("Num Stations: %d" % (3))
         # plt.clim([0,1])
-        # plt.show()
-        # assert False
+        plt.show()
+        assert False
         if saveflag:
             plt.savefig(dir_name + 'error_true_fig.png', format = 'png')
         # assert False
@@ -124,42 +142,3 @@ def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name)
         if saveflag:
             plt.savefig(dir_name + 'error_predicted_fig.png', format = 'png')
 
-def plotPlane(eq, center, fig): 
-    print "EQ: ", eq
-    print "CENTER: ", center
-
-    x1 = center[0] + .2
-    x2 = center[0] - .2
-    y1 =  (eq[1] - eq[0][0]*x1)/(eq[0][1])
-    y2 =  (eq[1] - eq[0][0]*x2)/(eq[0][1])
-
-    print "x1: ", x1
-    print "x2: ", x2
-    print "y1: ", y1
-    print "y2: ", y2
-    print "*******"
-
-    # print x1
-    # print x2
-    # print y1[0]
-    # print y2[0]
-    # assert False
-    
-    # '''
-    x = [x1,x2,x2,x1]
-    # y = [y1[0],y2[0],y2[0],y1[0]]
-    y = [y1,y2,y2,y1]
-    z = [-1,-1,1,1]
-    verts = [zip(x,y,z)]
-    # '''
-    
-    '''
-    x = [1,0,0,1]
-    y = [3,0,0,3]
-    z = [0,0,1,1]
-    verts = [zip(x,y,z)]
-    '''
-
-    # fig = plt.figure()
-    ax = fig.gca(projection='3d')
-    ax.add_collection3d(Poly3DCollection(verts))

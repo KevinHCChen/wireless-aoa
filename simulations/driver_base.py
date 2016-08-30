@@ -1,7 +1,7 @@
 import numpy as np
 
 import matplotlib
-matplotlib.use('Agg')
+# matplotlib.use('Agg')
 import utilities as util
 import models as models
 import data_generation as data_generation
@@ -13,7 +13,7 @@ import glob
 
 from chainer import optimizers
 
-use_dir = True
+use_dir = False
 
 if use_dir:
     # cfg_fns = "config_files/noise_model.ini"
@@ -82,7 +82,7 @@ for cfg_fn in cfg_fns:
     mobiles, bases, angles = data_generation.generate_data(10000,
                                                            params['data__num_stations'],
                                                            params ['data__ndims'],
-                                                           pts_r=3.9, bs_r=4,
+                                                           pts_r=3, bs_r=4,
                                                            bs_type=params['data__bs_type'])
 
     trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles, 0.)
