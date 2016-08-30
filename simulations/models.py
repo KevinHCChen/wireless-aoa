@@ -80,7 +80,6 @@ class NBPStructuredMLP():
         self.lower_models_l.append(BaseMLP(n_in/num_pairs, n_lower, self.ndim))
 
         self.upper_model = BaseMLP(n_lower[-1]*num_pairs, n_upper, self.ndim)
-        
 
     def trainModel(self, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False):
 
@@ -93,8 +92,13 @@ class NBPStructuredMLP():
 
             tmp_trainXs = []
             tmp_testXs = []
-            tmp_trainXs.append(trainXs[0][:,(i*self.ndim*(self.ndim-1)):(i*self.ndim*(self.ndim-1))+self.ndim*(self.ndim-1)])
-            tmp_testXs.append(testXs[0][:,(i*self.ndim*(self.ndim-1)):(i*self.ndim*(self.ndim-1))+self.ndim*(self.ndim-1)])
+            if self.ndim == 2:
+                tmp_trainXs.append(trainXs[0][:,(i*self.ndim):(i*self.ndim)+self.ndim])
+                tmp_testXs.append(testXs[0][:,(i*self.ndim):(i*self.ndim)+self.ndim])
+            elif self.ndim == 3:
+                tmp_trainXs.append(trainXs[0][:,(i*self.ndim*(self.ndim)):(i*self.ndim*(self.ndim))+self.ndim*(self.ndim)])
+                tmp_testXs.append(testXs[0][:,(i*self.ndim*(self.ndim)):(i*self.ndim*(self.ndim))+self.ndim*(self.ndim)])
+
 
 
             model, loss = train_model(model, tmp_trainXs, trainY,
@@ -133,7 +137,10 @@ class NBPStructuredMLP():
         output_testXs = []
         for i, model in enumerate(self.lower_models_l):
             tmp_testXs = []
-            tmp_testXs.append(X[0][:,(i*self.ndim*(self.ndim-1)):(i*self.ndim*(self.ndim-1))+self.ndim*(self.ndim-1)])
+            if self.ndim == 2:
+                tmp_testXs.append(X[0][:,(i*self.ndim):(i*self.ndim)+self.ndim])
+            elif self.ndim == 3:
+                tmp_testXs.append(X[0][:,(i*self.ndim*(self.ndim)):(i*self.ndim*(self.ndim))+self.ndim*(self.ndim)])
 
             x = chainer.Variable(np.asarray(tmp_testXs[0]))
             output_testXs.append( model.forward(x) )
