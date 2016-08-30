@@ -39,6 +39,7 @@ with open('experiment_set_csvs/experimentset1_08292016_11pm.csv', 'rU') as f:
             f.write('num_stations: %s\n' % (row[2]))
             f.write('sphere_r: %s\n' % (4))
             f.write('bs_type: %s\n' % (row[8]))
+            f.write('addnoise: %s\n' % ('False'))
 
             f.close()
 
