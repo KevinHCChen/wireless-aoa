@@ -34,6 +34,7 @@ def plotLine(eq, center, ang):
         x2 =  (eq[1] - eq[0][1]*y2)/(eq[0][0])
     plt.plot([x1,x2], [y1,y2], '-', linewidth=10., markersize=12)
 
+
 def plotPlane(eq, center, ang, fig): 
     if ang % 180 < 45 or ang % 180 > 135:
         x1 = center[0] + .2
@@ -58,6 +59,7 @@ def to_coef(m, p):
     const = p[1]-m*p[0]
     #return the left side coefficients and the right side constant. these represent the equation.
     return ([-m, 1], const)
+
 
 def plot_scatter(positions, error, title):
     plt.scatter(positions[:,0], positions[:,1], c=error)
