@@ -13,14 +13,15 @@ import glob
 
 from chainer import optimizers
 
-use_dir = True
+use_dir = False
 
 if use_dir:
     # cfg_fns = "config_files/noise_model.ini"
     cfg_fns = glob.glob('expset_08292016_11pm/*')
 else:
     #cfg_fns = ["config_files/noise_baseModel.ini"]
-    cfg_fns = ["config_files/broken_structured.ini"]
+    #cfg_fns = ["config_files/broken_structured.ini"]
+    cfg_fns = ["config_files/baseModel3D.ini"]
 
 
 for cfg_fn in cfg_fns:
@@ -43,7 +44,7 @@ for cfg_fn in cfg_fns:
                                                            pts_r=3.9, bs_r=4,
                                                            bs_type=params['data__bs_type'])
 
-    if addnoise:
+    if params['data__addnoise']:
       angles = data_generation.add_noise(angles, col_idxs=range(angles.shape[1]), noise_params={'mean': 0, 'std': 1} )
 
     # split data

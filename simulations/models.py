@@ -74,7 +74,7 @@ class NBPStructuredMLP():
     def __init__(self, n_in, n_lower, n_upper, n_out):
 
         num_pairs = 2
-        ndim = 2  # TODO: Fix parameter passed dimensions!
+        ndim = n_out
         self.lower_models_l = []
         self.lower_models_l.append(BaseMLP(n_in/num_pairs, n_lower, ndim))
         self.lower_models_l.append(BaseMLP(n_in/num_pairs, n_lower, ndim))
@@ -92,8 +92,8 @@ class NBPStructuredMLP():
 
             tmp_trainXs = []
             tmp_testXs = []
-            tmp_trainXs.append(trainXs[0][:,(i*2):(i*2)+2])
-            tmp_testXs.append(testXs[0][:,(i*2):(i*2)+2])
+            tmp_trainXs.append(trainXs[0][:,(i*ndim):(i*ndim)+ndim])
+            tmp_testXs.append(testXs[0][:,(i*ndim):(i*ndim)+ndim])
 
             model, loss = train_model(model, tmp_trainXs, trainY,
                                             tmp_testXs, testY,
@@ -131,7 +131,7 @@ class NBPStructuredMLP():
         output_testXs = []
         for i, model in enumerate(self.lower_models_l):
             tmp_testXs = []
-            tmp_testXs.append(X[0][:,(i*2):(i*2)+2])
+            tmp_testXs.append(X[0][:,(i*ndim):(i*ndim)+ndim])
 
             x = chainer.Variable(np.asarray(tmp_testXs[0]))
             output_testXs.append( model.forward(x) )
