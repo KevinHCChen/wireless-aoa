@@ -1,7 +1,7 @@
 import numpy as np
 
 import matplotlib
-# matplotlib.use('Agg')
+matplotlib.use('Agg')
 import utilities as util
 import models as models
 import data_generation as data_generation

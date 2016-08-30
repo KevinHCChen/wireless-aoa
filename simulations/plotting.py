@@ -4,6 +4,8 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
+color_vector = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
+
 def plotStations(baseStations):
     for bs in baseStations:
         #plt.plot(bs[0][0], bs[0][1], marker=(4, 0, bs[1]), markersize=40)
@@ -14,11 +16,11 @@ def plotStations(baseStations):
 
 
 def plotStations3D(baseStations, fig):
-    for bs in baseStations:
+    for i, bs in enumerate(baseStations):
         cords = np.array(bs[0])
         slope = np.tan(np.radians(bs[1][0]))
         eq = to_coef(slope, cords)
-        plotPlane(eq, bs[0], bs[1][0], fig)
+        plotPlane(eq, bs[0], bs[1][0], fig, color_vector[i%len(color_vector)])
 
 
 def plotLine(eq, center, ang):
@@ -35,7 +37,7 @@ def plotLine(eq, center, ang):
     plt.plot([x1,x2], [y1,y2], '-', linewidth=10., markersize=12)
 
 
-def plotPlane(eq, center, ang, fig): 
+def plotPlane(eq, center, ang, fig, color): 
     if ang % 180 < 45 or ang % 180 > 135:
         x1 = center[0] + .2
         x2 = center[0] - .2
@@ -51,7 +53,9 @@ def plotPlane(eq, center, ang, fig):
     z = [-1,-1,1,1]
     verts = [zip(x,y,z)]
     ax = fig.gca(projection='3d')
-    ax.add_collection3d(Poly3DCollection(verts))
+    p3c = Poly3DCollection(verts)
+    p3c.set_facecolor(color)
+    ax.add_collection3d(p3c)
 
 
 def to_coef(m, p):
