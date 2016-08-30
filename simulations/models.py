@@ -64,6 +64,88 @@ class StructuredMLP(chainer.ChainList):
         self.y = y
         return self.loss
 
+class NBPStructuredMLP():
+
+    def __init__(self, n_in, n_lower, n_upper, n_out):
+
+        num_pairs = 2
+        ndim = 2  # TODO: Fix parameter passed dimensions!
+        self.lower_models_l = []
+        self.lower_models_l.append(BaseMLP(n_in/num_pairs, n_lower, ndim))
+        self.lower_models_l.append(BaseMLP(n_in/num_pairs, n_lower, ndim))
+
+        self.upper_model = BaseMLP(n_lower[-1]*num_pairs, n_upper, ndim)
+
+    def trainModel(self, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False):
+
+        output_testXs = []
+        output_trainXs= []
+        for i, model in enumerate(self.lower_models_l):
+            # Setup optimizer
+            optimizer = optimizers.Adam()
+            optimizer.setup(model)
+
+            tmp_trainXs = []
+            tmp_testXs = []
+            tmp_trainXs.append(trainXs[0][:,(i*2):(i*2)+2])
+            tmp_testXs.append(testXs[0][:,(i*2):(i*2)+2])
+
+            model, loss = train_model(model, tmp_trainXs, trainY,
+                                            tmp_testXs, testY,
+                                          n_epoch=n_epoch,
+                                          batchsize=batchsize,
+                                          max_flag=max_flag)
+
+            x = chainer.Variable(np.asarray(tmp_trainXs[0]))
+            output_trainXs.append( model.forward(x) )
+
+            x = chainer.Variable(np.asarray(tmp_testXs[0]))
+            output_testXs.append( model.forward(x) )
+
+
+        trainXs = np.hstack([x.data for x in output_trainXs])
+        testXs = np.hstack([x.data for x in output_testXs])
+
+        tmp_trainXs = []
+        tmp_testXs = []
+        tmp_trainXs.append(trainXs)
+        tmp_testXs.append(testXs)
+        optimizer = optimizers.Adam()
+        optimizer.setup(model)
+
+        self.upper_model, loss = train_model(self.upper_model, tmp_trainXs, trainY,
+                                          tmp_testXs, testY,
+                                          n_epoch=n_epoch,
+                                          batchsize=batchsize,
+                                          max_flag=max_flag)
+
+
+    def forward(self, X):
+
+        output_testXs = []
+        for i, model in enumerate(self.lower_models_l):
+            tmp_testXs = []
+            tmp_testXs.append(X[0][:,(i*2):(i*2)+2])
+
+            x = chainer.Variable(np.asarray(tmp_testXs[0]))
+            output_testXs.append( model.forward(x) )
+
+
+
+        testXs = np.hstack([x.data for x in output_testXs])
+
+        tmp_testXs = []
+        tmp_testXs.append(testXs)
+        return tmp_testXs
+
+
+    def testModel(self, X, Y):
+        res = self.forward(X)
+        #predY, error = test_model(self.upper_model, X, Y)
+        predY, error = test_model(self.upper_model, res, Y)
+        return predY, error
+
+
 
 
 # Network definition
