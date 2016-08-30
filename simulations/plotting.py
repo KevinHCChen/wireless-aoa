@@ -4,7 +4,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
-def plotStations(baseStations, station_len):
+def plotStations(baseStations):
     for bs in baseStations:
         #plt.plot(bs[0][0], bs[0][1], marker=(4, 0, bs[1]), markersize=40)
         cords = np.array(bs[0])
@@ -13,12 +13,10 @@ def plotStations(baseStations, station_len):
         plotLine(eq, bs[0], bs[1][0])
 
 
-def plotStations3D(baseStations, station_len, fig):
+def plotStations3D(baseStations, fig):
     for bs in baseStations:
         cords = np.array(bs[0])
         slope = np.tan(np.radians(bs[1][0]))
-        print "CORDS: ", cords
-        print "SLOPE: ", slope
         eq = to_coef(slope, cords)
         plotPlane(eq, bs[0], bs[1][0], fig)
 
@@ -75,17 +73,17 @@ def plot_scatter(positions, error, title):
 
 # positions (x,y,z?) as numpy array
 def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name):
+    # 2D case
     if true_pos.shape[1] == 2:
         plt.figure()
         plt.subplot(2,1,1)
         plot_scatter(true_pos, error, title)
-        plotStations(bases, 2)
-        
+        plotStations(bases)
 
         #plt.figure()#;plt.clf()
         plt.subplot(2,1,2)
         plot_scatter(predicted_pos, error, title)
-        plotStations(bases, 2)
+        plotStations(bases)
         fig = plt.gcf() 
         fig.set_size_inches(6.5, 10.5, forward=True)
 
@@ -94,11 +92,8 @@ def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name)
 
         # plt.show()
 
-
-
+    # 3D case
     if true_pos.shape[1] == 3:
-        # print "BASES: ", bases
-        # assert False
         fig = plt.figure()
 
         ax = fig.add_subplot(111, projection='3d')
@@ -106,38 +101,26 @@ def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name)
         ax.set_xlabel('X Plane')
         ax.set_ylabel('Y Plane')
         ax.set_zlabel('Z Plane')
-        # plotStations3D(bases[0], 2, fig)
-        plotStations3D(bases, 3, fig)
-        # ax.colorbar()
-        # ax.ylim([-5,5])
-        # ax.xlim([-5,5])
+        plotStations3D(bases, fig)
         ax.set_ylim((-6,6))
         ax.set_xlim((-6,6))
         ax.set_zlim((-6,6))
-        plt.title("Num Stations: %d" % (3))
-        # plt.clim([0,1])
-        plt.show()
-        assert False
+        plt.title("Ground Truth, Num Stations: %d" % (3))
+        # plt.show()
         if saveflag:
             plt.savefig(dir_name + 'error_true_fig.png', format = 'png')
-        # assert False
 
-        # plt.subplot(2,1,1)
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         ax.scatter(predicted_pos[:,0], predicted_pos[:,1], predicted_pos[:,2], c=error)
         ax.set_xlabel('X Label')
         ax.set_ylabel('Y Label')
         ax.set_zlabel('Z Label')
-        # plotStations3D(bases, 2, fig)
-        # plotStations3D(bases, 2, fig)
-        # plt.colorbar()
-        # plt.ylim([-5,5])
-        # plt.xlim([-5,5])
-        plt.title("Num Stations: %d" % (3))
-        # plt.clim([0,1])
-        # plt.show()
-        # fig.set_size_inches(6.5, 10.5, forward=True)
+        plotStations3D(bases, fig)
+        ax.set_ylim((-6,6))
+        ax.set_xlim((-6,6))
+        ax.set_zlim((-6,6))
+        plt.title("Predicted, Num Stations: %d" % (3))
         # plt.show()
         if saveflag:
             plt.savefig(dir_name + 'error_predicted_fig.png', format = 'png')
