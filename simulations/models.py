@@ -104,6 +104,8 @@ class BaseMLP(chainer.ChainList):
 def train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False):
     print "TrainX: ", trainXs[0].shape
     print "TrainY: ", trainY.shape
+    print "Test:", testXs[0].shape
+
     # Setup optimizer
     optimizer = optimizers.Adam()
     optimizer.setup(model)
@@ -129,13 +131,11 @@ def train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=10
             if model.name == 'smlp':
                 x = chainer.Variable(np.asarray([x[perm[i:i + batchsize]] for x in trainXs]))
             elif model.name == 'bmlp':
-                print np.array(trainXs).shape
-                #x = chainer.Variable(np.asarray(np.hstack(trainXs)[perm[i:i + batchsize]]))
-                x = chainer.Variable(np.asarray(trainXs[perm[i:i + batchsize]]))
+                x = chainer.Variable(np.asarray(np.hstack(trainXs)[perm[i:i + batchsize]]))
+                #x = chainer.Variable(np.asarray(trainXs[perm[i:i + batchsize]]))
             else:
                 assert False, "Error in models.py train_model(): Not a valid model"
 
-            print x.shape
             t = chainer.Variable(trainY[perm[i:i + batchsize]])
 
             # Pass the loss function (Classifier defines it) and its arguments
@@ -161,9 +161,9 @@ def train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=10
                 x = chainer.Variable(np.asarray([x[i:i + batchsize] for x in testXs]),
                                  volatile='on')
             elif model.name == 'bmlp':
-                #x = chainer.Variable(np.asarray(np.hstack(testXs)[i:i + batchsize]),
-                x = chainer.Variable(np.asarray(testXs[i:i + batchsize]),
+                x = chainer.Variable(np.asarray(np.hstack(testXs)[i:i + batchsize]),
                                  volatile='on')
+                #x = chainer.Variable(np.asarray(testXs[i:i + batchsize]),
             else:
                 assert False, "Error in models.py train_model(): Not a valid model"
 
@@ -193,9 +193,9 @@ def test_model(model, testXs, testY):
         x = chainer.Variable(np.asarray([x for x in testXs]),
                             volatile='on')
     elif model.name == 'bmlp':
-        #x = chainer.Variable(np.asarray(np.hstack(testXs)),
-        x = chainer.Variable(np.asarray(testXs),
+        x = chainer.Variable(np.asarray(np.hstack(testXs)),
                             volatile='on')
+        #x = chainer.Variable(np.asarray(testXs),
     else:
         assert False, "Error in models.py test_model(): Not a valid model"
     t = chainer.Variable(testY,

@@ -14,7 +14,7 @@ import chainer
 
 from chainer import optimizers
 
-use_dir = False 
+use_dir = False
 
 if use_dir:
     # cfg_fns = "config_files/noise_model.ini"
@@ -44,7 +44,7 @@ for cfg_fn in cfg_fns:
                                                            pts_r=3.9, bs_r=4,
                                                            bs_type=params['data__bs_type'])
 
-    #angles = data_generation.add_noise(angles, col_idxs=range(angles.shape[1]), noise_params={'mean': 0, 'std': 1} )
+    angles = data_generation.add_noise(angles, col_idxs=range(angles.shape[1]), noise_params={'mean': 0, 'std': 1} )
     # split data
 
     trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles)
@@ -56,7 +56,7 @@ for cfg_fn in cfg_fns:
     models_l.append(models.BaseMLP(trainXs[0].shape[1]/2, params['NN__network_size'][0],
                            params['data__ndims']) )
 
-    models_l.append(models.BaseMLP(trainXs[0].shape[1]/2, params['NN__network_size'][0],
+    models_l.append(models.BaseMLP(testXs[0].shape[1]/2, params['NN__network_size'][0],
                            params['data__ndims']))
 
     output_testXs = []
@@ -70,16 +70,23 @@ for cfg_fn in cfg_fns:
         # train model
         #model, loss = models.train_model(model, list(trainXs[0][:,(i*2):(i*2)+2]),
         #                                trainY, list(testXs[0][:,(i*2):(i*2)+2]), testY,
-        model, loss = models.train_model(model, trainXs[0][:,(i*2):(i*2)+2],
-                                         trainY, testXs[0][:,(i*2):(i*2)+2], testY,
+        tmp_trainXs = []
+        tmp_testXs = []
+        tmp_trainXs.append(trainXs[0][:,(i*2):(i*2)+2])
+        tmp_testXs.append(testXs[0][:,(i*2):(i*2)+2])
+
+        #model, loss = models.train_model(model, trainXs[0][:,(i*2):(i*2)+2], trainY,
+        #                                 testXs[0][:,(i*2):(i*2)+2], testY,
+        model, loss = models.train_model(model, tmp_trainXs, trainY,
+                                         tmp_testXs, testY,
                                 n_epoch=params['NN__n_epochs'],
                                 batchsize=params['NN__batchsize'],
                                 max_flag=params['NN__take_max'])
 
-        x = chainer.Variable(np.asarray(trainXs[0][:,(i*2):(i*2)+2]))
+        x = chainer.Variable(np.asarray(tmp_trainXs[0]))
         output_trainXs.append( model.forward(x) )
 
-        x = chainer.Variable(np.asarray(testXs[0][:,(i*2):(i*2)+2]))
+        x = chainer.Variable(np.asarray(tmp_testXs[0]))
         output_testXs.append( model.forward(x) )
 
 
@@ -87,19 +94,24 @@ for cfg_fn in cfg_fns:
     testXs = np.hstack([x.data for x in output_testXs])
     print trainXs.shape, testXs.shape
     print 'got to 1'
-    model = models.BaseMLP(trainXs.shape[1], params['NN__network_size'][1],
+
+    model2 = models.BaseMLP(trainXs.shape[1], params['NN__network_size'][1],
                            params['data__ndims'])
 
     print trainXs.shape
     print trainY.shape
     print 'got to 2'
 
+    tmp_trainXs = []
+    tmp_testXs = []
+    tmp_trainXs.append(trainXs)
+    tmp_testXs.append(testXs)
     optimizer = optimizers.Adam()
     optimizer.setup(model)
 
-    model, loss = models.train_model(model, trainXs,
-                                         trainY, testXs, testY,
-                                n_epoch=params['NN__n_epochs'],
+    model2, loss = models.train_model(model2, tmp_trainXs,
+                                         trainY, tmp_testXs, testY,
+                                     400,
                                 batchsize=params['NN__batchsize'],
                                 max_flag=params['NN__take_max'])
 
@@ -109,7 +121,6 @@ for cfg_fn in cfg_fns:
     f.close()
 
 
-    """
     # generate mobile points, base stations, and angles
     mobiles, bases, angles = data_generation.generate_data(10000,
                                                            params['data__num_stations'],
@@ -117,12 +128,28 @@ for cfg_fn in cfg_fns:
                                                            pts_r=3.9, bs_r=4,
                                                            bs_type=params['data__bs_type'])
 
+    angles = data_generation.add_noise(angles, col_idxs=range(angles.shape[1]), noise_params={'mean': 0, 'std': 1} )
+
     trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles, 0.)
-    """
+
+    output_testXs = []
+    for i, model in enumerate(models_l):
+        tmp_testXs = []
+        tmp_testXs.append(testXs[0][:,(i*2):(i*2)+2])
+
+        x = chainer.Variable(np.asarray(tmp_testXs[0]))
+        output_testXs.append( model.forward(x) )
+
+
+
+    testXs = np.hstack([x.data for x in output_testXs])
+
+    tmp_testXs = []
+    tmp_testXs.append(testXs)
 
     # test model
 
-    predY, error = models.test_model(model, testXs, testY)
+    predY, error = models.test_model(model2, tmp_testXs, testY)
 
     plotting.plot_error(testY, predY, error, bases,
                         "Num Stations: %d" % (params['data__num_stations']),
