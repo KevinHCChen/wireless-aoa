@@ -1,7 +1,7 @@
 import numpy as np
 
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 import utilities as util
 import models as models
 import data_generation as data_generation
@@ -13,11 +13,11 @@ import glob
 
 from chainer import optimizers
 
-use_dir = False
+use_dir = True
 
 if use_dir:
     # cfg_fns = "config_files/noise_model.ini"
-    cfg_fns = glob.glob('expset_08292016_1pm/*')
+    cfg_fns = glob.glob('expset_08292016_11pm/*')
 else:
     #cfg_fns = ["config_files/noise_baseModel.ini"]
     cfg_fns = ["config_files/broken_structured.ini"]
@@ -43,7 +43,8 @@ for cfg_fn in cfg_fns:
                                                            pts_r=3.9, bs_r=4,
                                                            bs_type=params['data__bs_type'])
 
-    angles = data_generation.add_noise(angles, col_idxs=range(angles.shape[1]), noise_params={'mean': 0, 'std': 1} )
+    if addnoise:
+      angles = data_generation.add_noise(angles, col_idxs=range(angles.shape[1]), noise_params={'mean': 0, 'std': 1} )
 
     # split data
     trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles)
