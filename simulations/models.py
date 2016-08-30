@@ -96,8 +96,8 @@ class NBPStructuredMLP():
                 tmp_trainXs.append(trainXs[0][:,(i*self.ndim):(i*self.ndim)+self.ndim])
                 tmp_testXs.append(testXs[0][:,(i*self.ndim):(i*self.ndim)+self.ndim])
             elif self.ndim == 3:
-                tmp_trainXs.append(trainXs[0][:,(i*self.ndim*(self.ndim)):(i*self.ndim*(self.ndim))+self.ndim*(self.ndim)])
-                tmp_testXs.append(testXs[0][:,(i*self.ndim*(self.ndim)):(i*self.ndim*(self.ndim))+self.ndim*(self.ndim)])
+                tmp_trainXs.append(trainXs[0][:,(i*self.ndim*2):(i*self.ndim*2)+self.ndim*2])
+                tmp_testXs.append(testXs[0][:,(i*self.ndim*2):(i*self.ndim*2)+self.ndim*2])
 
 
 
@@ -140,7 +140,7 @@ class NBPStructuredMLP():
             if self.ndim == 2:
                 tmp_testXs.append(X[0][:,(i*self.ndim):(i*self.ndim)+self.ndim])
             elif self.ndim == 3:
-                tmp_testXs.append(X[0][:,(i*self.ndim*(self.ndim)):(i*self.ndim*(self.ndim))+self.ndim*(self.ndim)])
+                tmp_testXs.append(X[0][:,(i*self.ndim*2):(i*self.ndim*2)+self.ndim*2])
 
             x = chainer.Variable(np.asarray(tmp_testXs[0]))
             output_testXs.append( model.forward(x) )

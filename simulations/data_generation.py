@@ -50,9 +50,11 @@ def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
         bases = [((4,0,0), [90.,90.]), ((-4,0,0), [90.,90.]), ((0,4,0), [180.,90.])]
     elif bs_type=="structured":
         #bases = [[((4,0), [90.]), ((0,-4), [0.])],[((4,0), [90.]), ((0,4), [0.])]]
-        bases = [((4,0), [90.]), ((0,4), [0.]), ((-4,0), [90.]), ((0,4), [0.])]
+        bases = [((4,0), [90.]), ((-4,0), [90.]), ((0,4), [180.])]
+        #bases = [((4,0), [90.]), ((0,4), [0.]), ((-4,0), [90.]), ((0,4), [0.])]
     elif bs_type=="structured-3D":
-        bases = [((4,0,0), [90.,90.]), ((0,4,0), [0.,90.]), ((-4,0,0), [90.,90.]), ((0,4,0), [0.,90.])]
+        bases = [((4,0,0), [90.,90.]), ((-4,0,0), [90.,90.]), ((0,4,0), [180.,90.])]
+        #bases = [((4,0,0), [90.,90.]), ((0,4,0), [0.,90.]), ((-4,0,0), [90.,90.]), ((0,4,0), [0.,90.])]
 
     return bases
 
@@ -107,7 +109,7 @@ def get_mobile_angles(bases, mobiles, ndim):
     elif ndim == 3:
         print "*****HERE******"
         print "Mobiels: ", mobiles
-        print "BASES: ", bases 
+        print "BASES: ", bases
         mobile_angles = [[get3D_angles(mobile_loc, base[0], base[1]) for base in bases] for mobile_loc in mobiles]
 
         mobile_angles = np.array(mobile_angles)
@@ -122,14 +124,49 @@ def generate_data(num_pts, num_stations, ndim, pts_r=3, bs_r=4, bs_type="random"
     angles = get_mobile_angles(bases, mobiles, ndim)
     return mobiles, bases, angles
 
-def add_noise(data,col_idxs=[-1], noise_type="gaussian", noise_params={'mean': 0, 'std':1}):
+def add_noise(data, ndim,  base_idxs=[-1], noise_type="gaussian", noise_params={'mean': 0, 'std':1}):
 
     if noise_type == "gaussian":
-        assert data.shape[1] >= len(col_idxs), "Bad Noise shape selection!"
-        gauss_noise = np.random.normal(loc=noise_params['mean'],\
+        if ndim == 2:
+            # using 1 angle for each base station (alpha)
+            col_idxs = base_idxs
+            gauss_noise = np.random.normal(loc=noise_params['mean'],\
                                        scale=noise_params['std'],\
                                        size=(data.shape[0],len(col_idxs)))
-        data[:,col_idxs] += gauss_noise
+
+            data[:,col_idxs] += gauss_noise
+        elif ndim == 3:
+            # using 3 angles for each base station (alpha beta gamma)
+            for idx in base_idxs:
+                gauss_noise = np.random.normal(loc=noise_params['mean'],\
+                                       scale=noise_params['std'],\
+                                       size=(data.shape[0],ndim))
+                data[:, (idx*3):(idx*3)+3] += gauss_noise
+
+    return data
+
+def replicate_data(data, ndim,  base_idxs):
+
+    if len(base_idxs) == 0:
+        return data
+    else:
+        # using 1 angle for each base station (alpha)
+        if ndim == 2:
+            rep_data = []
+            for idxs in base_idxs:
+                print idxs
+                rep_data.append(data[:,idxs])
+            data = np.hstack(rep_data)
+        # using 3 angles for each base station (alpha beta gamma)
+        elif ndim == 3:
+            rep_data = []
+            for idxs in base_idxs:
+                col_idxs = []
+                for i in idxs:
+                    col_idxs += [i, i+1, i+2]
+                rep_data.append(data[:,col_idxs])
+            data = np.hstack(rep_data)
+
     return data
 
 
@@ -152,5 +189,5 @@ def test_datagen():
         print "Bases: ", bases
         print "Angles: ", angles
 
-test_datagen()
+#test_datagen()
 

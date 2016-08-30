@@ -86,11 +86,10 @@ def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name)
         plot_scatter(true_pos, error, title)
         plotStations(bases)
 
-        #plt.figure()#;plt.clf()
         plt.subplot(2,1,2)
         plot_scatter(predicted_pos, error, title)
         plotStations(bases)
-        fig = plt.gcf() 
+        fig = plt.gcf()
         fig.set_size_inches(6.5, 10.5, forward=True)
 
         if saveflag:

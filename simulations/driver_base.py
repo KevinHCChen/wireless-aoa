@@ -15,7 +15,6 @@ args = parser.parse_args()
 showfig = args.showfig
 configfile = args.configfile
 if not showfig:
-    print "WILL NOT DISPLAY"
     import matplotlib
     matplotlib.use('Agg')
 
@@ -39,7 +38,7 @@ else:
     #cfg_fns = ["config_files/broken_structured.ini"]
     cfg_fns = ["config_files/baseModel2D.ini"]
 
-    
+
 for cfg_fn in cfg_fns:
     print "CFG: ", cfg_fn
     config, dir_name = util.load_configuration(cfg_fn)
@@ -63,6 +62,10 @@ for cfg_fn in cfg_fns:
     if params['data__addnoise']:
         angles = data_generation.add_noise(angles, col_idxs=range(angles.shape[1]), noise_params={'mean': 0, 'std': 1} )
 
+    if params['NN__type'] == 'snbp-mlp':
+        angles = data_generation.replicate_data(angles, params['data__ndims'],  [[0,2],[1,2]])
+
+
     # split data
     trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles)
 
@@ -75,10 +78,6 @@ for cfg_fn in cfg_fns:
                                      params['NN__network_size'][1], params['data__ndims'],
                                      [[0,1],[2,3]])
     elif params['NN__type'] == 'snbp-mlp':
-        #TODO: fix pass in data structure and n_in
-        # print trainXs[0].shape
-        # print trainXs[0]
-        # assert False
         model = models.NBPStructuredMLP(trainXs[0].shape[1], params['NN__network_size'][0],
                                         params['NN__network_size'][1], params['data__ndims'])
 
@@ -95,11 +94,14 @@ for cfg_fn in cfg_fns:
 
 
     # generate mobile points, base stations, and angles
-    mobiles, bases, angles = data_generation.generate_data(10000,
+    mobiles, bases, angles = data_generation.generate_data(5000,
                                                            params['data__num_stations'],
                                                            params ['data__ndims'],
                                                            pts_r=3, bs_r=4,
                                                            bs_type=params['data__bs_type'])
+
+    if params['NN__type'] == 'snbp-mlp':
+        angles = data_generation.replicate_data(angles, params['data__ndims'],  [[0,2],[1,2]])
 
     trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles, 0.)
 
