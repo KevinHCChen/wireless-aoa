@@ -71,10 +71,10 @@ def add_angle_dependent_noise(data, ndim,  base_idxs=[-1],  noise_params={'noise
                                        scale=noise_params['std'],\
                                        size=(data.shape[0],len(col_idxs)))
 
-            data_multiplier = nonlinear_effect_function(data, noise_params['k'], noise_params['j'])
+            data_multiplier = nonlinear_effect_function(data[:,col_idxs], noise_params['k'], noise_params['j'])
 
             gauss_noise = np.multiply(gauss_noise, data_multiplier)
-
+            assert  gauss_noise.shape == data[:,col_idxs].shape, "shapes don't match - whoops!"
             data[:,col_idxs] += gauss_noise
         
         elif ndim == 3:
@@ -162,13 +162,13 @@ def add_no_output_noise(data, ndim,  base_idxs=[-1], noise_params={'constant_val
     if ndim == 2:
         # using 1 angle for each base station (alpha)
         col_idxs = base_idxs
-        zeros = np.zeros((data.shape[0],len(col_idxs))) + constant_val
+        zeros = np.zeros((data.shape[0],len(col_idxs))) + noise_params['constant_val']
         data[:,col_idxs] = zeros
 
     elif ndim == 3:
         # using 3 angles for each base station (alpha beta gamma)
         for idx in base_idxs:
-            zeros = np.zeros((data.shape[0],ndim)) + constant_val
+            zeros = np.zeros((data.shape[0],ndim)) + noise_params['constant_val']
             data[:, (idx*3):(idx*3)+3] = zeros
 
 

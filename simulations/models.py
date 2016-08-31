@@ -101,7 +101,7 @@ class NBPStructuredMLP():
 
             model, loss = train_model(model, tmp_trainXs, trainY,
                                             tmp_testXs, testY,
-                                          n_epoch=n_epoch/4,
+                                          n_epoch=n_epoch,
                                           batchsize=batchsize,
                                           max_flag=max_flag)
 

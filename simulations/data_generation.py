@@ -46,6 +46,7 @@ def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
 
     elif bs_type=="colinear":
         bases = [((4,0), [90.]), ((-4,0), [90.]), ((0,4), [180.])]
+        # bases = [((-4,0), [90.]), ((0,4), [180.])]
     elif bs_type=="colinear-3D":
         bases = [((4,0,0), [90.,90.]), ((-4,0,0), [90.,90.]), ((0,4,0), [180.,90.])]
     elif bs_type=="structured":
