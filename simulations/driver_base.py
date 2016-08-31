@@ -61,8 +61,23 @@ for cfg_fn in cfg_fns:
                                                            pts_r=3.9, bs_r=4,
                                                            bs_type=params['data__bs_type'])
 
+    # IMPORTANT: remember to add noise before replicating data (e.g., for snbp-mlp)
     if params['data__addnoise']:
-        angles = noise_models.add_distribution_noise(angles, col_idxs=range(angles.shape[1]), noise_type='gaussian', noise_params={'mean': 0, 'std': 1} )
+        if params['data__addnoise'] == 'add_distribution_noise':
+            angles = noise_models.add_distribution_noise(angles, col_idxs=range(angles.shape[1]), noise_type='gaussian', 
+                                                        noise_params={'mean': 0, 'std': 1} )
+        elif params['data__addnoise'] == 'add_angle_dependent_noise':
+            angles = noise_models.add_distribution_noise(angles, col_idxs=range(angles.shape[1]), noise_type='gaussian', 
+                                                        noise_params={'corruption_rate': 0.1, 'lower_bound': -1, 'upper_bound':1} )
+        elif params['data__addnoise'] == 'add_spurious_noise':
+            angles = noise_models.add_distribution_noise(angles, col_idxs=range(angles.shape[1]), noise_type='gaussian', 
+                                                        noise_params={'corruption_rate': 0.1, 'lower_bound': -1, 'upper_bound':1} )
+        elif params['data__addnoise'] == 'transform_to_nonsense_noise':
+            angles = noise_models.add_distribution_noise(angles, col_idxs=range(angles.shape[1]), noise_type='gaussian',
+                                                        noise_params={'lower_bound': -1, 'upper_bound':1} )
+        else:
+            assert False, "There is no noise model matching the one you have selected in the config file"
+
 
     if params['NN__type'] == 'snbp-mlp':
         angles = data_generation.replicate_data(angles, params['data__ndims'],  [[0,2],[1,2]])
