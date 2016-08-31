@@ -73,9 +73,10 @@ class NBPStructuredMLP():
 
     def __init__(self, n_in, n_lower, n_upper, n_out):
 
-        num_pairs = 2
+        num_pairs = 3
         self.ndim = n_out
         self.lower_models_l = []
+        self.lower_models_l.append(BaseMLP(n_in/num_pairs, n_lower, self.ndim))
         self.lower_models_l.append(BaseMLP(n_in/num_pairs, n_lower, self.ndim))
         self.lower_models_l.append(BaseMLP(n_in/num_pairs, n_lower, self.ndim))
 
@@ -103,7 +104,7 @@ class NBPStructuredMLP():
 
             model, loss = train_model(model, tmp_trainXs, trainY,
                                             tmp_testXs, testY,
-                                          n_epoch=n_epoch,
+                                          n_epoch=n_epoch/4,
                                           batchsize=batchsize,
                                           max_flag=max_flag)
 

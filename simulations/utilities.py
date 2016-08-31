@@ -34,7 +34,7 @@ def load_configuration(cfg_fn):
 
 
 def test_train_split(X, Y, training_size=0.8):
-    X = X/360.
+    # X = X/360.
     trainXs, testXs  = [], []
 
     trainXs.append( X[:X.shape[0]*training_size,:].astype(np.float32))
@@ -58,9 +58,11 @@ def create_param_dict(config):
     params['data__ndims'] = int(config.get("data", "ndims"))
     params['data__num_stations'] = int(config.get("data", "num_stations"))
     params['data__bs_type'] = config.get("data", "bs_type")
-    params['data__addnoise'] = ast.literal_eval(config.get("data", "addnoise"))
     params['exp_details__save'] = ast.literal_eval(config.get("exp_details", "save"))
     params['exp_details__interactive'] = ast.literal_eval(config.get("exp_details", "interactive"))
+    params['noise__addnoise'] = ast.literal_eval(config.get("noise", "addnoise"))
+    params['noise__noise_model'] = config.get("noise", "noise_model")
+    params['noise__noise_params'] = ast.literal_eval(config.get("noise", "noise_params"))
 
     return params
 

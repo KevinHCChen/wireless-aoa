@@ -122,6 +122,9 @@ def generate_data(num_pts, num_stations, ndim, pts_r=3, bs_r=4, bs_type="random"
     mobiles = gen_points(num_pts, ndim, r=pts_r)
     bases = gen_basestations(num_stations, ndim, r=bs_r, bs_type=bs_type)
     angles = get_mobile_angles(bases, mobiles, ndim)
+    angles = angles % 360
+    angles %= 360
+    angles /= 360.
     return mobiles, bases, angles
 
 

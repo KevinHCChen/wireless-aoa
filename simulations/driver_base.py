@@ -61,13 +61,16 @@ for cfg_fn in cfg_fns:
                                                            pts_r=3.9, bs_r=4,
                                                            bs_type=params['data__bs_type'])
 
+
     # IMPORTANT: remember to add noise before replicating data (e.g., for snbp-mlp)
-    if params['data__addnoise']:
-        angles = noise_models.add_noise_dispatcher(angles, params['data__addnoise'], col_idxs=range(angles.shape[1]), 
-                                                        noise_params={'noise_type'='gaussian', 'mean': 0, 'std': 1})
+    if params['noise__addnoise']:
+        angles = noise_models.add_noise_dispatcher(angles, params['noise__noise_model'], params['data__ndims'], base_idxs=range(angles.shape[1]), 
+                                                        noise_params=params['noise__noise_params'])
 
     if params['NN__type'] == 'snbp-mlp':
-        angles = data_generation.replicate_data(angles, params['data__ndims'],  [[0,2],[1,2]])
+        rep_idxs = [[0,2],[1,2],[0,1]]
+        angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
+        
 
 
     # split data
@@ -105,7 +108,7 @@ for cfg_fn in cfg_fns:
                                                            bs_type=params['data__bs_type'])
 
     if params['NN__type'] == 'snbp-mlp':
-        angles = data_generation.replicate_data(angles, params['data__ndims'],  [[0,2],[1,2]])
+        angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
 
     trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles, 0.)
 

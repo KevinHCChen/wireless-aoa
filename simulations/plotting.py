@@ -72,7 +72,7 @@ def plot_scatter(positions, error, title):
     plt.ylim([-5,5])
     plt.xlim([-5,5])
     plt.title(title)
-    plt.clim([0,1])
+    # plt.clim([0,1])
 
     # plt.axis('equal')
 
