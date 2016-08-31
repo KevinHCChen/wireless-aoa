@@ -62,7 +62,7 @@ for cfg_fn in cfg_fns:
                                                            bs_type=params['data__bs_type'])
 
     if params['data__addnoise']:
-        angles = noise_models.add_gaussian_noise(angles, col_idxs=range(angles.shape[1]), noise_params={'mean': 0, 'std': 1} )
+        angles = noise_models.add_distribution_noise(angles, col_idxs=range(angles.shape[1]), noise_type='gaussian', noise_params={'mean': 0, 'std': 1} )
 
     if params['NN__type'] == 'snbp-mlp':
         angles = data_generation.replicate_data(angles, params['data__ndims'],  [[0,2],[1,2]])
