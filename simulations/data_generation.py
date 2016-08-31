@@ -124,26 +124,7 @@ def generate_data(num_pts, num_stations, ndim, pts_r=3, bs_r=4, bs_type="random"
     angles = get_mobile_angles(bases, mobiles, ndim)
     return mobiles, bases, angles
 
-def add_noise(data, ndim,  base_idxs=[-1], noise_type="gaussian", noise_params={'mean': 0, 'std':1}):
 
-    if noise_type == "gaussian":
-        if ndim == 2:
-            # using 1 angle for each base station (alpha)
-            col_idxs = base_idxs
-            gauss_noise = np.random.normal(loc=noise_params['mean'],\
-                                       scale=noise_params['std'],\
-                                       size=(data.shape[0],len(col_idxs)))
-
-            data[:,col_idxs] += gauss_noise
-        elif ndim == 3:
-            # using 3 angles for each base station (alpha beta gamma)
-            for idx in base_idxs:
-                gauss_noise = np.random.normal(loc=noise_params['mean'],\
-                                       scale=noise_params['std'],\
-                                       size=(data.shape[0],ndim))
-                data[:, (idx*3):(idx*3)+3] += gauss_noise
-
-    return data
 
 def replicate_data(data, ndim,  base_idxs):
 
