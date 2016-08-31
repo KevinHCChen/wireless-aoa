@@ -67,12 +67,12 @@ def to_coef(m, p):
 
 def plot_scatter(positions, error, title):
     plt.scatter(positions[:,0], positions[:,1], c=error)
-    
+
     plt.colorbar()
     plt.ylim([-5,5])
     plt.xlim([-5,5])
     plt.title(title)
-    # plt.clim([0,1])
+    plt.clim([0,1])
 
     # plt.axis('equal')
 

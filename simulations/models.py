@@ -71,14 +71,11 @@ class StructuredMLP(chainer.ChainList):
 
 class NBPStructuredMLP():
 
-    def __init__(self, n_in, n_lower, n_upper, n_out):
+    def __init__(self, n_in, n_lower, n_upper, n_out, num_pairs):
 
-        num_pairs = 3
         self.ndim = n_out
-        self.lower_models_l = []
-        self.lower_models_l.append(BaseMLP(n_in/num_pairs, n_lower, self.ndim))
-        self.lower_models_l.append(BaseMLP(n_in/num_pairs, n_lower, self.ndim))
-        self.lower_models_l.append(BaseMLP(n_in/num_pairs, n_lower, self.ndim))
+        self.lower_models_l = [BaseMLP(n_in/num_pairs, n_lower,self.ndim)
+                               for i in range(num_pairs)]
 
         self.upper_model = BaseMLP(n_lower[-1]*num_pairs, n_upper, self.ndim)
 

@@ -68,9 +68,8 @@ for cfg_fn in cfg_fns:
                                                         noise_params=params['noise__noise_params'])
 
     if params['NN__type'] == 'snbp-mlp':
-        rep_idxs = [[0,2],[1,2],[0,1]]
+        rep_idxs = [[0,2],[1,2]]
         angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
-        
 
 
     # split data
@@ -86,7 +85,8 @@ for cfg_fn in cfg_fns:
                                      [[0,1],[2,3]])
     elif params['NN__type'] == 'snbp-mlp':
         model = models.NBPStructuredMLP(trainXs[0].shape[1], params['NN__network_size'][0],
-                                        params['NN__network_size'][1], params['data__ndims'])
+                                        params['NN__network_size'][1], params['data__ndims'],
+                                        len(rep_idxs))
 
     # train model
     #model, loss = models.train_model(model, trainXs, trainY, testXs, testY,
