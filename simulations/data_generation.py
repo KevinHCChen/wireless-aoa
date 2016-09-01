@@ -113,9 +113,6 @@ def get_mobile_angles(bases, mobiles, ndim):
         # print "AO: ", angles_output.shape
         # assert False
     elif ndim == 3:
-        print "*****HERE******"
-        print "Mobiels: ", mobiles
-        print "BASES: ", bases
         mobile_angles = [[get3D_angles(mobile_loc, base[0], base[1]) for base in bases] for mobile_loc in mobiles]
 
         mobile_angles = np.array(mobile_angles)
@@ -158,7 +155,7 @@ def replicate_data(data, ndim,  base_idxs):
             for idxs in base_idxs:
                 col_idxs = []
                 for i in idxs:
-                    col_idxs += [i, i+1, i+2]
+                    col_idxs += [i*ndim, i*ndim+1, i*ndim+2]
                 rep_data.append(data[:,col_idxs])
             data = np.hstack(rep_data)
 
