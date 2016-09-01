@@ -49,19 +49,20 @@ def test_train_split(X, Y, training_size=0.8):
 
 def parseParams(params):
     new_params = {}
-    for param in params:
-        if type(params[param]) == 'list':
-            new_params[param] == params[param].__str__()
-        elif type(params[param]) == 'dict':
-            for k,v in params[param]:
-                if type(v) == 'list':
+    for param,_ in params.iteritems():
+        if type(params[param]) == list:
+            new_params[param] = [params[param].__str__()]
+        elif type(params[param]) == dict:
+            for k,v in params[param].iteritems():
+                if type(v) == list:
                     new_v = v.__str__()
                 else:
                     new_v = v
-                new_params[k] = new_v
+                new_params[k] = [new_v]
         else:
-            new_params[param] == params[param]
-    return
+            new_params[param] = [params[param]]
+
+    return new_params
 
 
 def create_param_dict(config):

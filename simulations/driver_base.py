@@ -3,8 +3,11 @@ import json
 import ast
 import glob
 import argparse
-import noise_models as noise_models 
+import noise_models as noise_models
+import datetime
 from chainer import optimizers
+import os
+import pandas as pd
 
 
 parser = argparse.ArgumentParser(description='Driver for 5G Experiments')
@@ -28,19 +31,21 @@ import data_generation as data_generation
 import plotting as plotting
 
 
-use_dir = False
+use_dir = True
 
 if configfile:
     cfg_fns = [configfile]
 elif use_dir:
     # cfg_fns = "config_files/noise_model.ini"
-    cfg_fns = glob.glob('expset_09012016_10am/*')
+    #cfg_fns = glob.glob('expset_09012016_10am/*')
+    cfg_fns = glob.glob('test_batch/*')
 else:
     #cfg_fns = ["config_files/noise_baseModel.ini"]
     #cfg_fns = ["config_files/broken_structured.ini"]
-    cfg_fns = ["config_files/baseModel2D.ini"]
-    # cfg_fns = ["expset_08312016_10pm/exp1_setting3.ini"]*10 + ["expset_08312016_10pm/exp1_setting10.ini"]*10
+    cfg_fns = ["config_files/baseModel2D.ini"]*2
+    #cfg_fns = ["expset_08312016_10pm/exp1_setting3.ini"]*1 + ["expset_08312016_10pm/exp1_setting10.ini"]*1
 
+df_all = pd.DataFrame()
 
 for cfg_fn in cfg_fns:
     print "CFG: ", cfg_fn
@@ -48,7 +53,7 @@ for cfg_fn in cfg_fns:
 
     params = util.create_param_dict(config)
 
-    print params
+    df = pd.DataFrame(util.parseParams(params))
 
     if params['exp_details__interactive']:
         plt.ion()
@@ -57,6 +62,7 @@ for cfg_fn in cfg_fns:
     all_predY = None
     all_error = None
     mean_errors = []
+    std_errors = []
     for iter_number in range(params['exp_details__num_iterations_per_setting']):
         # generate mobile points, base stations, and angles
         mobiles, bases, angles = data_generation.generate_data(params['data__num_pts'],
@@ -131,6 +137,7 @@ for cfg_fn in cfg_fns:
         f.close()
 
         mean_errors.append(np.mean(error))
+        std_errors.append(np.std(error))
 
 
 
@@ -141,7 +148,7 @@ for cfg_fn in cfg_fns:
         if all_predY == None:
             all_predY = np.zeros((predY.shape[0], predY.shape[1], params['exp_details__num_iterations_per_setting']))
         if all_error == None:
-            all_error = np.zeros((error.shape[0], params['exp_details__num_iterations_per_setting']))   
+            all_error = np.zeros((error.shape[0], params['exp_details__num_iterations_per_setting']))
 
         all_predY[:,:,iter_number] = predY
         all_error[:,iter_number] = error
@@ -150,11 +157,13 @@ for cfg_fn in cfg_fns:
     f.write("Mean Error: %f\n" % (np.mean(mean_errors)))
     f.close()
 
-
-    f = open('resultsdata.npz', 'w')
+    f = open(dir_name + 'resultsdata.npz', 'w')
     np.savez(f, all_predY=all_predY, all_error=all_error)
     f.close()
 
+    df['mean_err'] = np.mean(mean_errors)
+    df['std_err'] = np.mean(mean_errors)
+    df_all = df_all.append(df, ignore_index=True)
 
     # print out warning if figures not saved
     if params['exp_details__save']:
@@ -163,7 +172,9 @@ for cfg_fn in cfg_fns:
         print "****** Not saving!!!! ****** "
         print "If you would like to save, change the config file"
 
+res_dir_folder = 'aggregated_results'
+if not os.path.exists(res_dir_folder):
+    os.makedirs(res_dir_folder)
 
-
-
-
+res_dir_name = "%s/%s__%s.csv" % (res_dir_folder, config.get("exp_details", "name"), datetime.datetime.now().strftime("%m_%d_%Y_%I:%M:%S%p"))
+df_all.to_csv(res_dir_name)
