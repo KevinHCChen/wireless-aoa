@@ -31,18 +31,18 @@ import data_generation as data_generation
 import plotting as plotting
 
 
-use_dir = True
+use_dir = False 
 
 if configfile:
     cfg_fns = [configfile]
 elif use_dir:
     # cfg_fns = "config_files/noise_model.ini"
-    #cfg_fns = glob.glob('expset_09012016_10am/*')
-    cfg_fns = glob.glob('test_batch/*')
+    cfg_fns = glob.glob('expset_09012016_10am/*')
+    #cfg_fns = glob.glob('test_batch/*')
 else:
     #cfg_fns = ["config_files/noise_baseModel.ini"]
     #cfg_fns = ["config_files/broken_structured.ini"]
-    cfg_fns = ["config_files/baseModel2D.ini"]*2
+    cfg_fns = ["config_files/baseModel2D.ini"]
     #cfg_fns = ["expset_08312016_10pm/exp1_setting3.ini"]*1 + ["expset_08312016_10pm/exp1_setting10.ini"]*1
 
 df_all = pd.DataFrame()
@@ -99,7 +99,6 @@ for cfg_fn in cfg_fns:
                                             len(rep_idxs))
 
         # train model
-        #model, loss = models.train_model(model, trainXs, trainY, testXs, testY,
         loss = model.trainModel(trainXs, trainY, testXs, testY,
                                    n_epoch=params['NN__n_epochs'],
                                    batchsize=params['NN__batchsize'],
@@ -128,7 +127,6 @@ for cfg_fn in cfg_fns:
         trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles, 0.)
 
         # test model
-        #predY, error = models.test_model(model, testXs, testY)
         predY, error = model.testModel(testXs, testY)
 
         f = open(dir_name + 'error_iteration%d.txt' % iter_number, 'w')
