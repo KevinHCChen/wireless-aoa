@@ -34,11 +34,12 @@ if configfile:
     cfg_fns = [configfile]
 elif use_dir:
     # cfg_fns = "config_files/noise_model.ini"
-    cfg_fns = glob.glob('expset_08312016_10pm/*')
+    cfg_fns = glob.glob('expset_09012016_10am/*')
 else:
     #cfg_fns = ["config_files/noise_baseModel.ini"]
     #cfg_fns = ["config_files/broken_structured.ini"]
-    cfg_fns = ["config_files/baseModel2D.ini"]
+    # cfg_fns = ["config_files/baseModel2D.ini"]
+    cfg_fns = ["expset_08312016_10pm/exp1_setting3.ini"]*10 + ["expset_08312016_10pm/exp1_setting10.ini"]*10
 
 
 for cfg_fn in cfg_fns:
@@ -122,8 +123,8 @@ for cfg_fn in cfg_fns:
     predY, error = model.testModel(testXs, testY)
 
     f = open(dir_name + 'error.txt', 'w')
-    f.write("Mean Error: %f" % (np.mean(error)))
-    f.write("Error Standard Deviation: %f" % (np.std(error)))
+    f.write("Mean Error: %f\n" % (np.mean(error)))
+    f.write("Error Standard Deviation: %f\n" % (np.std(error)))
     f.close()
 
 
