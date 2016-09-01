@@ -62,9 +62,10 @@ def create_param_dict(config):
     params['exp_details__interactive'] = ast.literal_eval(config.get("exp_details", "interactive"))
     params['noise__addnoise_train'] = ast.literal_eval(config.get("noise", "addnoise_train"))
     params['noise__addnoise_test'] = ast.literal_eval(config.get("noise", "addnoise_test"))
-    params['noise__noise_model'] = config.get("noise", "noise_model")
-    params['noise__noise_params'] = ast.literal_eval(config.get("noise", "noise_params"))
-    params['noise__bases_to_noise'] = json.loads(config.get("noise", "bases_to_noise"))
+    if params['noise__addnoise_train'] or params['noise__addnoise_test']:
+        params['noise__noise_model'] = config.get("noise", "noise_model")
+        params['noise__noise_params'] = ast.literal_eval(config.get("noise", "noise_params"))
+        params['noise__bases_to_noise'] = json.loads(config.get("noise", "bases_to_noise"))
 
     return params
 

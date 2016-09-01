@@ -2,11 +2,11 @@ import csv
 import random
 import os
 
-dir_name = 'expset_08302016_10am/'
+dir_name = 'expset_08312016_10pm/'
 if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-with open('experiment_set_csvs/experimentset1_3D_08302016_10am.csv', 'rU') as f:
+with open('experiment_set_csvs/experiment_08312016_10pm.csv', 'rU') as f:
     reader = csv.reader(f)
     first = True
     num_files_gen = 0
@@ -39,7 +39,14 @@ with open('experiment_set_csvs/experimentset1_3D_08302016_10am.csv', 'rU') as f:
             f.write('num_stations: %s\n' % (row[2]))
             f.write('sphere_r: %s\n' % (4))
             f.write('bs_type: %s\n' % (row[8]))
-            f.write('addnoise: %s\n' % ('False'))
+
+            f.write('\n')
+            f.write('[noise]\n')
+            f.write('addnoise_train: %s\n' % (row[9]))
+            f.write('addnoise_test: %s\n' % (row[10]))
+            f.write('noise_model: %s\n' % (row[11]))
+            f.write('noise_params: %s\n' % (row[12]))
+            f.write('bases_to_noise: %s\n' % (row[13]))
 
             f.close()
 
@@ -50,5 +57,7 @@ print 'Automatic INI File Generation Completed!'
 print '%d files automatically generated' % (num_files_gen)
 print 'This saved you %d minutes' % (num_files_gen*17)
 print 'Congrats!!'
+
+
 
 

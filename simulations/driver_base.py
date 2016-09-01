@@ -28,13 +28,13 @@ import data_generation as data_generation
 import plotting as plotting
 
 
-use_dir = False
+use_dir = True
 
 if configfile:
     cfg_fns = [configfile]
 elif use_dir:
     # cfg_fns = "config_files/noise_model.ini"
-    cfg_fns = glob.glob('expset_08292016_11pm/*')
+    cfg_fns = glob.glob('expset_08312016_10pm/*')
 else:
     #cfg_fns = ["config_files/noise_baseModel.ini"]
     #cfg_fns = ["config_files/broken_structured.ini"]
@@ -120,6 +120,13 @@ for cfg_fn in cfg_fns:
     # test model
     #predY, error = models.test_model(model, testXs, testY)
     predY, error = model.testModel(testXs, testY)
+
+    f = open(dir_name + 'error.txt', 'w')
+    f.write("Mean Error: %f" % (np.mean(error)))
+    f.write("Error Standard Deviation: %f" % (np.std(error)))
+    f.close()
+
+
 
     plotting.plot_error(testY, predY, error, bases,
                         "Num Stations: %d" % (params['data__num_stations']),
