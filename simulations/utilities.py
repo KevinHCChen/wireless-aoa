@@ -47,6 +47,16 @@ def test_train_split(X, Y, training_size=0.8):
     return trainXs, trainY, testXs, testY
 
 
+def parseParams(params):
+    new_params = {}
+    for param in params:
+        if type(params[param]) == 'list':
+            new_params[param] == params[param].__str__()
+        else:
+            new_params[param] == params[param]
+    return
+
+
 def create_param_dict(config):
     params = {}
     params['NN__type'] = config.get("NN", "type")
