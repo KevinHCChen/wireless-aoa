@@ -52,6 +52,13 @@ def parseParams(params):
     for param in params:
         if type(params[param]) == 'list':
             new_params[param] == params[param].__str__()
+        elif type(params[param]) == 'dict':
+            for k,v in params[param]:
+                if type(v) == 'list':
+                    new_v = v.__str__()
+                else:
+                    new_v = v
+                new_params[k] = new_v
         else:
             new_params[param] == params[param]
     return
