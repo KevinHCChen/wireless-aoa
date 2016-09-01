@@ -2,11 +2,11 @@ import csv
 import random
 import os
 
-dir_name = 'expset_08312016_10pm/'
+dir_name = 'expset_09012016_10am/'
 if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-with open('experiment_set_csvs/experiment_08312016_10pm.csv', 'rU') as f:
+with open('experiment_set_csvs/experiment_09_01_2016_10am.csv', 'rU') as f:
     reader = csv.reader(f)
     first = True
     num_files_gen = 0
