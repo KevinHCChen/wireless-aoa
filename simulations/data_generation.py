@@ -9,12 +9,18 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
 
-def gen_points(num_pts, ndim, r=3):
+def gen_points_random(num_pts, ndim, r=3):
     points = np.random.uniform(-r,r,size=(num_pts,ndim))
     points = np.array(points)
     return points
  
 
+def gen_points_grid(num_pts, ndim, r=3):
+    assert ndim <= 2, "gen_points_grid in data_generation has not been implemented yet for %d dimensions" % (ndim)
+    x = np.linspace(-r,r, int(np.sqrt(num_pts)))
+    points = np.array(np.meshgrid(x, x))
+    points = points.reshape(2,int(np.sqrt(num_pts))**2).T
+    return points
 
 
 def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
@@ -119,8 +125,13 @@ def get_mobile_angles(bases, mobiles, ndim):
     return angles_output
 
 
-def generate_data(num_pts, num_stations, ndim, pts_r=3, bs_r=4, bs_type="random"):
-    mobiles = gen_points(num_pts, ndim, r=pts_r)
+def generate_data(num_pts, num_stations, ndim, pts_r=3, bs_r=4, bs_type="random", points_type="random"):
+    if points_type == "random":
+        mobiles = gen_points_random(num_pts, ndim, r=pts_r)
+    elif points_type == "grid":
+        mobiles = gen_points_grid(num_pts, ndim, r=pts_r)
+    else:
+        assert False, "This pattern of point generation has not been implemented yet in data_generation"
     bases = gen_basestations(num_stations, ndim, r=bs_r, bs_type=bs_type)
     angles = get_mobile_angles(bases, mobiles, ndim)
     angles = angles % 360
@@ -163,7 +174,7 @@ def test_datagen():
     num_pts = 4
     num_stations = 5
     for ndim in ndims:
-        mobiles = gen_points(num_pts, ndim, r=3)
+        mobiles = gen_points_random(num_pts, ndim, r=3)
         bases = gen_basestations(num_stations, ndim, bs_type=bs_type)
         angles = get_mobile_angles(bases, mobiles, ndim)
         print "pre noise: ", angles

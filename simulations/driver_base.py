@@ -59,12 +59,12 @@ for cfg_fn in cfg_fns:
                                                            params['data__num_stations'],
                                                            params ['data__ndims'],
                                                            pts_r=3.9, bs_r=4,
-                                                           bs_type=params['data__bs_type'])
+                                                           bs_type=params['data__bs_type'], points_type="random")
 
 
     # IMPORTANT: remember to add noise before replicating data (e.g., for snbp-mlp)
     if params['noise__addnoise_train']:
-        angles = noise_models.add_noise_dispatcher(angles, params['noise__noise_model'], params['data__ndims'], base_idxs=[2], 
+        angles = noise_models.add_noise_dispatcher(angles, params['noise__noise_model'], params['data__ndims'], base_idxs=params['noise__bases_to_noise'], 
                                                         noise_params=params['noise__noise_params'])
 
     if params['NN__type'] == 'snbp-mlp':
@@ -101,15 +101,15 @@ for cfg_fn in cfg_fns:
 
 
     # generate mobile points, base stations, and angles
-    mobiles, bases, angles = data_generation.generate_data(5000,
+    mobiles, bases, angles = data_generation.generate_data(50*50,
                                                            params['data__num_stations'],
                                                            params ['data__ndims'],
                                                            pts_r=3, bs_r=4,
-                                                           bs_type=params['data__bs_type'])
+                                                           bs_type=params['data__bs_type'], points_type="grid")
 
 
     if params['noise__addnoise_test']:
-        angles = noise_models.add_noise_dispatcher(angles, params['noise__noise_model'], params['data__ndims'], base_idxs=[0], 
+        angles = noise_models.add_noise_dispatcher(angles, params['noise__noise_model'], params['data__ndims'], base_idxs=params['noise__bases_to_noise'], 
                                                         noise_params=params['noise__noise_params'])
 
     if params['NN__type'] == 'snbp-mlp':

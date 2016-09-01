@@ -64,6 +64,7 @@ def create_param_dict(config):
     params['noise__addnoise_test'] = ast.literal_eval(config.get("noise", "addnoise_test"))
     params['noise__noise_model'] = config.get("noise", "noise_model")
     params['noise__noise_params'] = ast.literal_eval(config.get("noise", "noise_params"))
+    params['noise__bases_to_noise'] = json.loads(config.get("noise", "bases_to_noise"))
 
     return params
 
