@@ -13,15 +13,14 @@ def gen_points_random(num_pts, ndim, r=3):
     points = np.random.uniform(-r,r,size=(num_pts,ndim))
     points = np.array(points)
     return points
- 
 
+# Returns a grid of points with a square or cube root of the num_pts requests
 def gen_points_grid(num_pts, ndim, r=3):
-    assert ndim <= 2, "gen_points_grid in data_generation has not been implemented yet for %d dimensions" % (ndim)
-    x = np.linspace(-r,r, int(np.sqrt(num_pts)))
-    points = np.array(np.meshgrid(x, x))
-    points = points.reshape(2,int(np.sqrt(num_pts))**2).T
+    assert ndim <= 3, "gen_points_grid in data_generation has not been implemented yet for %d dimensions" % (ndim)
+    x = np.linspace(-r,r, int(np.power(num_pts, 1./ndim)))
+    points = np.array(np.meshgrid(*([x]*ndim)))
+    points = points.reshape(ndim,int(np.power(num_pts, 1./ndim))**ndim).T
     return points
-
 
 def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
     # point on the circle with radius r
