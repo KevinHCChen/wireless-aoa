@@ -60,6 +60,7 @@ def create_param_dict(config):
     params['data__bs_type'] = config.get("data", "bs_type")
     params['exp_details__save'] = ast.literal_eval(config.get("exp_details", "save"))
     params['exp_details__interactive'] = ast.literal_eval(config.get("exp_details", "interactive"))
+    params['exp_details__num_iterations_per_setting'] = ast.literal_eval(config.get("exp_details", "num_iterations_per_setting"))
     params['noise__addnoise_train'] = ast.literal_eval(config.get("noise", "addnoise_train"))
     params['noise__addnoise_test'] = ast.literal_eval(config.get("noise", "addnoise_test"))
     if params['noise__addnoise_train'] or params['noise__addnoise_test']:

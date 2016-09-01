@@ -78,7 +78,7 @@ def plot_scatter(positions, error, title):
 
 
 # positions (x,y,z?) as numpy array
-def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name):
+def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name, iter_number):
     # 2D case
     if true_pos.shape[1] == 2:
         plt.figure()
@@ -93,7 +93,7 @@ def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name)
         fig.set_size_inches(6.5, 10.5, forward=True)
 
         if saveflag:
-            plt.savefig(dir_name + 'error_fig.png', format = 'png')
+            plt.savefig(dir_name + 'error_fig_iteration%d.png' % (iter_number), format = 'png')
 
         plt.show()
 
@@ -113,7 +113,7 @@ def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name)
         plt.title("Ground Truth, Num Stations: %d" % (3))
         plt.show()
         if saveflag:
-            plt.savefig(dir_name + 'error_true_fig.png', format = 'png')
+            plt.savefig(dir_name + 'error_true_fig_iteration%d.png' % (iter_number), format = 'png')
 
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
@@ -128,5 +128,5 @@ def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name)
         plt.title("Predicted, Num Stations: %d" % (3))
         plt.show()
         if saveflag:
-            plt.savefig(dir_name + 'error_predicted_fig.png', format = 'png')
+            plt.savefig(dir_name + 'error_predicted_fig_iteration%d.png' % (iter_number), format = 'png')
 
