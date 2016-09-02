@@ -37,7 +37,7 @@ if configfile:
     cfg_fns = [configfile]
 elif use_dir:
     # cfg_fns = "config_files/noise_model.ini"
-    cfg_fns = glob.glob('experiment1_wnoise_09022016_1040am/*')
+    cfg_fns = glob.glob('experiment1_wnoise_09022016_1040am/*').sort()
     #cfg_fns = glob.glob('test_batch/*')
 else:
     #cfg_fns = ["config_files/noise_baseModel.ini"]
