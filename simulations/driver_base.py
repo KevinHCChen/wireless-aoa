@@ -15,10 +15,16 @@ parser.add_argument('--showfig', '-g', dest='showfig', action='store_true',
                     help='Show the figure')
 parser.add_argument('--configfile', '-c', dest='configfile', type=str,
                     help='Which config file to use')
+parser.add_argument('--startidx', '-s', dest='startidx', type=int,
+                    help='Which file to start at')
+parser.add_argument('--endidx', '-e', dest='endidx', type=int,
+                    help='Which file to end at')
 args = parser.parse_args()
 
 showfig = args.showfig
 configfile = args.configfile
+startidx = args.startidx
+endidx = args.endidx
 if not showfig:
     import matplotlib
     matplotlib.use('Agg')
@@ -38,6 +44,11 @@ if configfile:
 elif use_dir:
     # cfg_fns = "config_files/noise_model.ini"
     cfg_fns = glob.glob('experiment1_wnoise_09022016_1040am/*').sort()
+    if startidx and endidx:
+        assert startidx <= endidx, "Startidx is greater than endidx...not judging, just letting you know..."
+        cfg_fns = cfg_fns[startidx:endidx]
+    elif (startidx and not endidx) or (endidx and not startidx):
+        assert False, "You must use both startidx and endidx"
     #cfg_fns = glob.glob('test_batch/*')
 else:
     #cfg_fns = ["config_files/noise_baseModel.ini"]
