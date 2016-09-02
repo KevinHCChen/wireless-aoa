@@ -43,7 +43,8 @@ if configfile:
     cfg_fns = [configfile]
 elif use_dir:
     # cfg_fns = "config_files/noise_model.ini"
-    cfg_fns = glob.glob('experiment1_wnoise_09022016_1040am/*').sort()
+    cfg_fns = glob.glob('experiment1_wnoise_09022016_1040am/*')
+    cfg_fns.sort()
     if startidx and endidx:
         assert startidx <= endidx, "Startidx is greater than endidx...not judging, just letting you know..."
         cfg_fns = cfg_fns[startidx:endidx]
