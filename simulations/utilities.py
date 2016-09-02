@@ -76,6 +76,8 @@ def create_param_dict(config):
     params['data__ndims'] = int(config.get("data", "ndims"))
     params['data__num_stations'] = int(config.get("data", "num_stations"))
     params['data__bs_type'] = config.get("data", "bs_type")
+    params['exp_details__name'] = config.get("exp_details", "name")
+    params['exp_details__description'] = config.get("exp_details", "description")
     params['exp_details__save'] = ast.literal_eval(config.get("exp_details", "save"))
     params['exp_details__interactive'] = ast.literal_eval(config.get("exp_details", "interactive"))
     params['exp_details__num_iterations_per_setting'] = ast.literal_eval(config.get("exp_details", "num_iterations_per_setting"))

@@ -213,7 +213,7 @@ class BaseMLP(chainer.ChainList):
 def train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False):
     # Setup optimizer
     # optimizer = optimizers.Adam()
-    optimizer = regularizedAdam( _lambda = 0 ) # larger lambda = stronger L2 regularization
+    optimizer = regularizedAdam( _lambda = 0.001 ) # larger lambda = stronger L2 regularization
     optimizer.setup(model)
 
     max_acc = 0

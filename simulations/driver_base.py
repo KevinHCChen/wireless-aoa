@@ -31,13 +31,13 @@ import data_generation as data_generation
 import plotting as plotting
 
 
-use_dir = False 
+use_dir = True 
 
 if configfile:
     cfg_fns = [configfile]
 elif use_dir:
     # cfg_fns = "config_files/noise_model.ini"
-    cfg_fns = glob.glob('expset_09012016_10am/*')
+    cfg_fns = glob.glob('experiment1_wnoise_09022016_1040am/*')
     #cfg_fns = glob.glob('test_batch/*')
 else:
     #cfg_fns = ["config_files/noise_baseModel.ini"]
@@ -160,7 +160,7 @@ for cfg_fn in cfg_fns:
     f.close()
 
     df['mean_err'] = np.mean(mean_errors)
-    df['std_err'] = np.mean(mean_errors)
+    df['std_err'] = np.mean(std_errors)
     df_all = df_all.append(df, ignore_index=True)
 
     # print out warning if figures not saved
