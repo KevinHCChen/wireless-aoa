@@ -47,8 +47,6 @@ elif use_dir:
     if startidx and endidx:
         assert startidx <= endidx, "Startidx is greater than endidx...not judging, just letting you know..."
         cfg_fns = cfg_fns[startidx:endidx]
-    elif (startidx and not endidx) or (endidx and not startidx):
-        assert False, "You must use both startidx and endidx"
     #cfg_fns = glob.glob('test_batch/*')
 else:
     #cfg_fns = ["config_files/noise_baseModel.ini"]
