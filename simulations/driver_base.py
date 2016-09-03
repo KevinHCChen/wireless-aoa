@@ -43,9 +43,9 @@ if configfile:
     cfg_fns = [configfile]
 elif use_dir:
     # cfg_fns = "config_files/noise_model.ini"
-    cfg_fns = glob.glob('exp_beforemeeting_late/*')
+    cfg_fns = glob.glob('exp_bm_gaussian_11am/*')
     cfg_fns.sort()
-    if startidx and endidx:
+    if endidx:
         assert startidx <= endidx, "Startidx is greater than endidx...not judging, just letting you know..."
         cfg_fns = cfg_fns[startidx:endidx]
     #cfg_fns = glob.glob('test_batch/*')
