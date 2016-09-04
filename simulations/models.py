@@ -66,9 +66,9 @@ class StructuredMLP(chainer.ChainList):
         self.y = y
         return self.loss
 
-    def trainModel(self, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False):
+    def trainModel(self, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False, verbose=False):
         self.model, loss = train_model(trainXs, trainY, testXs, testY, n_epoch=n_epoch,
-                                       batchsize=batchsize, max_flag=max_flag)
+                                       batchsize=batchsize, max_flag=max_flag, verbose=verbose)
 
 
 class NBPStructuredMLP():
@@ -81,7 +81,7 @@ class NBPStructuredMLP():
 
         self.upper_model = BaseMLP(n_lower[-1]*num_pairs, n_upper, self.ndim)
 
-    def trainModel(self, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False):
+    def trainModel(self, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False, verbose=False):
 
         output_testXs = []
         output_trainXs= []
@@ -105,7 +105,8 @@ class NBPStructuredMLP():
                                             tmp_testXs, testY,
                                           n_epoch=n_epoch,
                                           batchsize=batchsize,
-                                          max_flag=max_flag)
+                                          max_flag=max_flag,
+                                          verbose=verbose)
 
             x = chainer.Variable(np.asarray(tmp_trainXs[0]))
             output_trainXs.append( model.forward(x) )
@@ -196,10 +197,10 @@ class BaseMLP(chainer.ChainList):
 
         return h_i
 
-    def trainModel(self, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False):
+    def trainModel(self, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False, verbose=False):
 
         self.model, loss = train_model(self, trainXs, trainY, testXs, testY,
-                                       n_epoch, batchsize, max_flag=max_flag)
+                                       n_epoch, batchsize, max_flag=max_flag, verbose=verbose)
         return loss
 
 
@@ -210,7 +211,7 @@ class BaseMLP(chainer.ChainList):
         return predY, error
 
 
-def train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False):
+def train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False, verbose=False):
     # Setup optimizer
     # optimizer = optimizers.Adam()
     optimizer = regularizedAdam( _lambda = 0.001 ) # larger lambda = stronger L2 regularization
@@ -224,8 +225,8 @@ def train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=10
     min_metric = float('inf')
 
     for epoch in six.moves.range(1, n_epoch + 1):
-
-        print('epoch', epoch)
+        if verbose:
+            print('epoch', epoch)
         perm = np.random.permutation(N)
 
         sum_accuracy = 0
@@ -253,8 +254,9 @@ def train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=10
         end = time.time()
         elapsed_time = end - start
         throughput = N / elapsed_time
-        print('train mean loss={}, accuracy={}, throughput={} images/sec'.format(
-            sum_loss / N, sum_accuracy / N, throughput))
+        if verbose:
+            print('train mean loss={}, accuracy={}, throughput={} images/sec'.format(
+                sum_loss / N, sum_accuracy / N, throughput))
 
 
         N_test = testXs[0].shape[0]
@@ -284,9 +286,10 @@ def train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=10
             best_model = copy.deepcopy(model)
             min_metric = (sum_loss / N_test)
 
-        print('test  mean loss={}, accuracy={}'.format(
-            sum_loss / N_test, 10./ N_test))
-            #sum_loss / N_test, sum_accuracy / N_test))
+        if verbose:
+            print('test  mean loss={}, accuracy={}'.format(
+                sum_loss / N_test, 10./ N_test))
+                #sum_loss / N_test, sum_accuracy / N_test))
 
     if max_flag:
         return best_model, min_metric
