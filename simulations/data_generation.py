@@ -1,12 +1,6 @@
 import numpy as np
 import numpy.linalg as lg
 from scipy.spatial.distance import euclidean
-import matplotlib.pyplot as plt
-from matplotlib import animation
-import itertools
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-
 
 
 def gen_points_random(num_pts, ndim, r=3):
@@ -60,7 +54,6 @@ def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
         #bases = [((4,0), [90.]), ((0,4), [0.]), ((-4,0), [90.]), ((0,4), [0.])]
     elif bs_type=="structured-3D":
         bases = [((4,0,0), [90.,90.]), ((-4,0,0), [90.,90.]), ((0,4,0), [180.,90.])]
-        #bases = [((4,0,0), [90.,90.]), ((0,4,0), [0.,90.]), ((-4,0,0), [90.,90.]), ((0,4,0), [0.,90.])]
 
     return bases
 
@@ -130,9 +123,9 @@ def generate_data(num_pts, num_stations, ndim, pts_r=3, bs_r=4, bs_type="random"
         assert False, "This pattern of point generation has not been implemented yet in data_generation"
     bases = gen_basestations(num_stations, ndim, r=bs_r, bs_type=bs_type)
     angles = get_mobile_angles(bases, mobiles, ndim)
-    angles = angles % 360
-    angles %= 360
+    angles %= 360.
     angles /= 360.
+    angles = np.nan_to_num(angles)
     return mobiles, bases, angles
 
 

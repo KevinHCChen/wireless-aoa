@@ -1,8 +1,7 @@
-import matplotlib.pyplot as plt
+import plotly as py
+import plotly.graph_objs as go
+from plotly import tools
 import numpy as np
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-from matplotlib import cm
-from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 color_vector = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
 
@@ -64,70 +63,78 @@ def to_coef(m, p):
     #return the left side coefficients and the right side constant. these represent the equation.
     return ([-m, 1], const)
 
+def rescale(data):
+    #data = np.nan_to_num(data) # TODO: FIX THIS!!!! YIKES
+    return (data - np.min(data))/(np.max(data) - np.min(data))
 
 def plot_scatter(positions, error, title):
-    plt.scatter(positions[:,0], positions[:,1], c=error)
 
-    plt.colorbar()
-    plt.ylim([-5,5])
-    plt.xlim([-5,5])
-    plt.title(title)
-    plt.clim([0,1])
+    trace = go.Scatter(
+        x=positions[:,0],
+        y=positions[:,1],
+        mode='markers',
+        marker=dict(
+            size=8,
+            color=rescale(error),
+            colorscale='Jet',
+            showscale=True,
+            opacity=0.8
+        )
+    )
 
-    # plt.axis('equal')
+    return trace
 
+def plot_scatter3D(positions, error, title):
+
+    trace = go.Scatter3d(
+        x=positions[:,0],
+        y=positions[:,1],
+        z=positions[:,2],
+        mode='markers',
+        marker=dict(
+            size=8,
+            color=rescale(error),
+            #color=error,
+            colorscale='Jet',
+            showscale=True,
+            opacity=0.5
+        )
+    )
+
+
+    return trace
 
 # positions (x,y,z?) as numpy array
 def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name, iter_number):
     # 2D case
     if true_pos.shape[1] == 2:
-        plt.figure()
-        plt.subplot(2,1,1)
-        plot_scatter(true_pos, error, title)
-        plotStations(bases)
+        fig = tools.make_subplots(rows=1, cols=2)
+        trace = plot_scatter(true_pos, error, title)
+        fig.append_trace(trace, 1,1)
 
-        plt.subplot(2,1,2)
-        plot_scatter(predicted_pos, error, title)
-        plotStations(bases)
-        fig = plt.gcf()
-        fig.set_size_inches(6.5, 10.5, forward=True)
+        trace = plot_scatter(predicted_pos, error, title)
+        fig.append_trace(trace, 1,2)
+        ax_range = [-4,4]
+        fig['layout']['xaxis1'].update( range=ax_range)
+        fig['layout']['xaxis2'].update( range=ax_range)
+        fig['layout']['yaxis1'].update( range=ax_range)
+        fig['layout']['yaxis2'].update( range=ax_range)
 
         if saveflag:
-            plt.savefig(dir_name + 'error_fig_iteration%d.png' % (iter_number), format = 'png')
-
-        plt.show()
+            py.offline.plot(fig, filename=dir_name + 'error-fig-iteration%d' % (iter_number))
 
     # 3D case
     if true_pos.shape[1] == 3:
-        fig = plt.figure()
+        fig = tools.make_subplots(rows=1, cols=2, specs=[[{'is_3d': True}, {'is_3d': True}]])
+        data = plot_scatter3D(true_pos, error, title)
+        fig.append_trace(data, 1,1)
 
-        ax = fig.add_subplot(111, projection='3d')
-        #ax.scatter(true_pos[:,0], true_pos[:,1], true_pos[:,2], c=error, alpha=0.1)
-        ax.scatter(true_pos[:,0], true_pos[:,1], true_pos[:,2], c=error, alpha=0.4)
-        ax.set_xlabel('X Plane')
-        ax.set_ylabel('Y Plane')
-        ax.set_zlabel('Z Plane')
-        plotStations3D(bases, fig)
-        ax.set_ylim((-6,6))
-        ax.set_xlim((-6,6))
-        ax.set_zlim((-6,6))
-        plt.title("Ground Truth, Num Stations: %d" % (3))
-        plt.show()
-        if saveflag:
-            plt.savefig(dir_name + 'error_true_fig_iteration%d.png' % (iter_number), format = 'png')
+        data = plot_scatter3D(predicted_pos, error, title)
+        fig.append_trace(data, 1,2)
+        fig['layout']['scene1']['aspectmode'] = 'cube'
+        fig['layout']['scene2']['aspectmode'] = 'cube'
 
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        ax.scatter(predicted_pos[:,0], predicted_pos[:,1], predicted_pos[:,2], c=error)
-        ax.set_xlabel('X Label')
-        ax.set_ylabel('Y Label')
-        ax.set_zlabel('Z Label')
-        plotStations3D(bases, fig)
-        ax.set_ylim((-6,6))
-        ax.set_xlim((-6,6))
-        ax.set_zlim((-6,6))
-        plt.title("Predicted, Num Stations: %d" % (3))
-        plt.show()
+
         if saveflag:
-            plt.savefig(dir_name + 'error_predicted_fig_iteration%d.png' % (iter_number), format = 'png')
+            py.offline.plot(fig, filename=dir_name + 'error-fig-iteration%d' % (iter_number))
 

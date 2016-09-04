@@ -15,10 +15,16 @@ parser.add_argument('--showfig', '-g', dest='showfig', action='store_true',
                     help='Show the figure')
 parser.add_argument('--configfile', '-c', dest='configfile', type=str,
                     help='Which config file to use')
+parser.add_argument('--startidx', '-s', dest='startidx', type=int,
+                    help='Which file to start at')
+parser.add_argument('--endidx', '-e', dest='endidx', type=int,
+                    help='Which file to end at')
 args = parser.parse_args()
 
 showfig = args.showfig
 configfile = args.configfile
+startidx = args.startidx
+endidx = args.endidx
 if not showfig:
     import matplotlib
     matplotlib.use('Agg')
@@ -31,13 +37,17 @@ import data_generation as data_generation
 import plotting as plotting
 
 
-use_dir = False 
+use_dir = True 
 
 if configfile:
     cfg_fns = [configfile]
 elif use_dir:
     # cfg_fns = "config_files/noise_model.ini"
-    cfg_fns = glob.glob('expset_09012016_10am/*')
+    cfg_fns = glob.glob('exp_beforemeeting_late/*')
+    cfg_fns.sort()
+    if startidx and endidx:
+        assert startidx <= endidx, "Startidx is greater than endidx...not judging, just letting you know..."
+        cfg_fns = cfg_fns[startidx:endidx]
     #cfg_fns = glob.glob('test_batch/*')
 else:
     #cfg_fns = ["config_files/noise_baseModel.ini"]
@@ -160,7 +170,7 @@ for cfg_fn in cfg_fns:
     f.close()
 
     df['mean_err'] = np.mean(mean_errors)
-    df['std_err'] = np.mean(mean_errors)
+    df['std_err'] = np.mean(std_errors)
     df_all = df_all.append(df, ignore_index=True)
 
     # print out warning if figures not saved
