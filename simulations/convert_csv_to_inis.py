@@ -19,6 +19,7 @@ with open('experiment_set_csvs/exp_bm_gaussian_11am.csv', 'rU') as f:
             f = open(dir_name + '%s.ini' % (row[0]), 'w')
 
             f.write('[exp_details]\n')
+            f.write('setname: %s\n' % (row[15]))
             f.write('name: %s\n' % (row[0]))
             f.write('description: %s\n' % ('NA'))
             f.write('save: %s\n' % ('True'))
