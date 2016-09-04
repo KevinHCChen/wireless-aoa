@@ -15,7 +15,7 @@ def load_configuration(cfg_fn):
     if not os.path.exists("experiment_results"):
         os.makedirs("experiment_results")
 
-    dir_name = "experiment_results/%s__%s/" % (config.get("exp_details", "name"), datetime.datetime.now().strftime("%m_%d_%Y_%I:%M:%S%p"))
+    dir_name = "experiment_results/%s__%s/" % (config.get("exp_details", "name"), datetime.datetime.now().strftime("%m_%d_%Y_%I-%M-%S%p"))
 
 
     if ast.literal_eval(config.get("exp_details", "save")):
