@@ -25,11 +25,6 @@ showfig = args.showfig
 configfile = args.configfile
 startidx = args.startidx
 endidx = args.endidx
-if not showfig:
-    import matplotlib
-    matplotlib.use('Agg')
-
-import matplotlib.pyplot as plt
 
 import utilities as util
 import models as models
@@ -64,9 +59,6 @@ for cfg_fn in cfg_fns:
     params = util.create_param_dict(config)
 
     df = pd.DataFrame(util.parseParams(params))
-
-    if params['exp_details__interactive']:
-        plt.ion()
 
 
     all_predY = None
