@@ -4,14 +4,17 @@ from plotly import tools
 import numpy as np
 
 color_vector = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
+color = ['red', 'green', 'blue', 'c', 'm', 'y', 'k']
 
 def plotStations(baseStations):
-    for bs in baseStations:
+    traces = []
+    for i, bs in enumerate(baseStations):
         #plt.plot(bs[0][0], bs[0][1], marker=(4, 0, bs[1]), markersize=40)
         cords = np.array(bs[0])
         slope = np.tan(np.radians(bs[1][0]))
         eq = to_coef(slope, cords)
-        plotLine(eq, bs[0], bs[1][0])
+        traces.append( plotLine(eq, bs[0], bs[1][0], i) )
+    return traces
 
 
 def plotStations3D(baseStations, fig):
@@ -22,7 +25,7 @@ def plotStations3D(baseStations, fig):
         plotPlane(eq, bs[0], bs[1][0], fig, color_vector[i%len(color_vector)])
 
 
-def plotLine(eq, center, ang):
+def plotLine(eq, center, ang, idx):
     if ang % 180 < 45 or ang % 180 > 135:
         x1 = center[0] + .2
         x2 = center[0] - .2
@@ -33,7 +36,22 @@ def plotLine(eq, center, ang):
         y2 = center[1] - .2
         x1 =  (eq[1] - eq[0][1]*y1)/(eq[0][0])
         x2 =  (eq[1] - eq[0][1]*y2)/(eq[0][0])
-    plt.plot([x1,x2], [y1,y2], '-', linewidth=10., markersize=12)
+
+
+    trace = go.Scatter(
+        x=[x1,x2],
+        y=[y1,y2],
+        line = dict(
+            color = color[idx%len(color)],
+            width = 10
+        )
+        #mode='markers',
+        #marker=dict(
+        #    size=20,
+        #)
+    )
+
+    return trace
 
 
 def plotPlane(eq, center, ang, fig, color): 
@@ -114,14 +132,19 @@ def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name,
 
         trace = plot_scatter(predicted_pos, error, title)
         fig.append_trace(trace, 1,2)
-        ax_range = [-4,4]
+        ax_range = [-4.5,4.5]
         fig['layout']['xaxis1'].update( range=ax_range)
         fig['layout']['xaxis2'].update( range=ax_range)
         fig['layout']['yaxis1'].update( range=ax_range)
         fig['layout']['yaxis2'].update( range=ax_range)
+        fig['layout'].update(showlegend=False)
+
+        for t in plotStations(bases):
+            fig.append_trace(t, 1,1)
+            fig.append_trace(t, 1,2)
 
         if saveflag:
-            py.offline.plot(fig, filename=dir_name + 'error-fig-iteration%d' % (iter_number))
+            py.offline.plot(fig, filename=dir_name + 'error-fig-iteration%d.html' % (iter_number))
 
     # 3D case
     if true_pos.shape[1] == 3:
@@ -136,5 +159,5 @@ def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name,
 
 
         if saveflag:
-            py.offline.plot(fig, filename=dir_name + 'error-fig-iteration%d' % (iter_number))
+            py.offline.plot(fig, filename=dir_name + 'error-fig-iteration%d.html' % (iter_number))
 
