@@ -49,6 +49,9 @@ elif configfile_dir:
     if configfile_dir[-1] != '/':
         configfile_dir += '/'
     cfg_fns = glob.glob(configfile_dir + '*')
+    if endidx:
+        assert startidx <= endidx, "Startidx is greater than endidx...not judging, just letting you know..."
+        cfg_fns = cfg_fns[startidx:endidx]
 elif use_dir:
     # cfg_fns = "config_files/noise_model.ini"
     cfg_fns = glob.glob('exp_bm_gaussian_11am/*')
