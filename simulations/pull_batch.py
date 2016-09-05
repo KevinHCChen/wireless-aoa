@@ -6,6 +6,9 @@ def fetch_results(srv, exp_name, out_dir):
    scp_str = "scp -r %s:wireless-aoa/simulations/experiment_results/%s\* %s/" \
              % (srv, exp_name, out_dir)
    os.system(scp_str)
+   scp_str = "scp -r %s:wireless-aoa/simulations/aggregated_results/%s\* %s/" \
+             % (srv, exp_name, out_dir)
+   os.system(scp_str)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Driver for 5G Experiments')
