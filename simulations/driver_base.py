@@ -40,7 +40,7 @@ import data_generation as data_generation
 import plotting as plotting
 
 
-use_dir = True 
+use_dir = False 
 
 
 if configfile:
@@ -194,5 +194,5 @@ res_dir_folder = 'aggregated_results'
 if not os.path.exists(res_dir_folder):
     os.makedirs(res_dir_folder)
 
-res_dir_name = "%s/%s__%s.csv" % (res_dir_folder, config.get("exp_details", "name"), datetime.datetime.now().strftime("%m_%d_%Y_%I:%M:%S%p"))
+res_dir_name = "%s/%s__%s.csv" % (res_dir_folder, config.get("exp_details", "setname"), datetime.datetime.now().strftime("%m_%d_%Y_%I:%M:%S%p"))
 df_all.to_csv(res_dir_name)
