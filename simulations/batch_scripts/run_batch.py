@@ -11,7 +11,7 @@ def scp_eigen_bash(file_name, file_idxs, remote_host, remote_path):
     f = open(file_name, 'w')
     f.write('#!/usr/bin/zsh\n')
     f.write('source /home/mcrouse/.zshrc\n')
-    f.write('python driver_base.py -d %s -s %d -e %d' % (configfile_dir, file_idxs[0], file_idxs[1]))
+    f.write('python driver_base.py -d %s -s %d -e %d' % (configfile_dir.split('../')[1], file_idxs[0], file_idxs[1]))
     f.close()
 
     # create scp command
@@ -22,6 +22,13 @@ def scp_eigen_bash(file_name, file_idxs, remote_host, remote_path):
     # scp the bash file to remote_host
     if not testing:
         os.system(scp_command)
+
+    chmod_command = 'ssh %s "/bin/chmod u+x %s"' % (remote_host, remote_path + file_name.split('/')[-1])
+
+    print "CHMODing the following: %s" % (chmod_command)
+
+    if not testing:
+        os.system(chmod_command)
 
     return remote_path + file_name.split('/')[-1]
 

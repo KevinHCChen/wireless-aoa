@@ -16,9 +16,12 @@ def load_configuration(cfg_fn):
         os.makedirs("experiment_results")
 
     try:
-        set_name = "%s__%s" % (config.get("exp_details", "setname"), datetime.datetime.now().strftime("%m_%d_%Y_%I:%M:%S%p"))
+        set_name = "%s" % (config.get("exp_details", "setname"))
     except:
-        set_name = "anonymous_set__%s" % (datetime.datetime.now().strftime("%m_%d_%Y_%I:%M:%S%p"))
+        set_name = "anonymous_set"
+
+    if not os.path.exists("experiment_results/" + set_name):
+        os.makedirs("experiment_results/" + set_name)
 
     dir_name = "experiment_results/%s/%s__%s/" % (set_name, config.get("exp_details", "name"), datetime.datetime.now().strftime("%m_%d_%Y_%I:%M:%S%p"))
 

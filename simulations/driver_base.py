@@ -43,7 +43,7 @@ import data_generation as data_generation
 import plotting as plotting
 
 
-use_dir = False 
+
 
 if configfile:
     cfg_fns = [configfile]
@@ -91,6 +91,9 @@ for cfg_fn in cfg_fns:
                                                                params ['data__ndims'],
                                                                pts_r=3.9, bs_r=4,
                                                                bs_type=params['data__bs_type'], points_type="random")
+
+
+
 
 
         # IMPORTANT: remember to add noise before replicating data (e.g., for snbp-mlp)
