@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 def add_noise_dispatcher(angles, noise_model, ndim, base_idxs=[-1], noise_params=None):
     if noise_model == 'add_distribution_noise':
@@ -57,12 +58,16 @@ def add_distribution_noise(data, ndim,  base_idxs=[-1], noise_params={'noise_typ
 
 # nonlinear function for add_angle_dependent_noise
 def nonlinear_effect_function(data, k, j):
-    multiplier_data = np.exp(np.abs(k * (data - (90/360.)))) - j
+    mult_data_copy = copy.deepcopy(data)
+
+    mult_data_copy[np.where(mult_data_copy>180/360.)] = mult_data_copy[np.where(mult_data_copy>180/360.)] - 0.5
+    multiplier_data = np.exp(np.abs(k * (mult_data_copy - (90/360.)))) - j
+
     return multiplier_data
 
 
 # adds noise based on the angle of the point to the given base station
-def add_angle_dependent_noise(data, ndim,  base_idxs=[-1],  noise_params={'noise_type': 'gaussian', 'k': 2, 'j': 1, 'mean': 0, 'std':1}):
+def add_angle_dependent_noise(data, ndim,  base_idxs=[-1],  noise_params={'noise_type': 'gaussian', 'k': 4, 'j': 1, 'mean': 0, 'std':0.01}):
     if noise_params['noise_type'] == "gaussian":
         if ndim == 2:
             # using 1 angle for each base station (alpha)
