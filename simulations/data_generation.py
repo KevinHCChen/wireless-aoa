@@ -123,7 +123,7 @@ def generate_data(num_pts, num_stations, ndim, pts_r=3, bs_r=4, bs_type="random"
         assert False, "This pattern of point generation has not been implemented yet in data_generation"
     bases = gen_basestations(num_stations, ndim, r=bs_r, bs_type=bs_type)
     angles = get_mobile_angles(bases, mobiles, ndim)
-    angles %= 360.
+    angles %= 360
     angles /= 360.
     angles = np.nan_to_num(angles)
     return mobiles, bases, angles

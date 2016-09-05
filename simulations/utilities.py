@@ -15,7 +15,15 @@ def load_configuration(cfg_fn):
     if not os.path.exists("experiment_results"):
         os.makedirs("experiment_results")
 
-    dir_name = "experiment_results/%s__%s/" % (config.get("exp_details", "name"), datetime.datetime.now().strftime("%m_%d_%Y_%I-%M-%S%p"))
+    try:
+        set_name = "%s" % (config.get("exp_details", "setname"))
+    except:
+        set_name = "anonymous_set"
+
+    if not os.path.exists("experiment_results/" + set_name):
+        os.makedirs("experiment_results/" + set_name)
+
+    dir_name = "experiment_results/%s/%s__%s/" % (set_name, config.get("exp_details", "name"), datetime.datetime.now().strftime("%m_%d_%Y_%I:%M:%S%p"))
 
 
     if ast.literal_eval(config.get("exp_details", "save")):
@@ -76,6 +84,9 @@ def create_param_dict(config):
     params['data__ndims'] = int(config.get("data", "ndims"))
     params['data__num_stations'] = int(config.get("data", "num_stations"))
     params['data__bs_type'] = config.get("data", "bs_type")
+    # params['exp_details__setname'] = config.get("exp_details", "setname")
+    params['exp_details__name'] = config.get("exp_details", "name")
+    params['exp_details__description'] = config.get("exp_details", "description")
     params['exp_details__save'] = ast.literal_eval(config.get("exp_details", "save"))
     params['exp_details__interactive'] = ast.literal_eval(config.get("exp_details", "interactive"))
     params['exp_details__num_iterations_per_setting'] = ast.literal_eval(config.get("exp_details", "num_iterations_per_setting"))

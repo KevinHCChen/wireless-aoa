@@ -2,11 +2,11 @@ import csv
 import random
 import os
 
-dir_name = 'expset_09012016_10am/'
+dir_name = 'exp_bm_gaussian_11am/'
 if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-with open('experiment_set_csvs/experiment_09_01_2016_10am.csv', 'rU') as f:
+with open('experiment_set_csvs/exp_bm_gaussian_11am.csv', 'rU') as f:
     reader = csv.reader(f)
     first = True
     num_files_gen = 0
@@ -19,10 +19,12 @@ with open('experiment_set_csvs/experiment_09_01_2016_10am.csv', 'rU') as f:
             f = open(dir_name + '%s.ini' % (row[0]), 'w')
 
             f.write('[exp_details]\n')
+            f.write('setname: %s\n' % (row[15]))
             f.write('name: %s\n' % (row[0]))
             f.write('description: %s\n' % ('NA'))
             f.write('save: %s\n' % ('True'))
             f.write('interactive: %s\n' % ('True'))
+            f.write('num_iterations_per_setting: %s\n' % (row[14]))
 
             f.write('\n')
             f.write('[NN]\n')

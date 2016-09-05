@@ -15,16 +15,24 @@ parser.add_argument('--showfig', '-g', dest='showfig', action='store_true',
                     help='Show the figure')
 parser.add_argument('--configfile', '-c', dest='configfile', type=str,
                     help='Which config file to use')
+parser.add_argument('--configfile_dir', '-d', dest='configfile_dir', type=str,
+                    help='Which directory of config files to use')
 parser.add_argument('--startidx', '-s', dest='startidx', type=int,
                     help='Which file to start at')
 parser.add_argument('--endidx', '-e', dest='endidx', type=int,
                     help='Which file to end at')
+parser.add_argument('--verbose', '-v', dest='verbose', action='store_true', 
+                    help='Print out verbose')
 args = parser.parse_args()
 
 showfig = args.showfig
 configfile = args.configfile
 startidx = args.startidx
 endidx = args.endidx
+configfile_dir = args.configfile_dir
+startidx = args.startidx
+endidx = args.endidx
+verbose = args.verbose
 
 import utilities as util
 import models as models
@@ -34,13 +42,18 @@ import plotting as plotting
 
 use_dir = True 
 
+
 if configfile:
     cfg_fns = [configfile]
+elif configfile_dir:
+    if configfile_dir[-1] != '/':
+        configfile_dir += '/'
+    cfg_fns = glob.glob(configfile_dir + '*')
 elif use_dir:
     # cfg_fns = "config_files/noise_model.ini"
-    cfg_fns = glob.glob('exp_beforemeeting_late/*')
+    cfg_fns = glob.glob('exp_bm_gaussian_11am/*')
     cfg_fns.sort()
-    if startidx and endidx:
+    if endidx:
         assert startidx <= endidx, "Startidx is greater than endidx...not judging, just letting you know..."
         cfg_fns = cfg_fns[startidx:endidx]
     #cfg_fns = glob.glob('test_batch/*')
@@ -53,7 +66,8 @@ else:
 df_all = pd.DataFrame()
 
 for cfg_fn in cfg_fns:
-    print "CFG: ", cfg_fn
+    if verbose:
+        print "CFG: ", cfg_fn
     config, dir_name = util.load_configuration(cfg_fn)
 
     params = util.create_param_dict(config)
@@ -72,6 +86,9 @@ for cfg_fn in cfg_fns:
                                                                params ['data__ndims'],
                                                                pts_r=3.9, bs_r=4,
                                                                bs_type=params['data__bs_type'], points_type="random")
+
+
+
 
 
         # IMPORTANT: remember to add noise before replicating data (e.g., for snbp-mlp)
@@ -104,7 +121,8 @@ for cfg_fn in cfg_fns:
         loss = model.trainModel(trainXs, trainY, testXs, testY,
                                    n_epoch=params['NN__n_epochs'],
                                    batchsize=params['NN__batchsize'],
-                                   max_flag=params['NN__take_max'])
+                                   max_flag=params['NN__take_max'],
+                                   verbose=verbose)
 
         f = open(dir_name + 'loss_iteration%d.txt' % (iter_number), 'w')
         f.write("%f" % (loss))
