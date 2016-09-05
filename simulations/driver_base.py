@@ -41,6 +41,9 @@ import plotting as plotting
 
 
 use_dir = False 
+repeat_for_noise_exp = True
+repeat_for_noise_exp_1 = True
+repeat_for_noise_exp_2 = True
 
 
 if configfile:
@@ -140,9 +143,19 @@ for cfg_fn in cfg_fns:
                                                                bs_type=params['data__bs_type'], points_type="grid")
 
 
+        angles = angles[475,:]
+        mobiles = mobiles[475,:]
+
+        if repeat_for_noise_exp:
+            angles = np.tile(angles, (params['data__num_pts'],1))
+            mobiles = np.tile(mobiles, (params['data__num_pts'],1))
+
         if params['noise__addnoise_test']:
             angles = noise_models.add_noise_dispatcher(angles, params['noise__noise_model'], params['data__ndims'], base_idxs=params['noise__bases_to_noise'], 
                                                             noise_params=params['noise__noise_params'])
+
+        if repeat_for_noise_exp_1:
+            angles = np.mean(angles,axis=0)
 
         if params['NN__type'] == 'snbp-mlp':
             angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
