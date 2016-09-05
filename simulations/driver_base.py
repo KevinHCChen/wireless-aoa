@@ -49,6 +49,7 @@ elif configfile_dir:
     if configfile_dir[-1] != '/':
         configfile_dir += '/'
     cfg_fns = glob.glob(configfile_dir + '*')
+    cfg_fns.sort()
     if endidx:
         assert startidx <= endidx, "Startidx is greater than endidx...not judging, just letting you know..."
         cfg_fns = cfg_fns[startidx:endidx]
