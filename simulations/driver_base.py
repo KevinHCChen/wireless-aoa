@@ -43,7 +43,7 @@ import plotting as plotting
 use_dir = False 
 repeat_for_noise_exp = True
 repeat_for_noise_exp_1 = True
-repeat_for_noise_exp_2 = True
+repeat_for_noise_exp_2 = False
 
 
 if configfile:
@@ -150,12 +150,22 @@ for cfg_fn in cfg_fns:
             angles = np.tile(angles, (params['data__num_pts'],1))
             mobiles = np.tile(mobiles, (params['data__num_pts'],1))
 
+
+
         if params['noise__addnoise_test']:
             angles = noise_models.add_noise_dispatcher(angles, params['noise__noise_model'], params['data__ndims'], base_idxs=params['noise__bases_to_noise'], 
                                                             noise_params=params['noise__noise_params'])
 
-        if repeat_for_noise_exp_1:
-            angles = np.mean(angles,axis=0)
+
+        
+
+        # if we are in noise experiment 2 we want to average all of the points before running through the model
+        if repeat_for_noise_exp_2:
+            angles = np.mean(angles, axis=0)
+            mobiles = np.mean(mobiles, axis=0)
+
+
+
 
         if params['NN__type'] == 'snbp-mlp':
             angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
@@ -164,6 +174,11 @@ for cfg_fn in cfg_fns:
 
         # test model
         predY, error = model.testModel(testXs, testY)
+
+        # if we are in noise experiment 1 we want to average the output from the model
+        if repeat_for_noise_exp_1:
+            predY = np.mean(predY, axis=0)
+            error = np.mean(error, axis=0)
 
         f = open(dir_name + 'error_iteration%d.txt' % iter_number, 'w')
         f.write("Mean Error: %f\n" % (np.mean(error)))
