@@ -52,7 +52,7 @@ elif configfile_dir:
     cfg_fns.sort()
     if endidx:
         assert startidx <= endidx, "Startidx is greater than endidx...not judging, just letting you know..."
-        cfg_fns = cfg_fns[startidx:endidx]
+        cfg_fns = cfg_fns[startidx:endidx+1]
 elif use_dir:
     # cfg_fns = "config_files/noise_model.ini"
     cfg_fns = glob.glob('exp_bm_gaussian_11am/*')
