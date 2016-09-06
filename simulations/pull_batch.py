@@ -26,9 +26,10 @@ if __name__ == "__main__":
     srv_list = ['eigen11', 'eigen12', 'eigen13', 'eigen14']
 
     exp_names = ['nonsensenoise', 'spuriousnoise', 'nooutputnoise']
+    exp_names = ['angledependentdistnoise_02', 'angledependentdistnoise_03']
 
     for srv in srv_list:
-      for exp_name in exp_names: 
+      for exp_name in exp_names:
         out_dir = exp_name
         if not os.path.exists(out_dir):
           os.makedirs(out_dir)
