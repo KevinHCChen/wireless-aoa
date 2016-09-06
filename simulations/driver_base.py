@@ -195,7 +195,7 @@ for cfg_fn in cfg_fns:
         # if we are in noise experiment 1 we want to average the output from the model
         if params['data__noiseyexperimentnumber'] == 1:
             predY = np.mean(predY, axis=0)
-            predY = predY.reshape(len(predY), 1)
+            predY = predY.reshape(1,len(predY))
             error = np.mean(error)
 
             # print "AFTER: ", predY.shape
@@ -215,7 +215,7 @@ for cfg_fn in cfg_fns:
         std_errors.append(np.std(error))
 
 
-        testY = trueTestY.reshape(len(trueTestY),1)
+        testY = trueTestY.reshape(1,len(trueTestY))
         print "A: ", testY.shape
         print "B: ", predY.shape
         print "C: ", error.shape
