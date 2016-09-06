@@ -162,11 +162,16 @@ for cfg_fn in cfg_fns:
         
 
         # if we are in noise experiment 2 we want to average all of the points before running through the model
+        # print "A: ", angles.shape
+        # print "B: ", mobiles.shape
         if params['data__noiseyexperimentnumber'] == 2:
             angles = np.mean(angles, axis=0)
+            angles = angles.reshape(1,len(angles))
             mobiles = np.mean(mobiles, axis=0)
-
-
+            mobiles = mobiles.reshape(1,len(mobiles))
+        # print "C: ", angles.shape
+        # print "D: ", mobiles.shape
+        # assert False
 
 
         if params['NN__type'] == 'snbp-mlp':
@@ -220,10 +225,10 @@ for cfg_fn in cfg_fns:
 
         if all_predY == None:
             # all_predY = np.zeros((predY.shape[0], predY.shape[1], params['exp_details__num_iterations_per_setting']))
-            all_predY = np.zeros((predY.shape[0], predY.shape[1], 1))
+            all_predY = np.zeros((predY.shape[0], predY.shape[1], params['exp_details__num_iterations_per_setting']))
         if all_error == None:
             # all_error = np.zeros((error.shape[0], params['exp_details__num_iterations_per_setting']))
-            all_error = np.zeros((error.shape[0], 1))
+            all_error = np.zeros((error.shape[0], params['exp_details__num_iterations_per_setting']))
 
         all_predY[:,:,iter_number] = predY
         all_error[:,iter_number] = error
