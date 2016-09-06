@@ -142,7 +142,7 @@ for cfg_fn in cfg_fns:
 
 
 
-        selected_point = randintnp.random.randint(50*50)
+        selected_point = np.random.randint(50*50)
 
         angles = angles[selected_point,:]
         trueTestY = mobiles[selected_point,:]
