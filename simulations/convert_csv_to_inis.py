@@ -2,11 +2,11 @@ import csv
 import random
 import os
 
-dir_name = 'batch_exp_configs/experiments_destructivenoise/'
+dir_name = 'batch_exp_configs/samepointnoisey/'
 if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-with open('experiment_set_csvs/experiments_destructivenoise.csv', 'rU') as f:
+with open('experiment_set_csvs/samepointnoisey.csv', 'rU') as f:
     reader = csv.reader(f)
     first = True
     num_files_gen = 0
