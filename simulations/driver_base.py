@@ -149,8 +149,8 @@ for cfg_fn in cfg_fns:
         mobiles = mobiles[selected_point,:]
 
 
-        angles = np.tile(angles, (params['numsamplesperpoints'],1))
-        mobiles = np.tile(mobiles, (params['numsamplesperpoints'],1))
+        angles = np.tile(angles, (params['data__numsamplesperpoints'],1))
+        mobiles = np.tile(mobiles, (params['data__numsamplesperpoints'],1))
 
 
 
