@@ -41,9 +41,6 @@ import plotting as plotting
 
 
 use_dir = False 
-repeat_for_noise_exp = True
-repeat_for_noise_exp_1 = True
-repeat_for_noise_exp_2 = False
 
 
 if configfile:
@@ -143,14 +140,16 @@ for cfg_fn in cfg_fns:
                                                                bs_type=params['data__bs_type'], points_type="grid")
 
 
-        angles = angles[475,:]
-        trueTestY = mobiles[475,:]
-        mobiles = mobiles[475,:]
+
+        selected_point = randintnp.random.randint(50*50)
+
+        angles = angles[selected_point,:]
+        trueTestY = mobiles[selected_point,:]
+        mobiles = mobiles[selected_point,:]
 
 
-        if repeat_for_noise_exp:
-            angles = np.tile(angles, (params['data__num_pts'],1))
-            mobiles = np.tile(mobiles, (params['data__num_pts'],1))
+        angles = np.tile(angles, (params['numsamplesperpoints'],1))
+        mobiles = np.tile(mobiles, (params['numsamplesperpoints'],1))
 
 
 
@@ -162,7 +161,7 @@ for cfg_fn in cfg_fns:
         
 
         # if we are in noise experiment 2 we want to average all of the points before running through the model
-        if repeat_for_noise_exp_2:
+        if params['data__noiseyexperimentnumber'] == 2:
             angles = np.mean(angles, axis=0)
             mobiles = np.mean(mobiles, axis=0)
 
@@ -188,7 +187,7 @@ for cfg_fn in cfg_fns:
         # print "BEFORE: ", error.shape
 
         # if we are in noise experiment 1 we want to average the output from the model
-        if repeat_for_noise_exp_1:
+        if params['data__noiseyexperimentnumber'] == 1:
             predY = np.mean(predY, axis=0)
             predY = predY.reshape(len(predY), 1)
             error = np.mean(error)
