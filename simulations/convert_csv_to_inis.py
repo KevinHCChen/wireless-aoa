@@ -2,11 +2,11 @@ import csv
 import random
 import os
 
-dir_name = 'batch_exp_configs/experiment_noise_09032016_1130pm/'
+dir_name = 'batch_exp_configs/experiments_destructivenoise/'
 if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-with open('experiment_set_csvs/experiment_noise_09032016_1130pm.csv', 'rU') as f:
+with open('experiment_set_csvs/experiments_destructivenoise.csv', 'rU') as f:
     reader = csv.reader(f)
     first = True
     num_files_gen = 0
@@ -41,6 +41,8 @@ with open('experiment_set_csvs/experiment_noise_09032016_1130pm.csv', 'rU') as f
             f.write('num_stations: %s\n' % (row[2]))
             f.write('sphere_r: %s\n' % (4))
             f.write('bs_type: %s\n' % (row[8]))
+            f.write('noiseyexperimentnumber: %s\n' % (row[16]))
+            f.write('numsamplesperpoints: %s\n' % (row[17]))
 
             f.write('\n')
             f.write('[noise]\n')
