@@ -21,13 +21,16 @@ if __name__ == "__main__":
     out_dir = args.out_dir
     exp_name = args.exp_name
 
-    assert out_dir, "Must specify output directory!"
+    #assert out_dir, "Must specify output directory!"
 
     srv_list = ['eigen11', 'eigen12', 'eigen13', 'eigen14']
 
-    if not os.path.exists(out_dir):
-       os.makedirs(out_dir)
+    exp_names = ['nonsensenoise', 'spuriousnoise', 'nooutputnoise']
 
     for srv in srv_list:
-       fetch_results(srv, exp_name, out_dir)
+      for exp_name in exp_names: 
+        out_dir = exp_name
+        if not os.path.exists(out_dir):
+          os.makedirs(out_dir)
+        fetch_results(srv, exp_name, out_dir)
 
