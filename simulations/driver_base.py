@@ -41,6 +41,9 @@ import plotting as plotting
 
 
 use_dir = False 
+repeat_for_noise_exp = True
+repeat_for_noise_exp_1 = True
+repeat_for_noise_exp_2 = False
 
 
 if configfile:
@@ -141,17 +144,63 @@ for cfg_fn in cfg_fns:
                                                                bs_type=params['data__bs_type'], points_type="grid")
 
 
+        angles = angles[475,:]
+        trueTestY = mobiles[475,:]
+        mobiles = mobiles[475,:]
+
+
+        if repeat_for_noise_exp:
+            angles = np.tile(angles, (params['data__num_pts'],1))
+            mobiles = np.tile(mobiles, (params['data__num_pts'],1))
+
+
+
         if params['noise__addnoise_test']:
             angles = noise_models.add_noise_dispatcher(angles, params['noise__noise_model'], params['data__ndims'], base_idxs=params['noise__bases_to_noise'], 
                                                             noise_params=params['noise__noise_params'])
 
+
+        
+
+        # if we are in noise experiment 2 we want to average all of the points before running through the model
+        if repeat_for_noise_exp_2:
+            angles = np.mean(angles, axis=0)
+            mobiles = np.mean(mobiles, axis=0)
+
+
+
+
         if params['NN__type'] == 'snbp-mlp':
             angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
 
+
+        # print "TY1: ", mobiles.shape
+
         trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles, 0.)
+
+        # print "TY2: ", testY.shape
+        # assert False
+        
 
         # test model
         predY, error = model.testModel(testXs, testY)
+
+        # print "BEFORE: ", predY.shape
+        # print "BEFORE: ", error.shape
+
+        # if we are in noise experiment 1 we want to average the output from the model
+        if repeat_for_noise_exp_1:
+            predY = np.mean(predY, axis=0)
+            predY = predY.reshape(len(predY), 1)
+            error = np.mean(error)
+
+            # print "AFTER: ", predY.shape
+            # print "AFTER: ", error
+
+        # assert False
+
+        error = error.reshape(1,1)
+
 
         f = open(dir_name + 'error_iteration%d.txt' % iter_number, 'w')
         f.write("Mean Error: %f\n" % (np.mean(error)))
@@ -162,15 +211,20 @@ for cfg_fn in cfg_fns:
         std_errors.append(np.std(error))
 
 
-
+        testY = trueTestY.reshape(len(trueTestY),1)
+        print "A: ", testY.shape
+        print "B: ", predY.shape
+        print "C: ", error.shape
         plotting.plot_error(testY, predY, error, bases,
                             "Num Stations: %d" % (params['data__num_stations']),
                             params['exp_details__save'], dir_name, iter_number)
 
         if all_predY == None:
-            all_predY = np.zeros((predY.shape[0], predY.shape[1], params['exp_details__num_iterations_per_setting']))
+            # all_predY = np.zeros((predY.shape[0], predY.shape[1], params['exp_details__num_iterations_per_setting']))
+            all_predY = np.zeros((predY.shape[0], predY.shape[1], 1))
         if all_error == None:
-            all_error = np.zeros((error.shape[0], params['exp_details__num_iterations_per_setting']))
+            # all_error = np.zeros((error.shape[0], params['exp_details__num_iterations_per_setting']))
+            all_error = np.zeros((error.shape[0], 1))
 
         all_predY[:,:,iter_number] = predY
         all_error[:,iter_number] = error
