@@ -84,6 +84,8 @@ def create_param_dict(config):
     params['data__ndims'] = int(config.get("data", "ndims"))
     params['data__num_stations'] = int(config.get("data", "num_stations"))
     params['data__bs_type'] = config.get("data", "bs_type")
+    params['data__noiseyexperimentnumber'] = int(config.get('data', 'noiseyexperimentnumber'))
+    params['data__numsamplesperpoints'] = int(config.get('data', 'numsamplesperpoints'))
     params['exp_details__setname'] = config.get("exp_details", "setname")
     params['exp_details__name'] = config.get("exp_details", "name")
     params['exp_details__description'] = config.get("exp_details", "description")
