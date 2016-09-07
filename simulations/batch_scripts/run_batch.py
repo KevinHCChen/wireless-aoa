@@ -51,6 +51,7 @@ def execute_remote_bash(remote_host, bash_script):
 
 
 if __name__ == "__main__":
+    machine_ids = [9,10,11,12,13,14,15]
 
     # get directory of ini files to batch out
     parser = argparse.ArgumentParser(description='Script for batching 5G Experiments to Eigens')
@@ -74,7 +75,8 @@ if __name__ == "__main__":
     # create list of all the eigens and their names
     # we will use this for bash file generation and for scp/ssh-ing
     machines = []
-    for i in range(11,15):
+
+    for i in machine_ids:#range(11,15):
         machines.append(('eigen%d' % (i),'mcrouse@eigen%d.int.seas.harvard.edu' % (i)))
 
     # get ini files from 
