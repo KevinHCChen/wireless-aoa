@@ -11,6 +11,8 @@ def scp_eigen_bash(file_name, file_idxs, remote_host, remote_path):
     f = open(file_name, 'w')
     f.write('#!/usr/bin/zsh\n')
     f.write('source /home/mcrouse/.zshrc\n')
+    f.write('git fetch\n')
+    f.write('git checkout samepointnoisey\n')
     f.write('python driver_base.py -d %s -s %d -e %d' % (configfile_dir.split('../')[1], file_idxs[0], file_idxs[1]))
     f.close()
 
@@ -72,7 +74,7 @@ if __name__ == "__main__":
     # create list of all the eigens and their names
     # we will use this for bash file generation and for scp/ssh-ing
     machines = []
-    for i in range(11,15):
+    for i in range(9,16):
         machines.append(('eigen%d' % (i),'mcrouse@eigen%d.int.seas.harvard.edu' % (i)))
 
     # get ini files from 
