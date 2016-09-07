@@ -39,6 +39,7 @@ import models as models
 import data_generation as data_generation
 import plotting as plotting
 
+num_innerloop = 100
 
 use_dir = False 
 
@@ -141,97 +142,76 @@ for cfg_fn in cfg_fns:
                                                                bs_type=params['data__bs_type'], points_type="grid")
 
 
+        for innerloop in num_innerloop:
+            selected_point = np.random.randint(50*50)
 
-        selected_point = np.random.randint(50*50)
-
-        angles = angles[selected_point,:]
-        trueTestY = mobiles[selected_point,:]
-        mobiles = mobiles[selected_point,:]
-
-
-        angles = np.tile(angles, (params['data__numsamplesperpoints'],1))
-        mobiles = np.tile(mobiles, (params['data__numsamplesperpoints'],1))
+            angles = angles[selected_point,:]
+            mobiles = mobiles[selected_point,:]
 
 
-
-        if params['noise__addnoise_test']:
-            angles = noise_models.add_noise_dispatcher(angles, params['noise__noise_model'], params['data__ndims'], base_idxs=params['noise__bases_to_noise'], 
-                                                            noise_params=params['noise__noise_params'])
+            angles = np.tile(angles, (params['data__numsamplesperpoints'],1))
+            mobiles = np.tile(mobiles, (params['data__numsamplesperpoints'],1))
 
 
-        
 
-        # if we are in noise experiment 2 we want to average all of the points before running through the model
-        # print "A: ", angles.shape
-        # print "B: ", mobiles.shape
-        if params['data__noiseyexperimentnumber'] == 2:
-            angles = np.mean(angles, axis=0)
-            angles = angles.reshape(1,len(angles))
-            mobiles = np.mean(mobiles, axis=0)
-            mobiles = mobiles.reshape(1,len(mobiles))
-        # print "C: ", angles.shape
-        # print "D: ", mobiles.shape
-        # assert False
+            if params['noise__addnoise_test']:
+                angles = noise_models.add_noise_dispatcher(angles, params['noise__noise_model'], params['data__ndims'], base_idxs=params['noise__bases_to_noise'], 
+                                                                noise_params=params['noise__noise_params'])
 
 
-        if params['NN__type'] == 'snbp-mlp':
-            angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
+            # if we are in noise experiment 2 we want to average all of the points before running through the model
+            if params['data__noiseyexperimentnumber'] == 2:
+                angles = np.mean(angles, axis=0)
+                angles = angles.reshape(1,len(angles))
+                mobiles = np.mean(mobiles, axis=0)
+                mobiles = mobiles.reshape(1,len(mobiles))
 
 
-        # print "TY1: ", mobiles.shape
-
-        trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles, 0.)
-
-        # print "TY2: ", testY.shape
-        # assert False
-        
-
-        # test model
-        predY, error = model.testModel(testXs, testY)
-
-        # print "BEFORE: ", predY.shape
-        # print "BEFORE: ", error.shape
-
-        # if we are in noise experiment 1 we want to average the output from the model
-        if params['data__noiseyexperimentnumber'] == 1:
-            predY = np.mean(predY, axis=0)
-            predY = predY.reshape(1,len(predY))
-            error = np.mean(error)
-
-            # print "AFTER: ", predY.shape
-            # print "AFTER: ", error
-
-        # assert False
-
-        error = error.reshape(1,1)
+            if params['NN__type'] == 'snbp-mlp':
+                angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
 
 
-        f = open(dir_name + 'error_iteration%d.txt' % iter_number, 'w')
-        f.write("Mean Error: %f\n" % (np.mean(error)))
-        f.write("Error Standard Deviation: %f\n" % (np.std(error)))
-        f.close()
+            trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles, 0.)
 
-        mean_errors.append(np.mean(error))
-        std_errors.append(np.std(error))
+            # test model
+            predY, error = model.testModel(testXs, testY)
+
+            # if we are in noise experiment 1 we want to average the output from the model
+            if params['data__noiseyexperimentnumber'] == 1:
+                predY = np.mean(predY, axis=0)
+                predY = predY.reshape(1,len(predY))
+                error = np.mean(error)
 
 
-        testY = trueTestY.reshape(1,len(trueTestY))
-        print "A: ", testY.shape
-        print "B: ", predY.shape
-        print "C: ", error.shape
-        plotting.plot_error(testY, predY, error, bases,
-                            "Num Stations: %d" % (params['data__num_stations']),
-                            params['exp_details__save'], dir_name, iter_number)
+            error = error.reshape(1,1)
 
-        if all_predY == None:
-            # all_predY = np.zeros((predY.shape[0], predY.shape[1], params['exp_details__num_iterations_per_setting']))
-            all_predY = np.zeros((predY.shape[0], predY.shape[1], params['exp_details__num_iterations_per_setting']))
-        if all_error == None:
-            # all_error = np.zeros((error.shape[0], params['exp_details__num_iterations_per_setting']))
-            all_error = np.zeros((error.shape[0], params['exp_details__num_iterations_per_setting']))
 
-        all_predY[:,:,iter_number] = predY
-        all_error[:,iter_number] = error
+            f = open(dir_name + 'error_iteration%d.txt' % iter_number, 'w')
+            f.write("Mean Error: %f\n" % (np.mean(error)))
+            f.write("Error Standard Deviation: %f\n" % (np.std(error)))
+            f.close()
+
+            mean_errors.append(np.mean(error))
+            std_errors.append(np.std(error))
+
+
+            # testY = trueTestY.reshape(1,len(trueTestY))
+            # print "A: ", testY.shape
+            # print "B: ", predY.shape
+            # print "C: ", error.shape
+            # plotting.plot_error(testY, predY, error, bases,
+            #                     "Num Stations: %d" % (params['data__num_stations']),
+            #                     params['exp_details__save'], dir_name, iter_number)
+
+            if all_predY == None:
+                # all_predY = np.zeros((predY.shape[0], predY.shape[1], params['exp_details__num_iterations_per_setting']))
+                all_predY = np.zeros((predY.shape[0], predY.shape[1], params['exp_details__num_iterations_per_setting']*num_innerloop))
+            if all_error == None:
+                # all_error = np.zeros((error.shape[0], params['exp_details__num_iterations_per_setting']))
+                all_error = np.zeros((error.shape[0], params['exp_details__num_iterations_per_setting']*num_innerloop))
+
+            all_predY[:,:,(iter_number*num_innerloop) + innerloop] = predY
+            all_error[:,(iter_number*num_innerloop) + innerloop] = error
 
     f = open(dir_name + 'error_average.txt', 'w')
     f.write("Mean Error: %f\n" % (np.mean(mean_errors)))
