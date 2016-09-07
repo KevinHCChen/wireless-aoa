@@ -138,7 +138,7 @@ for cfg_fn in cfg_fns:
 
 
         for innerloop in range(num_innerloop):
-
+            # hi!
             # generate mobile points, base stations, and angles
             mobiles, bases, angles = data_generation.generate_data(50*50,
                                                                params['data__num_stations'],
