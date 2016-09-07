@@ -142,7 +142,7 @@ for cfg_fn in cfg_fns:
                                                                bs_type=params['data__bs_type'], points_type="grid")
 
 
-        for innerloop in num_innerloop:
+        for innerloop in range(num_innerloop):
             selected_point = np.random.randint(50*50)
 
             angles = angles[selected_point,:]
