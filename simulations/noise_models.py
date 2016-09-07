@@ -35,19 +35,19 @@ def add_distribution_noise(data, ndim,  base_idxs=[-1], noise_params={'noise_typ
         if ndim == 2:
             # using 1 angle for each base station (alpha)
             col_idxs = base_idxs
-            gauss_noise = np.random.normal(loc=noise_params['mean'],\
+            noise = np.random.normal(loc=noise_params['mean'],\
                                        scale=noise_params['std'],\
                                        size=(data.shape[0],len(col_idxs)))
 
-            data[:,col_idxs] += gauss_noise
+            data[:,col_idxs] += noise
         
         elif ndim == 3:
             # using 3 angles for each base station (alpha beta gamma)
             for idx in base_idxs:
-                gauss_noise = np.random.normal(loc=noise_params['mean'],\
+                noise = np.random.normal(loc=noise_params['mean'],\
                                        scale=noise_params['std'],\
                                        size=(data.shape[0],ndim))
-                data[:, (idx*3):(idx*3)+3] += gauss_noise
+                data[:, (idx*3):(idx*3)+3] += noise
 
     if noise_params['noise_type'] == "uniform":
         if ndim == 2:
@@ -57,7 +57,7 @@ def add_distribution_noise(data, ndim,  base_idxs=[-1], noise_params={'noise_typ
                                            high=noise_params['upper_bound'],\
                                            size=(data.shape[0],len(col_idxs)))
 
-            data[:,col_idxs] += gauss_noise
+            data[:,col_idxs] += noise
         
         elif ndim == 3:
             assert False, "Not reallllllly sure if this works, better check it."
@@ -66,7 +66,7 @@ def add_distribution_noise(data, ndim,  base_idxs=[-1], noise_params={'noise_typ
                 noise = np.random.uniform(low=noise_params['lower_bound'],\
                                            high=noise_params['upper_bound'],\
                                            size=(data.shape[0],ndim))
-                data[:, (idx*3):(idx*3)+3] += gauss_noise
+                data[:, (idx*3):(idx*3)+3] += noise
 
     else:
         assert False, "This type of addative noise has not been implemented in noise_models.py"
