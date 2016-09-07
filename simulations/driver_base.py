@@ -134,15 +134,18 @@ for cfg_fn in cfg_fns:
         f.close()
 
 
-        # generate mobile points, base stations, and angles
-        mobiles, bases, angles = data_generation.generate_data(50*50,
+        
+
+
+        for innerloop in range(num_innerloop):
+
+            # generate mobile points, base stations, and angles
+            mobiles, bases, angles = data_generation.generate_data(50*50,
                                                                params['data__num_stations'],
                                                                params ['data__ndims'],
                                                                pts_r=3, bs_r=4,
                                                                bs_type=params['data__bs_type'], points_type="grid")
 
-
-        for innerloop in range(num_innerloop):
             selected_point = np.random.randint(50*50)
 
             angles = angles[selected_point,:]
