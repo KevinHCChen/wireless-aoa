@@ -10,7 +10,7 @@ def plot_increased_training(data, out_file, exp_name=None):
     net_types = np.sort(data['NN__type'].unique())
 
     if exp_name:
-        data = data[data['exp_details__name'].str.contains(exp_name)]
+        data = data[data['exp_details__setname'].str.contains(exp_name)]
         print data.shape
     data_list = []
     for n_type in net_types:
@@ -26,11 +26,6 @@ def plot_increased_training(data, out_file, exp_name=None):
                 data_list.append(go.Scatter(
                     x = x,
                     y = y,
-                    #error_y=dict(
-                    #            type='data',
-                    #            array=select2['std_err']**2,
-                    #            visible=True
-                    #        ),
                     name='%s-%s' %(n_type, nn_size)
                 ))
 
@@ -40,12 +35,36 @@ def plot_increased_training(data, out_file, exp_name=None):
                   yaxis = dict(title="MSE")
                 )
     fig = dict(data=data_list, layout=layout)
-
     py.offline.plot(fig, filename=out_file)
+
+def plot_methods(data, out_file):
+    methods = [1,2]
+
+    models = data['NN__type'].unique()
+    data_list = []
+    for model in models:
+        for method in methods:
+            selected = data[(data['data__noiseyexperimentnumber'] == method) &
+                            (data['NN__type'] == model)]
+            selected = selected.sort_values(by=['data__numsamplesperpoints'])
+            data_list.append(go.Scatter(
+                #x=selected['data__numsamplesperpoints'].unique(),
+                x=selected['data__numsamplesperpoints'],
+                y=selected['mean_err'],
+                name='%s - Method %i' % (model, method)
+                )
+            )
+
+    layout = dict(title = "Noisy Point Methods",
+                xaxis = dict(title="Number Averaged Points"),
+                yaxis = dict(title="MSE")
+                )
+
+    fig = dict(data=data_list, layout=layout)
+    py.offline.plot(fig, filename=out_file+'.html')
 
 def load_results(res_dir):
     fns = glob.glob(res_dir+"/*.csv")
-    print fns
     data = [pd.read_csv(fn) for fn in fns]
     return data
 
@@ -62,6 +81,11 @@ if __name__ == "__main__":
     #exp_names = ['gaussiandistnoise']
     #exp_names = ['angledependentdistnoise']
     #exp_names = ['no_noise']
+    exp_names = ['angledependentdistnoise_02', 'angledependentdistnoise_03']
+    exp_names = ['gaussiannoise_0p03']
+    #exp_names = ['results/samepointnoisey']
+    exp_names = ['samepointnoisey']
+    exp_names = ['samepointnoisey_100innerloop']
 
     data_l = []
 
@@ -72,8 +96,13 @@ if __name__ == "__main__":
     data = pd.concat(data_l, ignore_index=True)
     print data.shape
 
-    for exp in exp_names:
-        base_dir = "summary_plots/"
-        exp_name = "%s" % (exp)
-        plot_increased_training(data, base_dir + exp_name + "_increasing_training.html", 'wnoise')
+    base_dir = "summary_plots/"
+    # plot increased training
+    if False:
+        for exp in exp_names:
+            exp_name = "%s" % (exp)
+            plot_increased_training(data, base_dir + exp_name + "_increasing_training.html", exp_name)
+
+    if True:
+        plot_methods(data, base_dir + "methods_increasing_train_100Inner_")
 
