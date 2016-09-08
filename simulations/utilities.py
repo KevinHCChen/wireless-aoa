@@ -80,6 +80,10 @@ def create_param_dict(config):
     params['NN__n_epochs'] = int(config.get("NN", "n_epochs"))
     params['NN__batchsize'] = int(config.get("NN", "batchsize"))
     params['NN__take_max'] = ast.literal_eval(config.get("NN", "take_max"))
+    if config.has_option("data", "data_dist"):
+        params['data__data_dist'] = config.get("data", "data_dist")
+    else:
+        params['data__data_dist'] = "random"
     params['data__num_pts'] = int(config.get("data", "num_pts"))
     params['data__ndims'] = int(config.get("data", "ndims"))
     params['data__num_stations'] = int(config.get("data", "num_stations"))
