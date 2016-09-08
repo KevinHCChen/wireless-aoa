@@ -89,10 +89,8 @@ for cfg_fn in cfg_fns:
                                                                params['data__num_stations'],
                                                                params ['data__ndims'],
                                                                pts_r=3.9, bs_r=4,
-                                                               bs_type=params['data__bs_type'], points_type="random")
-
-
-
+                                                               bs_type=params['data__bs_type'],
+                                                               points_type=params['data__data_dist'])
 
 
         # IMPORTANT: remember to add noise before replicating data (e.g., for snbp-mlp)
@@ -101,6 +99,7 @@ for cfg_fn in cfg_fns:
                                                             noise_params=params['noise__noise_params'])
 
         if params['NN__type'] == 'snbp-mlp':
+            #rep_idxs = [[0,2],[1,2],[0,1]]
             rep_idxs = [[0,2],[1,2]]
             angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
 

@@ -2,11 +2,12 @@ import csv
 import random
 import os
 
-dir_name = 'batch_exp_configs/gaussiannoise_0p03/'
+config_name = 'uniform_grid_training_nonoise'
+dir_name = 'batch_exp_configs/%s/' % (config_name)
 if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-with open('experiment_set_csvs/gaussiannoise_0p03.csv', 'rU') as f:
+with open('experiment_set_csvs/%s.csv' % (config_name), 'rU') as f:
     reader = csv.reader(f)
     first = True
     num_files_gen = 0
@@ -36,6 +37,7 @@ with open('experiment_set_csvs/gaussiannoise_0p03.csv', 'rU') as f:
 
             f.write('\n')
             f.write('[data]\n')
+            f.write('data_dist: %s\n' % (row[16]))
             f.write('num_pts: %s\n' % (row[1]))
             f.write('ndims: %s\n' % (row[6]))
             f.write('num_stations: %s\n' % (row[2]))
