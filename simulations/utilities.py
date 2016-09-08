@@ -76,6 +76,7 @@ def parseParams(params):
 def create_param_dict(config):
     params = {}
     params['NN__type'] = config.get("NN", "type")
+    print config.get("NN", "network_size")
     params['NN__network_size'] = json.loads(config.get("NN", "network_size"))
     params['NN__n_epochs'] = int(config.get("NN", "n_epochs"))
     params['NN__batchsize'] = int(config.get("NN", "batchsize"))
