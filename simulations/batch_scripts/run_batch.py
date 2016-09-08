@@ -13,6 +13,7 @@ def scp_eigen_bash(file_name, file_idxs, remote_host, remote_path):
     f.write('source /home/mcrouse/.zshrc\n')
     f.write('git fetch\n')
     f.write('git checkout samepointnoisey\n')
+    f.write('git pull origin samepointnoisey\n')
     f.write('python driver_base.py -d %s -s %d -e %d' % (configfile_dir.split('../')[1], file_idxs[0], file_idxs[1]))
     f.close()
 
