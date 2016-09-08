@@ -24,14 +24,13 @@ if __name__ == "__main__":
     #assert out_dir, "Must specify output directory!"
 
     #srv_list = ['eigen11', 'eigen12', 'eigen13', 'eigen14']
-    srv_list = ['eigen15']
-    
     srv_list = ['eigen%d' % (i) for i in range(9,16)]
 
     exp_names = ['nonsensenoise', 'spuriousnoise', 'nooutputnoise']
     exp_names = ['angledependentdistnoise_02', 'angledependentdistnoise_03']
     exp_names = ['gaussiannoise_0p03']
-    exp_names = ['samepointnoisey_100innerloop']
+    exp_names = ['samepointnoisey_100innerloop_uniform']
+    exp_names = ['nonsensenoise_40iters', 'nooutputnoise_40iters']
 
     for srv in srv_list:
       for exp_name in exp_names:

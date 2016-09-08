@@ -25,7 +25,8 @@ def plot_increased_training(data, out_file, exp_name=None):
                 x = select2['data__num_pts']
                 data_list.append(go.Scatter(
                     x = x,
-                    y = y,
+                    #y = y,
+                    y = np.sqrt(y),
                     name='%s-%s' %(n_type, nn_size)
                 ))
 
@@ -49,8 +50,8 @@ def plot_methods(data, out_file):
             selected = selected.sort_values(by=['data__numsamplesperpoints'])
             data_list.append(go.Scatter(
                 #x=selected['data__numsamplesperpoints'].unique(),
-                x=selected['data__numsamplesperpoints'],
-                y=selected['mean_err'],
+                x=selected['data__numsamplesperpoints'][1:],
+                y=selected['mean_err'][1:],
                 name='%s - Method %i' % (model, method)
                 )
             )
@@ -84,8 +85,9 @@ if __name__ == "__main__":
     exp_names = ['angledependentdistnoise_02', 'angledependentdistnoise_03']
     exp_names = ['gaussiannoise_0p03']
     #exp_names = ['results/samepointnoisey']
-    exp_names = ['samepointnoisey']
-    exp_names = ['samepointnoisey_100innerloop']
+    #exp_names = ['samepointnoisey']
+    #exp_names = ['samepointnoisey_100innerloop_uniform']
+    exp_names = ['nonsensenoise_40iters', 'nooutputnoise_40iters']
 
     data_l = []
 
@@ -98,11 +100,11 @@ if __name__ == "__main__":
 
     base_dir = "summary_plots/"
     # plot increased training
-    if False:
+    if True:
         for exp in exp_names:
             exp_name = "%s" % (exp)
-            plot_increased_training(data, base_dir + exp_name + "_increasing_training.html", exp_name)
+            plot_increased_training(data, base_dir + exp_name + "_pos_increasing_training.html", exp_name)
 
-    if True:
-        plot_methods(data, base_dir + "methods_increasing_train_100Inner_")
+    if False:
+        plot_methods(data, base_dir + "methods_increasing_train")
 
