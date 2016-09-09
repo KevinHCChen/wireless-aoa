@@ -37,7 +37,6 @@ class StructuredMLP(chainer.ChainList):
         self.num_layers_upper = len(n_upper)
 
         self.col_idxs_l = col_idxs_l
-
         self.name = 'smlp'
 
     def __call__(self, x, t):
@@ -66,9 +65,39 @@ class StructuredMLP(chainer.ChainList):
         self.y = y
         return self.loss
 
+    def forward(self,x):
+        x = x[0]
+        h_i = x
+
+        cnt = 0
+        lower_levels = []
+        for col_idxs in self.col_idxs_l:
+            h_i = F.relu(self[cnt](x[:,col_idxs]))
+            cnt +=1
+            for i in range(1,self.num_layers_lower):
+                h_i = F.relu(self[cnt](h_i))
+                cnt += 1
+            lower_levels.append(copy.deepcopy(h_i))
+
+        h_i = F.concat(tuple(lower_levels))
+        for i in range(self.num_layers_upper):
+            h_i = F.relu(self[cnt](h_i))
+            cnt += 1
+
+
+        return self[-1](h_i)
+
     def trainModel(self, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False, verbose=False):
-        self.model, loss = train_model(trainXs, trainY, testXs, testY, n_epoch=n_epoch,
-                                       batchsize=batchsize, max_flag=max_flag, verbose=verbose)
+        self.model, loss = train_model(self, trainXs, trainY, testXs, testY,
+                                       n_epoch, batchsize, max_flag=max_flag, verbose=verbose)
+        return loss
+
+
+    def testModel(self, X, Y):
+        predY, error = test_model(self, X, Y)
+        return predY, error
+
+
 
 
 class NBPStructuredMLP():
@@ -213,8 +242,8 @@ class BaseMLP(chainer.ChainList):
 
 def train_model(model, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False, verbose=False):
     # Setup optimizer
-    # optimizer = optimizers.Adam()
-    optimizer = regularizedAdam( _lambda = 0.001 ) # larger lambda = stronger L2 regularization
+    optimizer = optimizers.Adam()
+    #optimizer = regularizedAdam( _lambda = 0.001 ) # larger lambda = stronger L2 regularization
     optimizer.setup(model)
 
     max_acc = 0

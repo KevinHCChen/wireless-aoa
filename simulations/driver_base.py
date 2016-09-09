@@ -95,14 +95,16 @@ for cfg_fn in cfg_fns:
 
         # IMPORTANT: remember to add noise before replicating data (e.g., for snbp-mlp)
         if params['noise__addnoise_train']:
-            angles = noise_models.add_noise_dispatcher(angles, params['noise__noise_model'], params['data__ndims'], base_idxs=params['noise__bases_to_noise'], 
-                                                            noise_params=params['noise__noise_params'])
+            angles = noise_models.add_noise_dispatcher(angles,
+                                                       params['noise__noise_model'],
+                                                       params['data__ndims'],
+                                                       base_idxs=params['noise__bases_to_noise'],
+                                                       noise_params=params['noise__noise_params'])
 
-        if params['NN__type'] == 'snbp-mlp':
+        if params['NN__type'] == 'snbp-mlp' or params['NN__type'] == 'smlp':
             #rep_idxs = [[0,2],[1,2],[0,1]]
-            # rep_idxs = [[0,2],[1,2]]
-            rep_idxs = [[0,2],[1,2],[0,1],[0,3],[1,3],[2,3]]
-
+            rep_idxs = [[0,2],[1,2]]
+            #rep_idxs = [[0,2],[1,2],[0,1],[0,3],[1,3],[2,3]]
             angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
 
 
@@ -146,7 +148,7 @@ for cfg_fn in cfg_fns:
             angles = noise_models.add_noise_dispatcher(angles, params['noise__noise_model'], params['data__ndims'], base_idxs=params['noise__bases_to_noise'], 
                                                             noise_params=params['noise__noise_params'])
 
-        if params['NN__type'] == 'snbp-mlp':
+        if params['NN__type'] == 'snbp-mlp' or params['NN__type'] == 'smlp':
             angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
 
         trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles, 0.)
