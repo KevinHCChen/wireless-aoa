@@ -100,7 +100,9 @@ for cfg_fn in cfg_fns:
 
         if params['NN__type'] == 'snbp-mlp':
             #rep_idxs = [[0,2],[1,2],[0,1]]
-            rep_idxs = [[0,2],[1,2]]
+            # rep_idxs = [[0,2],[1,2]]
+            rep_idxs = [[0,2],[1,2],[0,1],[0,3],[1,3],[2,3]]
+
             angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
 
 
@@ -114,7 +116,7 @@ for cfg_fn in cfg_fns:
         elif params['NN__type'] == 'smlp':
             model = models.StructuredMLP(None, params['NN__network_size'][0],
                                          params['NN__network_size'][1], params['data__ndims'],
-                                         [[0,1],[2,3]])
+                                         rep_idxs)
         elif params['NN__type'] == 'snbp-mlp':
             model = models.NBPStructuredMLP(trainXs[0].shape[1], params['NN__network_size'][0],
                                             params['NN__network_size'][1], params['data__ndims'],
