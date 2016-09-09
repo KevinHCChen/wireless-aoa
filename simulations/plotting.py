@@ -93,7 +93,8 @@ def plot_scatter(positions, error, title):
         mode='markers',
         marker=dict(
             size=8,
-            color=rescale(error),
+            #color=rescale(error),
+            color=error,
             colorscale='Jet',
             showscale=True,
             opacity=0.8

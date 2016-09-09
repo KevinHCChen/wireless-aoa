@@ -31,6 +31,7 @@ if __name__ == "__main__":
     exp_names = ['gaussiannoise_0p03']
     exp_names = ['samepointnoisey_100innerloop_uniform']
     exp_names = ['nonsensenoise_40iters', 'nooutputnoise_40iters']
+    exp_names = ['grid_training_initial_exploration_100iters']
 
     for srv in srv_list:
       for exp_name in exp_names:
