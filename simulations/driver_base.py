@@ -115,7 +115,7 @@ for cfg_fn in cfg_fns:
 
         if params['NN__type'] == "bmlp":
             model = models.BaseMLP(np.hstack(trainXs).shape[1], params['NN__network_size'],
-                                   params['data__ndims'], episilon=params['NN__episilon'])
+                                   params['data__ndims'], epsilon=params['NN__epsilon'])
         elif params['NN__type'] == 'smlp':
             model = models.StructuredMLP(None, params['NN__network_size'][0],
                                          params['NN__network_size'][1], params['data__ndims'],
@@ -123,7 +123,7 @@ for cfg_fn in cfg_fns:
         elif params['NN__type'] == 'snbp-mlp':
             model = models.NBPStructuredMLP(trainXs[0].shape[1], params['NN__network_size'][0],
                                             params['NN__network_size'][1], params['data__ndims'],
-                                            len(rep_idxs), episilon=params['NN__episilon'])
+                                            len(rep_idxs), epsilon=params['NN__epsilon'])
 
         # train model
         loss = model.trainModel(trainXs, trainY, testXs, testY,
