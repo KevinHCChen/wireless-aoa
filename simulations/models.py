@@ -58,7 +58,7 @@ def hinge_mean_squared_error(x0, x1, eps):
     is taken over the minibatch. Note that the error is not scaled by 1/2.
 
     """
-    return HingeMeanSquaredError()(x0, x1)
+    return HingeMeanSquaredError(eps)(x0, x1)
 
 # Network definition
 class StructuredMLP(chainer.ChainList):
