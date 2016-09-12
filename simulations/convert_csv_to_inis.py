@@ -2,7 +2,7 @@ import csv
 import random
 import os
 
-config_name = 'outputnoise_explore.csv'
+config_name = 'outputnoise_explore_2'
 dir_name = 'batch_exp_configs/%s/' % (config_name)
 if not os.path.exists(dir_name):
         os.makedirs(dir_name)
@@ -39,7 +39,8 @@ with open('experiment_set_csvs/%s.csv' % (config_name), 'rU') as f:
 
             f.write('\n')
             f.write('[data]\n')
-            f.write('data_dist: %s\n' % (row[16]))
+            if len(row) >= 17:
+                f.write('data_dist: %s\n' % (row[16]))
             f.write('num_pts: %s\n' % (row[1]))
             f.write('ndims: %s\n' % (row[6]))
             f.write('num_stations: %s\n' % (row[2]))

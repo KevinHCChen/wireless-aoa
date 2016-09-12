@@ -5,6 +5,8 @@ from chainer import training
 from chainer import computational_graph
 from chainer import optimizers
 from chainer import serializers
+from chainer import function
+from chainer.utils import type_check
 import copy
 
 from regularizedAdam import regularizedAdam
@@ -16,6 +18,47 @@ import time
 from Convert2Complex import *
 #plt.ion()
 
+class HingeMeanSquaredError(function.Function):
+
+    def __init__(self, eps=0.):
+        self.eps = eps
+    """Mean squared error (a.k.a. Euclidean loss) function."""
+
+    def check_type_forward(self, in_types):
+        type_check.expect(in_types.size() == 2)
+        type_check.expect(
+            in_types[0].dtype == np.float32,
+            in_types[1].dtype == np.float32,
+            in_types[0].shape == in_types[1].shape
+        )
+
+    def forward_cpu(self, inputs):
+        x0, x1 = inputs
+        self.diff = x0 - x1
+        self.diff[np.where(np.abs(self.diff) <= self.eps)] = 0.
+        diff = self.diff.ravel()
+        return  np.array(diff.dot(diff) / diff.size, dtype=diff.dtype),
+
+    def forward_gpu(self, inputs):
+        x0, x1 = inputs
+        self.diff = x0 - x1
+        diff = self.diff.ravel()
+        return diff.dot(diff) / diff.dtype.type(diff.size),
+
+    def backward(self, inputs, gy):
+        coeff = gy[0] * gy[0].dtype.type(2. / self.diff.size)
+        gx0 = coeff * self.diff
+        return gx0, -gx0
+
+
+def hinge_mean_squared_error(x0, x1, eps):
+    """Mean squared error function.
+
+    This function computes mean squared error between two variables. The mean
+    is taken over the minibatch. Note that the error is not scaled by 1/2.
+
+    """
+    return HingeMeanSquaredError()(x0, x1)
 
 # Network definition
 class StructuredMLP(chainer.ChainList):
@@ -216,10 +259,7 @@ class BaseMLP(chainer.ChainList):
         y = self[-1](h_i)
 
 
-        self.loss = F.mean_squared_error(y, t)
-
-        self.loss[np.where(self.loss <= self.epsilon)] = 0.
-
+        self.loss = hinge_mean_squared_error(y, t, self.epsilon)
         self.y = y
 
         return self.loss
