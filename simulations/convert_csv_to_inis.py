@@ -34,6 +34,8 @@ with open('experiment_set_csvs/%s.csv' % (config_name), 'rU') as f:
             f.write('n_epochs: %d\n' % (500))
             f.write('batchsize: %d\n' % (200))
             f.write('take_max: %s\n' % ('True'))
+            f.write('# Epsilon is in terms of squared L2\n')
+            f.write('epsilon: %s\n' % (row[?]))
 
             f.write('\n')
             f.write('[data]\n')

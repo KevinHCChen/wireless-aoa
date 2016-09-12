@@ -102,13 +102,14 @@ class StructuredMLP(chainer.ChainList):
 
 class NBPStructuredMLP():
 
-    def __init__(self, n_in, n_lower, n_upper, n_out, num_pairs):
-
+    def __init__(self, n_in, n_lower, n_upper, n_out, num_pairs, epsilon=0):
+        self.epsilon = epsilon
         self.ndim = n_out
-        self.lower_models_l = [BaseMLP(n_in/num_pairs, n_lower,self.ndim)
-                               for i in range(num_pairs)]
+        self.lower_models_l = [BaseMLP(n_in/num_pairs, n_lower,self.ndim, epsilon = self.epsilon)
+                               for i in range(num_pairs)] 
 
-        self.upper_model = BaseMLP(n_lower[-1]*num_pairs, n_upper, self.ndim)
+        self.upper_model = BaseMLP(n_lower[-1]*num_pairs, n_upper, self.ndim, epsilon=self.epsilon)
+
 
     def trainModel(self, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False, verbose=False):
 
@@ -196,7 +197,7 @@ class NBPStructuredMLP():
 # Network definition
 class BaseMLP(chainer.ChainList):
 
-    def __init__(self, n_in, n_units, n_out):
+    def __init__(self, n_in, n_units, n_out, epsilon = 0.):
 
         super(BaseMLP, self).__init__()
         self.add_link(L.Linear(n_in, n_units[0]))
@@ -205,6 +206,7 @@ class BaseMLP(chainer.ChainList):
         self.add_link(L.Linear(n_units[-1], n_out))
         self.num_layers = len(n_units) + 2
         self.name = 'bmlp'
+        self.epsilon = epsilon
 
     def __call__(self, x, t):
         h_i = x
@@ -215,6 +217,9 @@ class BaseMLP(chainer.ChainList):
 
 
         self.loss = F.mean_squared_error(y, t)
+
+        self.loss[np.where(self.loss <= self.epsilon)] = 0.
+
         self.y = y
 
         return self.loss

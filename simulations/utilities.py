@@ -84,6 +84,10 @@ def create_param_dict(config):
         params['data__data_dist'] = config.get("data", "data_dist")
     else:
         params['data__data_dist'] = "random"
+    if config.has_option("data", "data_dist"):
+        params['NN__epsilon'] = float(config.get("NN", "epsilon"))
+    else:
+        params['NN__epsilon'] = 0.
     params['data__num_pts'] = int(config.get("data", "num_pts"))
     params['data__ndims'] = int(config.get("data", "ndims"))
     params['data__num_stations'] = int(config.get("data", "num_stations"))
