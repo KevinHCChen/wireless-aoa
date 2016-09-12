@@ -105,6 +105,7 @@ for cfg_fn in cfg_fns:
             #rep_idxs = [[0,2],[1,2],[0,1]]
             #rep_idxs = [[0,2],[1,2]]
             rep_idxs = [[0,2],[1,2],[0,1],[0,3],[1,3],[2,3]]
+            #rep_idxs = [[0,2],[1,2]]
             angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
 
 

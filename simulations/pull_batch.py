@@ -8,7 +8,7 @@ def fetch_results(srv, exp_name, out_dir):
    os.system(scp_str)
    scp_str = "scp -r %s:wireless-aoa/simulations/aggregated_results/%s\* %s/" \
              % (srv, exp_name, out_dir)
-   os.system(scp_str)
+   #os.system(scp_str)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Driver for 5G Experiments')
@@ -32,6 +32,9 @@ if __name__ == "__main__":
     exp_names = ['samepointnoisey_100innerloop_uniform']
     exp_names = ['nonsensenoise_40iters', 'nooutputnoise_40iters']
     exp_names = ['grid_training_initial_exploration_100iters']
+    exp_names = ['4bs_nonoise', '4bs_nooutput_cv0', '4bs_nonsense_0r1',
+                 '4bs_spurious_0r1_cr0p1', '4bs_angledependent_0p01',
+                  '4bs_gaussian_0p01']
 
     for srv in srv_list:
       for exp_name in exp_names:

@@ -2,7 +2,7 @@ import csv
 import random
 import os
 
-config_name = 'uniform_grid_training_nonoise'
+config_name = 'outputnoise_explore.csv'
 dir_name = 'batch_exp_configs/%s/' % (config_name)
 if not os.path.exists(dir_name):
         os.makedirs(dir_name)
