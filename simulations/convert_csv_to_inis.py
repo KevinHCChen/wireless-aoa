@@ -1,8 +1,14 @@
 import csv
 import random
 import os
+import argparse
 
-config_name = 'outputnoise_explore_2'
+parser = argparse.ArgumentParser(description='Driver for Config Generation')
+parser.add_argument('--config_csv', '-d', dest='config_name', type=str,
+                    help='Which csv file to use to generate inis')
+args = parser.parse_args()
+
+config_name = args.config_name
 dir_name = 'batch_exp_configs/%s/' % (config_name)
 if not os.path.exists(dir_name):
         os.makedirs(dir_name)
@@ -35,7 +41,7 @@ with open('experiment_set_csvs/%s.csv' % (config_name), 'rU') as f:
             f.write('batchsize: %d\n' % (200))
             f.write('take_max: %s\n' % ('True'))
             f.write('# Epsilon is in terms of squared L2\n')
-            f.write('epsilon: %s\n' % (row[?]))
+            #f.write('epsilon: %s\n' % (row[?]))
 
             f.write('\n')
             f.write('[data]\n')

@@ -3,6 +3,7 @@ import json
 import ast
 import glob
 import argparse
+import itertools
 import noise_models as noise_models
 import datetime
 from chainer import optimizers
@@ -102,12 +103,7 @@ for cfg_fn in cfg_fns:
                                                        noise_params=params['noise__noise_params'])
 
         if params['NN__type'] == 'snbp-mlp' or params['NN__type'] == 'smlp':
-            #rep_idxs = [[0,2],[1,2]]
-            if params['data__num_stations'] == 3:
-                rep_idxs = [[0,2],[1,2],[0,1]]
-            else:
-                rep_idxs = [[0,2],[1,2],[0,1],[0,3],[1,3],[2,3]]
-            #rep_idxs = [[0,2],[1,2]]
+            rep_idxs = [comb for comb in itertools.combinations(range(params['data__num_stations']),2)]
             angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
 
 
@@ -193,6 +189,7 @@ for cfg_fn in cfg_fns:
     df['std_err'] = np.mean(std_errors)
     df_all = df_all.append(df, ignore_index=True)
 
+    print np.mean(mean_errors)
 
     # print out warning if figures not saved
     if params['exp_details__save']:
