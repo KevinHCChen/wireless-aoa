@@ -41,8 +41,8 @@ with open('experiment_set_csvs/%s.csv' % (config_name), 'rU') as f:
             f.write('batchsize: %d\n' % (200))
             f.write('take_max: %s\n' % ('True'))
             f.write('# Epsilon is in terms of squared L2\n')
-            if row[5] != '':
-                f.write('epsilon: %s\n' % (row[5]))
+            if row[7] != '':
+                f.write('epsilon: %s\n' % (row[7]))
 
             f.write('\n')
             f.write('[data]\n')
