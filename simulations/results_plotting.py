@@ -38,6 +38,44 @@ def plot_increased_training(data, out_file, exp_name=None):
     fig = dict(data=data_list, layout=layout)
     py.offline.plot(fig, filename=out_file)
 
+def plot_increasing_stations(data, out_file, exp_name=None):
+    nn_sizes = np.sort(data['NN__network_size'].unique())
+    net_types = np.sort(data['NN__type'].unique())
+    train_size = np.sort(data['data__num_pts'].unique())
+
+    if exp_name:
+        data = data[data['exp_details__setname'].str.contains(exp_name)]
+        data = data[data['NN__type'] == net_types[0]]
+        print data.shape
+    data_list = []
+
+    for n_pts in train_size:
+        print n_pts
+        select = data[data['data__num_pts'] == n_pts]
+        nn_sizes = np.sort(select['NN__network_size'].unique())
+        for nn_size in nn_sizes:
+            crit_str = nn_size.replace('[', '\[').replace(']', '\]')
+            select2 = select[select['NN__network_size'].str.match(crit_str)]
+            select2 = select2.sort_values(by=['data__num_stations'])
+            if select2.shape[0] > 0:
+                y = select2['mean_err']
+                x = select2['data__num_stations']
+                data_list.append(go.Scatter(
+                    x = x,
+                    y = y,
+                    #y = np.sqrt(y),
+                    name='Model: %s-%s - Training Size: %s' % (net_types[0],nn_size, n_pts)
+                ))
+
+
+    layout = dict(title = "%s - Increasing Number of Base Stations " % (exp_name),
+                  xaxis = dict(title="Number of Base Stations"),
+                  yaxis = dict(title="MSE")
+                )
+    fig = dict(data=data_list, layout=layout)
+    py.offline.plot(fig, filename=out_file)
+
+
 def plot_methods(data, out_file):
     methods = [1,2]
 
@@ -94,6 +132,9 @@ if __name__ == "__main__":
                  '4bs_spurious_0r1_cr0p1', '4bs_angledependent_0p01',
                   '4bs_gaussian_0p01']
 
+    exp_names = ['4bs_nooutput_cv0_Explore']
+    exp_names = ['structured_500_nooutput_bs3', 'structured_500_nooutput_bs4']
+    exp_names = ['increase_base_stations']
 
     data_l = []
 
@@ -106,10 +147,14 @@ if __name__ == "__main__":
 
     base_dir = "summary_plots/"
     # plot increased training
-    if True:
+    if False:
         for exp in exp_names:
             exp_name = "%s" % (exp)
             plot_increased_training(data, base_dir + exp_name + "_increasing_training.html", exp_name)
+    if True:
+        for exp in exp_names:
+            exp_name = "%s" % (exp)
+            plot_increasing_stations(data, base_dir + exp_name + "_increasing_base_stations.html", exp_name)
 
     if False:
         plot_methods(data, base_dir + "methods_increasing_train")
