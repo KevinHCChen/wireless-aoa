@@ -6,6 +6,7 @@
 \usepackage{ragged2e}
 \usepackage{adjustbox,setspace}
 \usepackage[caption=false]{subfig}
+\usepackage{listings}
 \usepackage{color}
 \usepackage{url}
 \usepackage{minibox}
@@ -156,6 +157,39 @@ The script \textbf{start\_tx.sh} sends the data file from reference antenna, wai
 
 \subsection{control}
 The controlling computer runs \textbf{start\_exp.sh}, which runs the entire experiment and move the log file locally for display.
+
+
+\section{Running the experiment}
+
+\begin{enumerate}
+\item Install python and numpy
+\item Connect Ethernet cable to the TX switch
+\item Setup Ethernet interface to be in the control subnet (192.168.12.xxx)\\
+For example, if the ethernet interface is en5, doing the following sets your ip at 192.168.12.123:
+\begin{lstlisting}
+sudo ifconfig en5 up 192.168.12.123
+\end{lstlisting}
+The ethernet interface can be found with ifconfig (just plug and unplug the cable and see how the list of interfaces changes).
+\item Setup ssh keys\\
+Login the Rx (192.168.12.61) and Tx (192.168.12.63) machines by
+\begin{lstlisting}
+ssh root@192.168.12.61 
+ssh root@192.168.12.63
+\end{lstlisting}
+then add your public key to the file ./ssh/authorized\_keys.  Your public keys should be locally at ./ssh/id\_rsa.pub.
+\item Make sure the folder wireless-aoa/data/testdata exists\\
+You may need to create that folder.
+\item Run experiment with a given run id
+\begin{lstlisting}
+./start_exp run_id
+\end{lstlisting}
+\item A plot show appear to display the received signal
+
+\end{enumerate}
+
+% setup ifconfig to be in the same subnet
+% setup ssh key
+
 
 
 
