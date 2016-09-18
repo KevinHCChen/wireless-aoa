@@ -180,3 +180,18 @@ if len(RUNS)==1:
 
 
 
+###
+# if False:
+    # scp root@192.168.12.61:/root/aoa/data/*test.dat ../data/testdata/
+    run = 'test'
+    raw_samples = [ readSamples(args.path+'rx'+str(rx+1)+'_'+str(run)+'.dat') for rx in range(args.rx) ] 
+
+    for x in raw_samples:
+        plt.plot(np.abs(x)/np.max(np.abs(x)))
+
+    for x in raw_samples:
+        print np.max(np.abs(x))
+
+
+
+

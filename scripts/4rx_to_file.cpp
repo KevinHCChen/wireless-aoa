@@ -177,6 +177,7 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
 		("ip1", po::value<std::string>(&ip1), "IP of 1st antenna")
 		("ip2", po::value<std::string>(&ip2), "IP of 2nd antenna")
 		("ip3", po::value<std::string>(&ip3), "IP of 3rd antenna")
+        ("ip4", po::value<std::string>(&ip4), "IP of 4th antenna")
     ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
