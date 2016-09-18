@@ -43,5 +43,5 @@ echo "Pulling data"
 scp root@$DELL_RX:/root/aoa/data/t*_$1.dat ../data/testdata/
 echo "All done!"
 
-ipython AoA.py -- --run=$1 --rx=$RX
-echo "ipython AoA.py -- --run=$1 --rx=$RX"
+python AOA.py --run=$1 --rx=$RX
+echo "python AOA.py -- --run=$1 --rx=$RX"
