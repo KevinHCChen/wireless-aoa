@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy
-from scipy.ndimage.morphology import binary_dilation, binary_erosion
+# import scipy
+# from scipy.ndimage.morphology import binary_dilation, binary_erosion
 from matplotlib import colors
 import sys
 import itertools
@@ -61,7 +61,7 @@ def angle2c(theta):
 def angleDiff(signal1, signal2):
     return np.mod(np.angle(signal1)-np.angle(signal2)+np.pi, 2*np.pi)-np.pi
 def readSamples(filename, size = -1):
-    dat = np.fromfile(open(filename, 'rb'), dtype=scipy.float32)
+    dat = np.fromfile(open(filename, 'rb'), dtype=np.float32)
     if size == -1:
         size = len(dat)
     dat = dat[:size*2]
@@ -69,7 +69,7 @@ def readSamples(filename, size = -1):
     return dat_complex
 def writeSamples(filename, samples):
     raw_seq = np.vstack([np.real(samples),np.imag(samples)]).T.ravel()
-    raw_seq.astype(scipy.float32).tofile(open(filename,'wb'))
+    raw_seq.astype(np.float32).tofile(open(filename,'wb'))
 def plotComplex(samples):
     plt.plot(np.real(samples),np.imag(samples),'.')
 
