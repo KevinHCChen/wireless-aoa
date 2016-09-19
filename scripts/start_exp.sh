@@ -22,6 +22,10 @@ BURST=2
 #   cat ~/UHD-install/EttusResearch-UHD-Mirror-e625e89/host/examples/CMakeLists.txt 
 #   cp /root/UHD-install/EttusResearch-UHD-Mirror-e625e89/host/examples/4rx_to_file ~/aoa/
 
+ssh root@$DELL_RX "sysctl -w net.core.rmem_max=50000000"
+ssh root@$DELL_TX "sysctl -w net.core.rmem_max=50000000"
+
+
 echo "Starting RX - Run $1"
 ssh root@$DELL_RX "sh -c 'nohup  /root/aoa/4rx_to_file \\
 --freq=$FREQ --rate=$RATE --gain=25 --run=$1 --runtime 4 \\
