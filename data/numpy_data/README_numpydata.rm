@@ -1,0 +1,2 @@
+Accessible through all_samples = np.load(<fn>)['all_samples'] 
+Format for these is [base station #, run #, x, y]
