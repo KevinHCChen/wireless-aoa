@@ -93,10 +93,9 @@ for cfg_fn in cfg_fns:
                                                                bs_type=params['data__bs_type'],
                                                                points_type=params['data__data_dist'])
 
-
         # IMPORTANT: remember to add noise before replicating data (e.g., for snbp-mlp)
         if params['noise__addnoise_train']:
-            angles = noise_models.add_noise_dispatcher(angles,
+            angles, mobiles = noise_models.add_noise_dispatcher(angles, mobiles,
                                                        params['noise__noise_model'],
                                                        params['data__ndims'],
                                                        base_idxs=params['noise__bases_to_noise'],
@@ -144,7 +143,7 @@ for cfg_fn in cfg_fns:
 
 
         if params['noise__addnoise_test']:
-            angles = noise_models.add_noise_dispatcher(angles, params['noise__noise_model'], params['data__ndims'], base_idxs=params['noise__bases_to_noise'], 
+            angles, mobiles = noise_models.add_noise_dispatcher(angles, mobiles, params['noise__noise_model'], params['data__ndims'], base_idxs=params['noise__bases_to_noise'], 
                                                             noise_params=params['noise__noise_params'])
 
         if params['NN__type'] == 'snbp-mlp' or params['NN__type'] == 'smlp':

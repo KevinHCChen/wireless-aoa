@@ -1,7 +1,7 @@
 import numpy as np
 import copy
 
-def add_noise_dispatcher(angles, noise_model, ndim, base_idxs=[-1], noise_params=None):
+def add_noise_dispatcher(angles, mobiles, noise_model, ndim, base_idxs=[-1], noise_params=None, ):
     if noise_model == 'add_distribution_noise':
         noisy_angles = add_distribution_noise(angles, ndim, base_idxs=base_idxs,
                                                     noise_params=noise_params )
@@ -22,10 +22,15 @@ def add_noise_dispatcher(angles, noise_model, ndim, base_idxs=[-1], noise_params
         noisy_angles = add_no_output_noise(angles, ndim, base_idxs=base_idxs,
                                                     noise_params=noise_params )
 
+    elif noise_model == 'add_multipath_noise':
+        noisy_angles, mobiles = add_multipath_noise(angles, ndim, mobiles, base_idxs=base_idxs)
+                                                    #noise_params=noise_params )
+
+
     else:
         assert False, "There is no noise model matching the one you have selected in the config file"
 
-    return noisy_angles
+    return noisy_angles, mobiles
 
 
 # adds noise to the data from the given distribution (default is gaussian N(0,1))
@@ -180,7 +185,51 @@ def add_no_output_noise(data, ndim,  base_idxs=[-1], noise_params={'constant_val
     return data
 
 
+def add_multipath_noise(data, ndim, mobiles,  base_idxs=[-1], noise_params={'mp_regions': [[(-2,-2),(-1,-1)],[(1,-2),(2,-1)]] }):
+    if ndim == 2:
+        # using 1 angle for each base station (alpha)
 
+        # print mobiles.shape
+        # print angles.shape
+        # print mobiles
+        # print angles
+        # assert False
+        original_size = data.shape[0]
+
+        mobiles = np.tile(mobiles,(len(noise_params['mp_regions'])+1,1))
+        data = np.tile(data,(len(noise_params['mp_regions'])+1,1))
+
+
+        for i, mp_region in enumerate(noise_params['mp_regions']):
+            x0 = mp_region[0][0]
+            y0 = mp_region[0][1]
+            xn = mp_region[1][0]
+            yn = mp_region[1][1]
+
+            toaddidxs = np.where(((mobiles[:,0] < xn) & (mobiles[:,0] > x0)) & ((mobiles[:,1] < yn) & (mobiles[:,1] > y0)))[0]
+
+
+            toaddidxs = toaddidxs[np.where(toaddidxs <= original_size)]
+            print "%d Points Affected by Multipath" % (len(toaddidxs))
+            toaddidxs += (i+1)*original_size
+
+
+            # data[toaddidxs, np.random.random_integers(0, high=mobiles.shape[1]-1)] += 70/360.#np.random.random_integers(0, high=360, size=1)/360.
+            data[toaddidxs, 0] += 20/360.#np.random.random_integers(0, high=360, size=1)/360.
+
+
+    elif ndim == 3:
+        assert False, "Not implemented yet"
+        # using 3 angles for each base station (alpha beta gamma)
+        for idx in base_idxs:
+            gauss_noise = np.random.normal(loc=noise_params['mean'],\
+                                   scale=noise_params['std'],\
+                                   size=(data.shape[0],ndim))
+            data[:, (idx*3):(idx*3)+3] += gauss_noise
+
+
+    data %= 1
+    return data, mobiles
 
 
 
