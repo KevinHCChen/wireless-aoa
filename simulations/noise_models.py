@@ -185,7 +185,10 @@ def add_no_output_noise(data, ndim,  base_idxs=[-1], noise_params={'constant_val
     return data
 
 
-def add_multipath_noise(data, ndim, mobiles,  base_idxs=[-1], noise_params={'mp_regions': [[(-2,-2),(-1,-1)],[(1,-2),(2,-1)]] }):
+def add_multipath_noise(data, ndim, mobiles,  base_idxs=[-1], noise_params={'mp_regions': [[(-2,-2),(-1,-1)],[(1,-2),(2,-1)], [(1,1),(2,2)]] }):
+
+    noise_vals = [10., 20.]#, 30., 40., 5.]
+    base_stat_idxs = [0,2]
     if ndim == 2:
         # using 1 angle for each base station (alpha)
 
@@ -196,8 +199,10 @@ def add_multipath_noise(data, ndim, mobiles,  base_idxs=[-1], noise_params={'mp_
         # assert False
         original_size = data.shape[0]
 
-        mobiles = np.tile(mobiles,(len(noise_params['mp_regions'])+1,1))
-        data = np.tile(data,(len(noise_params['mp_regions'])+1,1))
+        mobiles = np.tile(mobiles,(len(noise_params['mp_regions'])*len(noise_vals)+1,1))
+        data = np.tile(data,(len(noise_params['mp_regions'])*len(noise_vals)+1,1))
+
+        print mobiles.shape, data.shape
 
 
         for i, mp_region in enumerate(noise_params['mp_regions']):
@@ -209,13 +214,15 @@ def add_multipath_noise(data, ndim, mobiles,  base_idxs=[-1], noise_params={'mp_
             toaddidxs = np.where(((mobiles[:,0] < xn) & (mobiles[:,0] > x0)) & ((mobiles[:,1] < yn) & (mobiles[:,1] > y0)))[0]
 
 
-            toaddidxs = toaddidxs[np.where(toaddidxs <= original_size)]
-            print "%d Points Affected by Multipath" % (len(toaddidxs))
-            toaddidxs += (i+1)*original_size
-
-
-            # data[toaddidxs, np.random.random_integers(0, high=mobiles.shape[1]-1)] += 70/360.#np.random.random_integers(0, high=360, size=1)/360.
-            data[toaddidxs, 0] += 20/360.#np.random.random_integers(0, high=360, size=1)/360.
+            for j, nv in enumerate(noise_vals):
+                toaddidxs_t = toaddidxs[np.where(toaddidxs <= original_size)]
+                print "%d Points Affected by Multipath" % (len(toaddidxs_t))
+                toaddidxs_t += ((i+1)+(j*len(noise_params['mp_regions'])))*original_size
+                #print toaddidxs_t
+                # data[toaddidxs, np.random.random_integers(0, high=mobiles.shape[1]-1)] += 70/360.#np.random.random_integers(0, high=360, size=1)/360.
+                #data[toaddidxs_t, 0] += nv/360.#np.random.random_integers(0, high=360, size=1)/360.
+                data[toaddidxs_t, 0] += nv/360.#np.random.random_integers(0, high=360, size=1)/360.
+                #print data[toaddidxs_t, 0]
 
 
     elif ndim == 3:
