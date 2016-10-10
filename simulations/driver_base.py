@@ -143,8 +143,22 @@ for cfg_fn in cfg_fns:
 
 
         if params['noise__addnoise_test']:
-            angles, mobiles = noise_models.add_noise_dispatcher(angles, mobiles, params['noise__noise_model'], params['data__ndims'], base_idxs=params['noise__bases_to_noise'], 
-                                                            noise_params=params['noise__noise_params'])
+            angles, mobiles = noise_models.add_noise_dispatcher(angles, mobiles,
+                                                                params['noise__noise_model'],
+                                                                params['data__ndims'],
+                                                                base_idxs=params['noise__bases_to_noise'],
+                                                                noise_params=params['noise__noise_params'])
+
+            def unique_rows(a):
+                a = np.ascontiguousarray(a)
+                unique_a, idx = np.unique(a.view([('', a.dtype)]*a.shape[1]), return_index=True)
+                #return unique_a.view(a.dtype).reshape((unique_a.shape[0], a.shape[1]))
+                return idx
+
+            unique_idx = unique_rows(angles)
+            angles = angles[unique_idx,:]
+            mobiles = mobiles[unique_idx,:]
+
 
         if params['NN__type'] == 'snbp-mlp' or params['NN__type'] == 'smlp':
             angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)

@@ -185,9 +185,10 @@ def add_no_output_noise(data, ndim,  base_idxs=[-1], noise_params={'constant_val
     return data
 
 
-def add_multipath_noise(data, ndim, mobiles,  base_idxs=[-1], noise_params={'mp_regions': [[(-2,-2),(-1,-1)],[(1,-2),(2,-1)], [(1,1),(2,2)]] }):
+def add_multipath_noise(data, ndim, mobiles,  base_idxs=[-1], noise_params={'mp_regions': [[(-2,-2),(-1,-1)]]}):#,[(1,-2),(2,-1)], [(1,1),(2,2)]] }):
 
-    noise_vals = [10., 20.]#, 30., 40., 5.]
+    noise_vals = [70., 10., 30., 40., 5.]
+    #noise_vals = [20.]
     base_stat_idxs = [0,2]
     if ndim == 2:
         # using 1 angle for each base station (alpha)
@@ -221,7 +222,7 @@ def add_multipath_noise(data, ndim, mobiles,  base_idxs=[-1], noise_params={'mp_
                 #print toaddidxs_t
                 # data[toaddidxs, np.random.random_integers(0, high=mobiles.shape[1]-1)] += 70/360.#np.random.random_integers(0, high=360, size=1)/360.
                 #data[toaddidxs_t, 0] += nv/360.#np.random.random_integers(0, high=360, size=1)/360.
-                data[toaddidxs_t, 0] += nv/360.#np.random.random_integers(0, high=360, size=1)/360.
+                data[toaddidxs_t, 1] += nv/360.#np.random.random_integers(0, high=360, size=1)/360.
                 #print data[toaddidxs_t, 0]
 
 
