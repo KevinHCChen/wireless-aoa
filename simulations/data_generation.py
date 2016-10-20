@@ -47,6 +47,10 @@ def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
         #bases = [((4,0), [90.]), ((-4,0), [90.]), ((0,4), [180.])]
         bases = [((4,0), [90.]), ((-4,0), [270.]), ((0,4), [180.])]
         # bases = [((-4,0), [90.]), ((0,4), [180.])]
+    elif bs_type=="outdoor":
+        #bases = [((4,0), [90.]), ((-4,0), [90.]), ((0,4), [180.])]
+        bases = [((-3.58,0), [90.]),((0, 2.726), [180.]), ((3.58,0), [270.])]
+        # bases = [((-4,0), [90.]), ((0,4), [180.])]
     elif bs_type=="colinear-3D":
         bases = [((4,0,0), [90.,90.]), ((-4,0,0), [90.,90.]), ((0,4,0), [180.,90.])]
     elif bs_type=="structured":
@@ -57,6 +61,54 @@ def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
         bases = [((4,0,0), [90.,90.]), ((-4,0,0), [90.,90.]), ((0,4,0), [180.,90.])]
 
     return bases
+
+
+def generate_from_real_data(parsed_data):
+    base_stations = [((-3.58,0), [90.]),((0, 2.726), [180.]), ((3.58,0), [270.])]
+    virt_x=np.tile(np.linspace(-2.5,2.5, 6), 5)
+    virt_y=np.repeat(np.linspace(-1.6,1.6, 5), 6)
+
+    mobiles = np.vstack((virt_x, virt_y)).T
+    mobiles = np.tile(mobiles,(parsed_data.shape[1],1))
+    # true_angles = get_mobile_angles(base_stations, mobiles, 2)
+    # true_angles %= 360
+
+    angles = []
+    for run_number in range(parsed_data.shape[0]):
+        # xx= 180. - parsed_data[1,run_number,:,:].T.ravel()
+        # print xx.shape
+        # print xx
+        # assert False
+        this_run_angles = np.vstack(([180. - parsed_data[i,run_number,:,:].T.ravel() for i in range(parsed_data.shape[0])]))
+        angles.append(this_run_angles.T)
+
+    angles = np.vstack(angles)
+    # angles = angles.T
+    # print angles
+    # print angles.shape
+    # print mobiles
+    # assert False
+
+    # angles = np.vstack(([np.hstack(([180. - parsed_data[i,j,:,:].T.ravel() for i in range(parsed_data.shape[0])]))\
+                                                                           # for j in range(parsed_data.shape[1])]))
+
+    # angles = angles.T
+
+
+    angles %= 360
+    angles /= 360.
+
+    return mobiles, base_stations, angles
+
+    
+    # print angles.shape
+    # print mobiles.shape
+    # assert False, 'Snapp, I cant believe this worked'
+    
+    
+
+
+
 
 
 
@@ -124,6 +176,7 @@ def generate_data(num_pts, num_stations, ndim, pts_r=3, bs_r=4, bs_type="random"
         assert False, "This pattern of point generation has not been implemented yet in data_generation"
     bases = gen_basestations(num_stations, ndim, r=bs_r, bs_type=bs_type)
     angles = get_mobile_angles(bases, mobiles, ndim)
+    # angles = np.abs(90. - angles)
     angles %= 360
     angles /= 360.
     angles = np.nan_to_num(angles)
