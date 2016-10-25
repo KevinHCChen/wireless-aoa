@@ -96,7 +96,13 @@ for cfg_fn in cfg_fns:
 
         
 
-        mobiles, bases, angles = data_generation.generate_from_real_data(parsed_data1)
+        # mobiles, bases, angles = data_generation.generate_from_real_data(parsed_data1)
+        mobiles, bases, angles = data_generation.generate_data(params['data__num_pts'],
+                                                               params['data__num_stations'],
+                                                               params ['data__ndims'],
+                                                               pts_r=2.65, bs_r=4,
+                                                               bs_type=params['data__bs_type'],
+                                                               points_type=params['data__data_dist'])
 
         # IMPORTANT: remember to add noise before replicating data (e.g., for snbp-mlp)
         if params['noise__addnoise_train']:
@@ -145,14 +151,13 @@ for cfg_fn in cfg_fns:
         
 
         mobiles, bases, angles = data_generation.generate_from_real_data(parsed_data2)
-        '''
-        mobiles, bases, angles = data_generation.generate_data(params['data__num_pts'],
-                                                               params['data__num_stations'],
-                                                               params ['data__ndims'],
-                                                               pts_r=2.65, bs_r=4,
-                                                               bs_type=params['data__bs_type'],
-                                                               points_type=params['data__data_dist'])
-        '''
+        
+        # mobiles, bases, angles = data_generation.generate_data(params['data__num_pts'],
+        #                                                        params['data__num_stations'],
+        #                                                        params ['data__ndims'],
+        #                                                        pts_r=2.65, bs_r=4,
+        #                                                        bs_type=params['data__bs_type'],
+        #                                                        points_type=params['data__data_dist'])
 
 
         if params['noise__addnoise_test']:
