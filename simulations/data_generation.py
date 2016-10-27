@@ -60,9 +60,13 @@ def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
     elif bs_type=="structured-3D":
         bases = [((4,0,0), [90.,90.]), ((-4,0,0), [90.,90.]), ((0,4,0), [180.,90.])]
     elif bs_type=="faraway":
-        bases = [((-3,18), [180.]), ((3,18), [180.])]
+        #bases = [((-3,18), [180.]), ((3,18), [180.])]
+        #bases = [((-3,18), [0.]), ((3,18), [0.])]
+        bases = [((-18,0), [90.]), ((18,0), [90.])]
+        bases = [((-18,18), [90.]), ((18,18), [90.])]
+        bases = [((-18,-18), [90.]), ((18,-18), [90.])]
     elif bs_type=="faraway_but_closer":
-        bases = [((-3,4), [180.]), ((3,4), [180.])]
+        bases = [((-3,4), [0.]), ((3,4), [0.])]
 
     return bases
 
@@ -127,8 +131,21 @@ def get_angle(mobile_loc, base_loc, base_theta):
         k = -1
     else:
         k = 1
-    angle = np.degrees(k*np.arccos(x/hyp)) % 360
-    return angle+base_theta
+    theta = np.degrees(np.arccos(np.abs(x)/np.abs(hyp)))
+    angle = theta
+
+    if x > 0 and y > 0:
+        angle = theta
+    if x < 0 and y > 0:
+        angle = 180. - theta
+    if x < 0 and y < 0:
+        angle = 180. + theta
+    if x > 0 and y < 0:
+        angle = 360. - theta
+    return (angle+base_theta) % 360.
+
+    #angle = np.degrees(k*np.arccos(x/hyp)) % 360
+    #return angle+base_theta
 
 
 #mobile_loc - (x,y,z)
@@ -215,6 +232,12 @@ def replicate_data(data, ndim,  base_idxs):
 
 
 # TODO: maaaaaayyyyyyyybbbbeeeee some assert tests, but everything **looks** great
+
+def test_angle_calculation():
+    r = 4.
+    bases = [((0.,0.), (0.))]
+
+
 def test_datagen():
     bs_type = "random"
     ndims = [2,3]
