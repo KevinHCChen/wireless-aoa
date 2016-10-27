@@ -142,7 +142,8 @@ def get_angle(mobile_loc, base_loc, base_theta):
         angle = 180. + theta
     if x > 0 and y < 0:
         angle = 360. - theta
-    return (angle+base_theta) % 360.
+    # return (angle+base_theta) % 360.
+    return angle % 360
 
     #angle = np.degrees(k*np.arccos(x/hyp)) % 360
     #return angle+base_theta
@@ -232,11 +233,24 @@ def replicate_data(data, ndim,  base_idxs):
 
 
 # TODO: maaaaaayyyyyyyybbbbeeeee some assert tests, but everything **looks** great
+# to cite sources, this comes from...fuck that shit
+import math
+def PointsInCircum(r,n=100):
+    return [(math.cos(2*math.pi/n*x)*r,math.sin(2*math.pi/n*x)*r) for x in xrange(0,n+1)]
+
 
 def test_angle_calculation():
     r = 4.
-    bases = [((0.,0.), (0.))]
+    bases = [((0.,0.), [0.])]
+    circle_points = np.array(PointsInCircum(1,100))
+    angles = get_mobile_angles(bases, circle_points, 2)
+    print angles
+    print "Did it work? [Y]/n"
+    print "> "
+    return
 
+
+# test_angle_calculation()
 
 def test_datagen():
     bs_type = "random"
@@ -256,4 +270,11 @@ def test_datagen():
         print "Angles: ", angles
 
 #test_datagen()
+
+
+
+
+
+
+
 
