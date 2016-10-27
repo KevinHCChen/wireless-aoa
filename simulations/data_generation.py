@@ -63,8 +63,9 @@ def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
         #bases = [((-3,18), [180.]), ((3,18), [180.])]
         #bases = [((-3,18), [0.]), ((3,18), [0.])]
         bases = [((-18,0), [90.]), ((18,0), [90.])]
-        bases = [((-18,18), [90.]), ((18,18), [90.])]
-        bases = [((-18,-18), [90.]), ((18,-18), [90.])]
+        bases = [((-18,-18), [0.]), ((18,18), [0.])]
+        bases = [((-18,18), [0.]), ((18,18), [0.])]
+        bases = [((-18,-18), [0.]), ((18,-18), [0.])]
     elif bs_type=="faraway_but_closer":
         bases = [((-3,4), [0.]), ((3,4), [0.])]
 
@@ -202,6 +203,7 @@ def generate_data(num_pts, num_stations, ndim, pts_r=3, bs_r=4, bs_type="random"
     angles %= 360
     angles /= 360.
     angles = np.nan_to_num(angles)
+    angles = angles - np.mean(angles,axis=0)
     return mobiles, bases, angles
 
 
