@@ -42,15 +42,18 @@ def load_configuration(cfg_fn):
 
 
 def test_train_split(X, Y, training_size=0.8):
-    # X = X/360.
     trainXs, testXs  = [], []
 
-    trainXs.append( X[:X.shape[0]*training_size,:].astype(np.float32))
-    testXs.append( X[X.shape[0]*training_size:,:].astype(np.float32))
+    idx = np.random.permutation(range(X.shape[0]))
+    tr_idx = idx[:X.shape[0]*training_size]
+    test_idx = idx[X.shape[0]*training_size:]
+
+    trainXs.append( X[tr_idx,:].astype(np.float32))
+    testXs.append( X[test_idx,:].astype(np.float32))
 
     # Could be a list??? Comiter thinks so....
-    trainY = Y[:Y.shape[0]*training_size,:].astype(np.float32)
-    testY = Y[Y.shape[0]*training_size:,:].astype(np.float32)
+    trainY = Y[tr_idx,:].astype(np.float32)
+    testY = Y[test_idx,:].astype(np.float32)
 
     return trainXs, trainY, testXs, testY
 

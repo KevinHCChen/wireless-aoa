@@ -45,7 +45,7 @@ def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
 
     elif bs_type=="colinear":
         #bases = [((4,0), [90.]), ((-4,0), [90.]), ((0,4), [180.])]
-        bases = [((4,0), [90.]), ((-4,0), [270.]), ((0,4), [180.])]
+        bases = [((4,0), [0.]), ((-4,0), [0.]), ((0,4), [0.])]
         # bases = [((-4,0), [90.]), ((0,4), [180.])]
     elif bs_type=="outdoor":
         #bases = [((4,0), [90.]), ((-4,0), [90.]), ((0,4), [180.])]
@@ -55,7 +55,7 @@ def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
         bases = [((4,0,0), [90.,90.]), ((-4,0,0), [90.,90.]), ((0,4,0), [180.,90.])]
     elif bs_type=="structured":
         #bases = [[((4,0), [90.]), ((0,-4), [0.])],[((4,0), [90.]), ((0,4), [0.])]]
-        bases = [((4,0), [90.]), ((-4,0), [270.]), ((0,4), [180.])]
+        bases = [((4,0), [0.]), ((-4,0), [0.]), ((0,4), [0.])]
         #bases = [((4,0), [90.]), ((0,4), [0.]), ((-4,0), [90.]), ((0,4), [0.])]
     elif bs_type=="structured-3D":
         bases = [((4,0,0), [90.,90.]), ((-4,0,0), [90.,90.]), ((0,4,0), [180.,90.])]
@@ -203,7 +203,7 @@ def generate_data(num_pts, num_stations, ndim, pts_r=3, bs_r=4, bs_type="random"
     angles %= 360
     angles /= 360.
     angles = np.nan_to_num(angles)
-    angles = angles - np.mean(angles,axis=0)
+    #angles = angles - np.mean(angles,axis=0)
     return mobiles, bases, angles
 
 
