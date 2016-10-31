@@ -16,6 +16,7 @@ def gen_points_grid(num_pts, ndim, r=3):
     points = points.reshape(ndim,int(np.power(num_pts, 1./ndim))**ndim).T
     return points
 
+
 def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
     # point on the circle with radius r
     #random point and random angle
