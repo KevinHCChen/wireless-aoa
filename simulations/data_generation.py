@@ -2,6 +2,8 @@ import numpy as np
 import numpy.linalg as lg
 from scipy.spatial.distance import euclidean
 
+speed_of_light = 299792458.0
+lambda_val = 0.15
 
 def gen_points_random(num_pts, ndim, r=3):
     points = np.random.uniform(-r,r,size=(num_pts,ndim))
@@ -15,6 +17,19 @@ def gen_points_grid(num_pts, ndim, r=3):
     points = np.array(np.meshgrid(*([x]*ndim)))
     points = points.reshape(ndim,int(np.power(num_pts, 1./ndim))**ndim).T
     return points
+
+
+def get_phaseoffset(mobile_loc, base_loc, base_theta):
+
+    arrival_times = [euclidean(mobile_loc, ((base_loc[0] + (i*lambda_val)), base_loc[1]))/speed_of_light for i in range(4)]
+
+    arrival_times = np.array(arrival_times)
+    phase_offsets = arrival_times - arrival_times[0]
+    phase_offsets = phase_offsets[1:]
+
+    return phase_offsets
+
+
 
 
 def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
@@ -190,6 +205,26 @@ def get_mobile_angles(bases, mobiles, ndim):
 
     return angles_output
 
+def get_mobile_phases(bases, mobiles, ndim):
+    if ndim == 2:
+        mobile_angles = []
+        assert mobiles.shape[1]==2, "Mobiles must have 2 columns!"
+        mobile_angles.append([[get_phaseoffset(mobile_loc, base[0], base[1][0]) for base in bases] for mobile_loc in mobiles])
+        angles_output = np.vstack(mobile_angles)
+        angles_output = angles_output.reshape(-1,angles_output.shape[1]*angles_output.shape[2])
+        angles_output *= 1e10
+        print angles_output
+        # print angles_output
+        # print angles_output.shape
+        # assert False
+    elif ndim == 3:
+        assert False
+        # mobile_angles = [[get3D_angles(mobile_loc, base[0], base[1]) for base in bases] for mobile_loc in mobiles]
+        # mobile_angles = np.array(mobile_angles)
+        # angles_output = mobile_angles.reshape(mobile_angles.shape[0], -1)
+
+    return angles_output
+
 
 def generate_data(num_pts, num_stations, ndim, pts_r=3, bs_r=4, bs_type="random", points_type="random"):
     if points_type == "random":
@@ -199,12 +234,15 @@ def generate_data(num_pts, num_stations, ndim, pts_r=3, bs_r=4, bs_type="random"
     else:
         assert False, "This pattern of point generation has not been implemented yet in data_generation"
     bases = gen_basestations(num_stations, ndim, r=bs_r, bs_type=bs_type)
-    angles = get_mobile_angles(bases, mobiles, ndim)
+    angles = get_mobile_phases(bases, mobiles, ndim)
     # angles = np.abs(90. - angles)
+    
+    '''
     angles %= 360
     angles /= 360.
     angles = np.nan_to_num(angles)
     angles = angles - np.mean(angles,axis=0)
+    '''
     return mobiles, bases, angles
 
 
