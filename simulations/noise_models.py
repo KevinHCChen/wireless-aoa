@@ -44,7 +44,8 @@ def add_distribution_noise(data, ndim,  base_idxs=[-1], noise_params={'noise_typ
                                        scale=noise_params['std'],\
                                        size=(data.shape[0],len(col_idxs)))
 
-            data[:,col_idxs] += gauss_noise
+            #data[:,col_idxs] += gauss_noise
+            data[:,col_idxs] -= .05
         
         elif ndim == 3:
             # using 3 angles for each base station (alpha beta gamma)

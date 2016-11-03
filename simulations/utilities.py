@@ -95,6 +95,10 @@ def create_param_dict(config):
     params['data__ndims'] = int(config.get("data", "ndims"))
     params['data__num_stations'] = int(config.get("data", "num_stations"))
     params['data__bs_type'] = config.get("data", "bs_type")
+    if config.has_option("data", "sphere_r"):
+        params['data__sphere_r'] = float(config.get("data", "sphere_r"))
+    else:
+        params['data__sphere_r'] = float(config.get("data", "sphere_r"))
     params['exp_details__setname'] = config.get("exp_details", "setname")
     params['exp_details__name'] = config.get("exp_details", "name")
     params['exp_details__description'] = config.get("exp_details", "description")

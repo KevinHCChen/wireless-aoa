@@ -89,7 +89,7 @@ for cfg_fn in cfg_fns:
         mobiles, bases, angles = data_generation.generate_data(params['data__num_pts'],
                                                                params['data__num_stations'],
                                                                params ['data__ndims'],
-                                                               pts_r=3., bs_r=4,
+                                                               pts_r=params['data__sphere_r'], bs_r=4,
                                                                bs_type=params['data__bs_type'],
                                                                points_type=params['data__data_dist'])
 
@@ -138,7 +138,7 @@ for cfg_fn in cfg_fns:
         mobiles, bases, angles = data_generation.generate_data(50*50,
                                                                params['data__num_stations'],
                                                                params ['data__ndims'],
-                                                               pts_r=3., bs_r=4,
+                                                               pts_r=params['data__sphere_r'], bs_r=4,
                                                                bs_type=params['data__bs_type'], points_type="grid")
 
 

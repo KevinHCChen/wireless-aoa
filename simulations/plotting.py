@@ -98,7 +98,7 @@ def plot_scatter(positions, error, title, to_rescale=False):
                 colorscale='Jet',
                 colorbar=go.ColorBar(
                     title='Colorbar',
-                    yanchor='bottom'
+                    #yanchor='bottom'
                     ),
                 showscale=True,
                 opacity=0.8
@@ -116,7 +116,7 @@ def plot_scatter(positions, error, title, to_rescale=False):
                 showscale=True,
                 colorbar=go.ColorBar(
                     title='Colorbar',
-                    yanchor='top'
+                    #yanchor='top'
                     ),
                 opacity=0.8
             )
@@ -148,25 +148,25 @@ def plot_scatter3D(positions, error, title):
 def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name, iter_number):
     # 2D case
     if true_pos.shape[1] == 2:
-        fig = tools.make_subplots(rows=2, cols=2)
+        fig = tools.make_subplots(rows=1, cols=2)
         trace = plot_scatter(true_pos, error, title)
         fig.append_trace(trace, 1,1)
-        trace = plot_scatter(true_pos, error, title, True)
-        fig.append_trace(trace, 2,1)
+        #trace = plot_scatter(true_pos, error, title, True)
+        #fig.append_trace(trace, 2,1)
 
         trace = plot_scatter(predicted_pos, error, title)
         fig.append_trace(trace, 1,2)
-        trace = plot_scatter(predicted_pos, error, title, True)
-        fig.append_trace(trace, 2,2)
+       # trace = plot_scatter(predicted_pos, error, title, True)
+       # fig.append_trace(trace, 2,2)
         ax_range = [-4.5,4.5]
         fig['layout']['xaxis1'].update( range=ax_range)
         fig['layout']['xaxis2'].update( range=ax_range)
-        fig['layout']['xaxis3'].update( range=ax_range)
-        fig['layout']['xaxis4'].update( range=ax_range)
+        #fig['layout']['xaxis3'].update( range=ax_range)
+        #fig['layout']['xaxis4'].update( range=ax_range)
         fig['layout']['yaxis1'].update( range=ax_range)
         fig['layout']['yaxis2'].update( range=ax_range)
-        fig['layout']['yaxis3'].update( range=ax_range)
-        fig['layout']['yaxis4'].update( range=ax_range)
+        #fig['layout']['yaxis3'].update( range=ax_range)
+        #fig['layout']['yaxis4'].update( range=ax_range)
         fig['layout'].update(showlegend=False)
 
         for t in plotStations(bases):

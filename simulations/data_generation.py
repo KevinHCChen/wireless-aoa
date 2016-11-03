@@ -14,6 +14,10 @@ def gen_points_grid(num_pts, ndim, r=3):
     x = np.linspace(-r,r, int(np.power(num_pts, 1./ndim)))
     points = np.array(np.meshgrid(*([x]*ndim)))
     points = points.reshape(ndim,int(np.power(num_pts, 1./ndim))**ndim).T
+
+    y = np.linspace(0,r,num_pts)
+    x = np.zeros(num_pts)
+    points = np.vstack((x,y)).T
     return points
 
 
@@ -66,7 +70,8 @@ def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
         bases = [((-18,0), [90.]), ((18,0), [90.])]
         bases = [((-18,-18), [0.]), ((18,18), [0.])]
         bases = [((-18,18), [0.]), ((18,18), [0.])]
-        bases = [((-18,-18), [0.]), ((18,-18), [0.])]
+        #bases = [((-18,-18), [0.]), ((18,-18), [0.])]
+        bases = [((-2,-1), [0.]), ((2,-1), [0.])]
     elif bs_type=="faraway_but_closer":
         bases = [((-3,4), [0.]), ((3,4), [0.])]
 
@@ -109,13 +114,6 @@ def generate_from_real_data(parsed_data):
     angles /= 360.
 
     return mobiles, base_stations, angles
-
-    
-    # print angles.shape
-    # print mobiles.shape
-    # assert False, 'Snapp, I cant believe this worked'
-    
-    
 
 
 
