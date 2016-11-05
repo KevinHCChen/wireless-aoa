@@ -96,6 +96,10 @@ def create_param_dict(config):
         params['NN__epsilon'] = float(config.get("NN", "epsilon"))
     else:
         params['NN__epsilon'] = 0.
+    if config.has_option("data", "data_type"):
+        params['data__data_type'] = config.get("data", "data_type")
+    else:
+        params['data__data_type'] = 'angles'
     params['data__num_pts'] = int(config.get("data", "num_pts"))
     params['data__ndims'] = int(config.get("data", "ndims"))
     params['data__num_stations'] = int(config.get("data", "num_stations"))
