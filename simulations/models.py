@@ -18,6 +18,8 @@ import time
 from Convert2Complex import *
 #plt.ion()
 
+used_antennas_per_bs = 3
+
 class HingeMeanSquaredError(function.Function):
 
     def __init__(self, eps=0.):
@@ -166,11 +168,21 @@ class NBPStructuredMLP():
             tmp_trainXs = []
             tmp_testXs = []
             if self.ndim == 2:
-                tmp_trainXs.append(trainXs[0][:,(i*self.ndim):(i*self.ndim)+self.ndim])
-                tmp_testXs.append(testXs[0][:,(i*self.ndim):(i*self.ndim)+self.ndim])
+                # tmp_trainXs.append(trainXs[0][:,(i*self.ndim):(i*self.ndim)+self.ndim])
+                # tmp_testXs.append(testXs[0][:,(i*self.ndim):(i*self.ndim)+self.ndim])
+                tmp_trainXs.append(trainXs[0][:,(i*self.ndim)*used_antennas_per_bs:((i*self.ndim)+self.ndim)*used_antennas_per_bs])
+                tmp_testXs.append(testXs[0][:,(i*self.ndim)*used_antennas_per_bs:((i*self.ndim)+self.ndim)*used_antennas_per_bs])
             elif self.ndim == 3:
                 tmp_trainXs.append(trainXs[0][:,(i*self.ndim*2):(i*self.ndim*2)+self.ndim*2])
                 tmp_testXs.append(testXs[0][:,(i*self.ndim*2):(i*self.ndim*2)+self.ndim*2])
+            '''
+            elif True:#self.ndim == 4:
+                tmp_trainXs.append(trainXs[0][:,(i*self.ndim):(i*self.ndim)+self.ndim])
+                tmp_testXs.append(testXs[0][:,(i*self.ndim):(i*self.ndim)+self.ndim])
+
+                tmp_trainXs.append(trainXs[0][:,(i*(num_antennas_per_bs-1)):(i*(num_antennas_per_bs-1))+(num_antennas_per_bs-1)])
+                tmp_testXs.append(testXs[0][:,(i*(num_antennas_per_bs-1)):(i*(num_antennas_per_bs-1))+(num_antennas_per_bs-1)])
+            '''
 
 
 
@@ -212,7 +224,8 @@ class NBPStructuredMLP():
         for i, model in enumerate(self.lower_models_l):
             tmp_testXs = []
             if self.ndim == 2:
-                tmp_testXs.append(X[0][:,(i*self.ndim):(i*self.ndim)+self.ndim])
+                # tmp_testXs.append(X[0][:,(i*self.ndim):(i*self.ndim)+self.ndim])
+                tmp_testXs.append(X[0][:,(i*self.ndim)*used_antennas_per_bs:((i*self.ndim)+self.ndim)*used_antennas_per_bs])
             elif self.ndim == 3:
                 tmp_testXs.append(X[0][:,(i*self.ndim*2):(i*self.ndim*2)+self.ndim*2])
 

@@ -4,6 +4,7 @@ from scipy.spatial.distance import euclidean
 
 speed_of_light = 299792458.0
 lambda_val = 0.15
+num_antennas_per_bs = 4
 
 def gen_points_random(num_pts, ndim, r=3):
     points = np.random.uniform(-r,r,size=(num_pts,ndim))
@@ -21,7 +22,7 @@ def gen_points_grid(num_pts, ndim, r=3):
 
 def get_phaseoffset(mobile_loc, base_loc, base_theta):
 
-    arrival_times = [euclidean(mobile_loc, ((base_loc[0] + (i*lambda_val)), base_loc[1]))/speed_of_light for i in range(4)]
+    arrival_times = [euclidean(mobile_loc, ((base_loc[0] + (i*lambda_val)), base_loc[1]))/speed_of_light for i in range(num_antennas_per_bs)]
 
     arrival_times = np.array(arrival_times)
     phase_offsets = arrival_times - arrival_times[0]
@@ -234,16 +235,16 @@ def generate_data(num_pts, num_stations, ndim, pts_r=3, bs_r=4, bs_type="random"
     else:
         assert False, "This pattern of point generation has not been implemented yet in data_generation"
     bases = gen_basestations(num_stations, ndim, r=bs_r, bs_type=bs_type)
-    angles = get_mobile_phases(bases, mobiles, ndim)
+    phases = get_mobile_phases(bases, mobiles, ndim)
+    angles = get_mobile_angles(bases, mobiles, ndim)
     # angles = np.abs(90. - angles)
     
-    '''
     angles %= 360
     angles /= 360.
     angles = np.nan_to_num(angles)
-    angles = angles - np.mean(angles,axis=0)
-    '''
-    return mobiles, bases, angles
+    # angles = angles - np.mean(angles,axis=0)
+
+    return mobiles, bases, angles, phases
 
 
 

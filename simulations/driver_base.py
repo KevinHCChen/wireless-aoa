@@ -40,7 +40,8 @@ import models as models
 import data_generation as data_generation
 import plotting as plotting
 
-
+num_antennas_per_bs = 4
+used_antennas_per_bs = 3
 use_dir = False 
 
 
@@ -86,16 +87,18 @@ for cfg_fn in cfg_fns:
     std_errors = []
     for iter_number in range(params['exp_details__num_iterations_per_setting']):
         # generate mobile points, base stations, and angles
-        mobiles, bases, angles = data_generation.generate_data(params['data__num_pts'],
+        mobiles, bases, angles, phases = data_generation.generate_data(params['data__num_pts'],
                                                                params['data__num_stations'],
                                                                params ['data__ndims'],
                                                                pts_r=3, bs_r=4,
                                                                bs_type=params['data__bs_type'],
                                                                points_type=params['data__data_dist'])
 
+        angles = phases
+
         # IMPORTANT: remember to add noise before replicating data (e.g., for snbp-mlp)
         if params['noise__addnoise_train']:
-            angles, mobiles = noise_models.add_noise_dispatcher(angles, mobiles,
+            angles, mobiles = noise_models.add_noise_dispatcher(angles, phases, mobiles,
                                                        params['noise__noise_model'],
                                                        params['data__ndims'],
                                                        base_idxs=params['noise__bases_to_noise'],
@@ -103,7 +106,27 @@ for cfg_fn in cfg_fns:
 
         if params['NN__type'] == 'snbp-mlp' or params['NN__type'] == 'smlp':
             rep_idxs = [comb for comb in itertools.combinations(range(params['data__num_stations']),2)]
-            angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
+            print rep_idxs
+            if True:
+                tmp = []
+                for x1,x2 in rep_idxs:
+                    tmp.append(tuple(range(x1*3,(x1*3)+3)) + tuple(range(x2*3,(x2*3)+3)))
+
+
+
+                rep_idxs = tmp
+                #[(rep_idx1*(num_antennas_per_bs-1) + i, rep_idx2*(num_antennas_per_bs-1) + i) for rep_idx1, rep_idx2 in rep_idxs for i in range(num_antennas_per_bs-1)]
+                angles = data_generation.replicate_data(phases, params['data__ndims'],  rep_idxs)
+            else:
+                angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
+
+        # for phase offset SMLP
+        '''
+        if params['NN__type'] == 'phased-snbp-mlp' or params['NN__type'] == 'smlp':
+            rep_idxs = [comb for comb in itertools.combinations(range(params['data__num_stations']),2)]
+            rep_idxs = [base_idx*(num_antennas_per_bs-1) + i for base_idx in rep_idxs for i in range(num_antennas_per_bs-1)]
+            angles = data_generation.replicate_data(phases, params['data__ndims'],  rep_idxs)
+        '''
 
 
         # split data
@@ -135,15 +158,16 @@ for cfg_fn in cfg_fns:
 
 
         # generate mobile points, base stations, and angles
-        mobiles, bases, angles = data_generation.generate_data(50*50,
+        mobiles, bases, angles, phases = data_generation.generate_data(50*50,
                                                                params['data__num_stations'],
                                                                params ['data__ndims'],
                                                                pts_r=3, bs_r=4,
                                                                bs_type=params['data__bs_type'], points_type="grid")
+        angles = phases
 
 
         if params['noise__addnoise_test']:
-            angles, mobiles = noise_models.add_noise_dispatcher(angles, mobiles,
+            angles, mobiles = noise_models.add_noise_dispatcher(angles, phases, mobiles,
                                                                 params['noise__noise_model'],
                                                                 params['data__ndims'],
                                                                 base_idxs=params['noise__bases_to_noise'],
@@ -161,7 +185,11 @@ for cfg_fn in cfg_fns:
 
 
         if params['NN__type'] == 'snbp-mlp' or params['NN__type'] == 'smlp':
-            angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
+            if True:
+                print rep_idxs
+                angles = data_generation.replicate_data(phases, params['data__ndims'],  rep_idxs)
+            else:
+                angles = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
 
         trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles, 0.)
 
