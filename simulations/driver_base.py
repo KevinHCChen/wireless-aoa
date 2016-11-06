@@ -4,7 +4,7 @@ import ast
 import glob
 import argparse
 import itertools
-import noise_models as noise_models
+import phase_noise_models as noise_models
 import datetime
 from chainer import optimizers
 import os
@@ -99,11 +99,13 @@ for cfg_fn in cfg_fns:
 
         # IMPORTANT: remember to add noise before replicating data (e.g., for snbp-mlp)
         if params['noise__addnoise_train']:
-            angles, phases, mobiles = noise_models.add_noise_dispatcher(angles, phases, mobiles, params['noise__addnoise_train'],
+            angles, phases, mobiles = noise_models.add_noise_dispatcher(angles, phases, mobiles, params['data__data_type'],
                                                        params['noise__noise_model'],
                                                        params['data__ndims'],
                                                        base_idxs=params['noise__bases_to_noise'],
                                                        noise_params=params['noise__noise_params'])
+
+
 
         if params['NN__type'] == 'snbp-mlp' or params['NN__type'] == 'smlp':
             rep_idxs = [comb for comb in itertools.combinations(range(params['data__num_stations']),2)]
@@ -173,7 +175,7 @@ for cfg_fn in cfg_fns:
                                                                bs_type=params['data__bs_type'], points_type="grid")
 
         if params['noise__addnoise_test']:
-            angles, phases, mobiles = noise_models.add_noise_dispatcher(angles, phases, mobiles, params['noise__addnoise_train'],
+            angles, phases, mobiles = noise_models.add_noise_dispatcher(angles, phases, mobiles, params['data__data_type'],
                                                                 params['noise__noise_model'],
                                                                 params['data__ndims'],
                                                                 base_idxs=params['noise__bases_to_noise'],

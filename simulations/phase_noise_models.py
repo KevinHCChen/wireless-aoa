@@ -3,37 +3,37 @@ import copy
 
 num_antennas_per_bs = 4
 
-def add_noise_dispatcher(angles, phases, mobiles, noise_model, ndim, base_idxs=[-1], noise_params=None, ):
+def add_noise_dispatcher(angles, phases, mobiles, pa_flag, noise_model, ndim, base_idxs=[-1], noise_params=None):
     if noise_model == 'add_distribution_noise':
-        noisy_angles = add_distribution_noise(phases, ndim, base_idxs=base_idxs,
+        noisy_phases = add_distribution_noise(phases, ndim, base_idxs=base_idxs,
                                                     noise_params=noise_params )
 
     elif noise_model == 'add_angle_dependent_noise':
-        noisy_angles = add_angle_dependent_noise(angles, phases, ndim, base_idxs=base_idxs,
+        noisy_phases = add_angle_dependent_noise(angles, phases, ndim, base_idxs=base_idxs,
                                                     noise_params=noise_params )
 
     elif noise_model == 'add_spurious_noise':
-        noisy_angles = add_spurious_noise(angles, ndim, base_idxs=base_idxs,
+        noisy_phases = add_spurious_noise(angles, ndim, base_idxs=base_idxs,
                                                     noise_params=noise_params )
 
     elif noise_model == 'transform_to_nonsense_noise':
-        noisy_angles = transform_to_nonsense_noise(angles, ndim, base_idxs=base_idxs,
+        noisy_phases = transform_to_nonsense_noise(angles, ndim, base_idxs=base_idxs,
                                                     noise_params=noise_params )
 
     elif noise_model == 'add_no_output_noise':
-        noisy_angles = add_no_output_noise(angles, ndim, base_idxs=base_idxs,
+        noisy_phases = add_no_output_noise(angles, ndim, base_idxs=base_idxs,
                                                     noise_params=noise_params )
 
     elif noise_model == 'add_multipath_noise':
         assert False, "Not impelmeneted"
-        noisy_angles, mobiles = add_multipath_noise(angles, ndim, mobiles, base_idxs=base_idxs)
+        noisy_phases, mobiles = add_multipath_noise(angles, ndim, mobiles, base_idxs=base_idxs)
                                                     #noise_params=noise_params )
 
 
     else:
         assert False, "There is no noise model matching the one you have selected in the config file"
 
-    return noisy_angles, mobiles
+    return angles, noisy_phases, mobiles
 
 
 # adds noise to the data from the given distribution (default is gaussian N(0,1))
