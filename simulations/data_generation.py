@@ -5,6 +5,8 @@ from scipy.spatial.distance import euclidean
 speed_of_light = 299792458.0
 lambda_val = 0.15
 num_antennas_per_bs = 4
+freq = .1*1e9
+period = 1./(freq)
 
 def gen_points_random(num_pts, ndim, r=3):
     points = np.random.uniform(-r,r,size=(num_pts,ndim))
@@ -24,7 +26,7 @@ def get_phaseoffset(mobile_loc, base_loc, base_theta):
 
     arrival_times = [euclidean(mobile_loc, ((base_loc[0] + (i*lambda_val)), base_loc[1]))/speed_of_light for i in range(num_antennas_per_bs)]
 
-    arrival_times = np.array(arrival_times)
+    arrival_times = np.array(arrival_times) #% period
     phase_offsets = arrival_times - arrival_times[0]
     phase_offsets = phase_offsets[1:]
 
@@ -130,8 +132,8 @@ def generate_from_real_data(parsed_data):
     # print angles.shape
     # print mobiles.shape
     # assert False, 'Snapp, I cant believe this worked'
-    
-    
+
+
 
 
 
