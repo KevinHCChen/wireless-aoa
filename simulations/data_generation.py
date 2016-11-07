@@ -3,7 +3,7 @@ import numpy.linalg as lg
 from scipy.spatial.distance import euclidean
 
 speed_of_light = 299792458.0
-lambda_val = 0.15
+lambda_val = 0.35
 num_antennas_per_bs = 4
 freq = .1*1e9
 period = 1./(freq)
@@ -27,8 +27,8 @@ def get_phaseoffset(mobile_loc, base_loc, base_theta):
     arrival_times = [euclidean(mobile_loc, ((base_loc[0] + (i*lambda_val)), base_loc[1]))/speed_of_light for i in range(num_antennas_per_bs)]
 
     arrival_times = np.array(arrival_times) #% period
-    phase_offsets = arrival_times - arrival_times[0]
-    phase_offsets = phase_offsets[1:]
+    phase_offsets = arrival_times #- arrival_times[0]
+    #phase_offsets = phase_offsets[1:]
 
     return phase_offsets
 
@@ -85,9 +85,10 @@ def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
         bases = [((-18,-18), [0.]), ((18,18), [0.])]
         bases = [((-18,18), [0.]), ((18,18), [0.])]
         bases = [((-18,-18), [0.]), ((18,-18), [0.])]
-    elif bs_type=="faraway_but_closer":
-        bases = [((-3,4), [0.]), ((3,4), [0.])]
-
+    elif bs_type=="e2e":
+        bases = [((4,0), [0.]), ((-4,0), [0.]), ((0,4), [0.])]
+        #bases = [((4,2), [90.]), ((4,-4), [0.]), ((4,4), [180.])]
+        #bases = [((4,0), [0.]), ((0,4), [0.])]#, ((0,4), [0.])]
     return bases
 
 
@@ -215,7 +216,10 @@ def get_mobile_phases(bases, mobiles, ndim):
         mobile_angles.append([[get_phaseoffset(mobile_loc, base[0], base[1][0]) for base in bases] for mobile_loc in mobiles])
         angles_output = np.vstack(mobile_angles)
         angles_output = angles_output.reshape(-1,angles_output.shape[1]*angles_output.shape[2])
-        angles_output *= 1e10
+        #angles_output *= 1e10
+        #angles_output *= 1e8
+        # rescale :)
+        angles_output = (angles_output + np.abs(np.min(angles_output)))/(np.max(angles_output)+np.abs(np.min(angles_output)))
         print angles_output
         # print angles_output
         # print angles_output.shape

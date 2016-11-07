@@ -113,13 +113,13 @@ def plot_scatter(positions, error, title, to_rescale=False):
             mode='markers',
             marker=dict(
                 size=8,
-                color=error,
+                color=error_mod,
                 colorscale='Jet',
                 cmin=0.,
                 cmax=1.,
                 showscale=True,
                 colorbar=go.ColorBar(
-                    title='Colorbar',
+                    title='Error (m)',
                     #yanchor='top'
                     ),
                 opacity=0.8
@@ -155,27 +155,22 @@ def plot_error(true_pos, predicted_pos, error, bases, title, saveflag, dir_name,
         fig = tools.make_subplots(rows=1, cols=2)
         trace = plot_scatter(true_pos, error, title)
         fig.append_trace(trace, 1,1)
-        #trace = plot_scatter(true_pos, error, title, True)
-        #fig.append_trace(trace, 2,1)
 
         trace = plot_scatter(predicted_pos, error, title)
         fig.append_trace(trace, 1,2)
-        #trace = plot_scatter(predicted_pos, error, title, True)
-        #fig.append_trace(trace, 2,2)
         ax_range = [-4.5,4.5]
         fig['layout']['xaxis1'].update( range=ax_range)
         fig['layout']['xaxis2'].update( range=ax_range)
-        #fig['layout']['xaxis3'].update( range=ax_range)
-        #fig['layout']['xaxis4'].update( range=ax_range)
         fig['layout']['yaxis1'].update( range=ax_range)
         fig['layout']['yaxis2'].update( range=ax_range)
-        #fig['layout']['yaxis3'].update( range=ax_range)
-        #fig['layout']['yaxis4'].update( range=ax_range)
         fig['layout'].update(showlegend=False)
+        fig['layout']['xaxis1'].update( title="X Actual Position")
+        fig['layout']['xaxis2'].update( title="X Predicted Position")
+        fig['layout']['yaxis1'].update( title="Y Actual Position")
+        fig['layout']['yaxis2'].update( title="Y Predicted Position ")
 
         for t in plotStations(bases):
             fig.append_trace(t, 1,1)
-            #fig.append_trace(t, 1,2)
 
         if saveflag:
             py.offline.plot(fig, filename=dir_name + 'error-fig-iteration%d.html' % (iter_number))

@@ -93,7 +93,7 @@ for cfg_fn in cfg_fns:
         mobiles, bases, angles, phases = data_generation.generate_data(params['data__num_pts'],
                                                                params['data__num_stations'],
                                                                params ['data__ndims'],
-                                                               pts_r=3., bs_r=4,
+                                                               pts_r=3, bs_r=4,
                                                                bs_type=params['data__bs_type'],
                                                                points_type=params['data__data_dist'])
 
@@ -129,6 +129,7 @@ for cfg_fn in cfg_fns:
             elif params['data__data_type'] == 'angles':
                 data = angles
 
+        data = phases
 
         # for phase offset SMLP
         '''
@@ -140,12 +141,19 @@ for cfg_fn in cfg_fns:
 
 
         # split data
-        trainXs, trainY, testXs, testY = util.test_train_split(data, mobiles)
+        #trainXs, trainY, testXs, testY = util.test_train_split(data, mobiles)
+        #trainXs, trainY, testXs, testY = util.test_train_split(data, np.matrix(angles[:,0]).T)
+        #angles = angles[:,0].reshape(angles.shape[0],1)
+        #trainXs, trainY, testXs, testY = util.test_train_split(data, angles)
 
+
+        lower_model_l = []
+        lower_model_output_l = []
 
         if params['NN__type'] == "bmlp":
             model = models.BaseMLP(np.hstack(trainXs).shape[1], params['NN__network_size'],
-                                   params['data__ndims'], epsilon=params['NN__epsilon'])
+                                   1, epsilon=params['NN__epsilon'])
+                                   #params['data__ndims'], epsilon=params['NN__epsilon'])
         elif params['NN__type'] == 'smlp':
             model = models.StructuredMLP(None, params['NN__network_size'][0],
                                          params['NN__network_size'][1], params['data__ndims'],
@@ -154,7 +162,47 @@ for cfg_fn in cfg_fns:
             model = models.NBPStructuredMLP(trainXs[0].shape[1], params['NN__network_size'][0],
                                             params['NN__network_size'][1], params['data__ndims'],
                                             len(rep_idxs), epsilon=params['NN__epsilon'])
+        else:
+            #angles = angles[:,i].reshape(angles.shape[0],1)
+            trainXs, trainY, testXs, testY = util.test_train_split(data, angles)
 
+            for i in range(params['data__num_stations']):
+
+                print "model ", i
+                #model_lower = models.BaseMLP(np.hstack(trainXs).shape[1], [500,50,200,50],
+                #model_lower = models.BaseMLP(np.hstack(trainXs).shape[1]/3, [200,50],
+                model_lower = models.BaseMLP(np.hstack(trainXs).shape[1], [200,50],
+                                    1, epsilon=params['NN__epsilon'])
+
+                #loss = model_lower.trainModel([trainXs[0][:,i*3:(i+1)*3]], trainY[:,i].reshape(trainY.shape[0],1), [testXs[0][:,i*3:(i+1)*3]], testY[:,i].reshape(testY.shape[0], 1),
+                loss = model_lower.trainModel(trainXs, trainY[:,i].reshape(trainY.shape[0],1), testXs, testY[:,i].reshape(testY.shape[0], 1),
+                                    n_epoch=params['NN__n_epochs'],
+                                    batchsize=params['NN__batchsize'],
+                                    max_flag=params['NN__take_max'],
+                                    verbose=verbose)
+
+                # MC says note cheating :) ....
+                #predY, error = model_lower.testModel([data[:,(i*3):(i+1)*3].astype(np.float32)], angles[:,i].reshape(angles.shape[0], 1).astype(np.float32))
+                predY, error = model_lower.testModel([data.astype(np.float32)], angles[:,i].reshape(angles.shape[0], 1).astype(np.float32))
+                print np.mean(error)
+
+
+                lower_model_output_l.append( predY )
+                lower_model_l.append(model_lower)
+
+            pred_angles = np.hstack(lower_model_output_l)
+
+        rep_idxs = [comb for comb in itertools.combinations(range(params['data__num_stations']),2)]
+        pred_angles = data_generation.replicate_data(pred_angles, params['data__ndims'],  rep_idxs)
+
+        print "next model"
+        trainXs, trainY, testXs, testY = util.test_train_split(pred_angles, mobiles)
+
+        model = models.NBPStructuredMLP(trainXs[0].shape[1], params['NN__network_size'][0],
+                                            params['NN__network_size'][1], params['data__ndims'],
+                                            len(rep_idxs), epsilon=params['NN__epsilon'])
+
+        print "next model"
         # train model
         loss = model.trainModel(trainXs, trainY, testXs, testY,
                                    n_epoch=params['NN__n_epochs'],
@@ -171,7 +219,7 @@ for cfg_fn in cfg_fns:
         mobiles, bases, angles, phases = data_generation.generate_data(50*50,
                                                                params['data__num_stations'],
                                                                params ['data__ndims'],
-                                                               pts_r=3., bs_r=4,
+                                                               pts_r=3, bs_r=4,
                                                                bs_type=params['data__bs_type'], points_type="grid")
 
         if params['noise__addnoise_test']:
@@ -181,18 +229,6 @@ for cfg_fn in cfg_fns:
                                                                 base_idxs=params['noise__bases_to_noise'],
                                                                 noise_params=params['noise__noise_params'])
 
-            """
-            def unique_rows(a):
-                a = np.ascontiguousarray(a)
-                unique_a, idx = np.unique(a.view([('', a.dtype)]*a.shape[1]), return_index=True)
-                #return unique_a.view(a.dtype).reshape((unique_a.shape[0], a.shape[1]))
-                return idx
-
-            unique_idx = unique_rows(angles)
-            angles = angles[unique_idx,:]
-            mobiles = mobiles[unique_idx,:]
-            """
-
 
         if params['NN__type'] == 'snbp-mlp' or params['NN__type'] == 'smlp':
             if params['data__data_type'] == 'phases':
@@ -201,11 +237,27 @@ for cfg_fn in cfg_fns:
                 data = data_generation.replicate_data(angles, params['data__ndims'],  rep_idxs)
         elif params['NN__type'] == 'bmlp':
             if params['data__data_type'] == 'phases':
-                data = phases  
+                data = phases
             elif params['data__data_type'] == 'angles':
                 data = angles
 
-        trainXs, trainY, testXs, testY = util.test_train_split(data, mobiles, 0.)
+        data = phases
+
+        test_lower_model_output_l = []
+
+        trainXs, trainY, testXs, testY = util.test_train_split(data, angles, 0.)
+        for i,m in enumerate(lower_model_l):
+            # MC says not cheating :) ....
+            #predY, error = m.testModel(testXs, testY[:,i].reshape(testY.shape[0],1))
+            predY, error = m.testModel([data.astype(np.float32)], angles[:,i].reshape(angles.shape[0], 1).astype(np.float32))
+
+            test_lower_model_output_l.append( predY )
+
+        pred_angles = np.hstack(test_lower_model_output_l)
+        rep_idxs = [comb for comb in itertools.combinations(range(params['data__num_stations']),2)]
+        pred_angles = data_generation.replicate_data(pred_angles, params['data__ndims'],  rep_idxs)
+
+        trainXs, trainY, testXs, testY = util.test_train_split(pred_angles, mobiles, 0.)
 
         # test model
         predY, error = model.testModel(testXs, testY)

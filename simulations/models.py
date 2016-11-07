@@ -18,7 +18,7 @@ import time
 from Convert2Complex import *
 #plt.ion()
 
-used_antennas_per_bs = 3
+used_antennas_per_bs = 1
 
 class HingeMeanSquaredError(function.Function):
 
@@ -272,6 +272,8 @@ class BaseMLP(chainer.ChainList):
         y = self[-1](h_i)
 
 
+        #print y.data.shape ,t.data.shape
+        #assert False
         self.loss = hinge_mean_squared_error(y, t, self.epsilon)
         self.y = y
 
