@@ -181,6 +181,7 @@ for cfg_fn in cfg_fns:
                                                                 base_idxs=params['noise__bases_to_noise'],
                                                                 noise_params=params['noise__noise_params'])
 
+            """
             def unique_rows(a):
                 a = np.ascontiguousarray(a)
                 unique_a, idx = np.unique(a.view([('', a.dtype)]*a.shape[1]), return_index=True)
@@ -190,6 +191,7 @@ for cfg_fn in cfg_fns:
             unique_idx = unique_rows(angles)
             angles = angles[unique_idx,:]
             mobiles = mobiles[unique_idx,:]
+            """
 
 
         if params['NN__type'] == 'snbp-mlp' or params['NN__type'] == 'smlp':
