@@ -41,7 +41,7 @@ import data_generation as data_generation
 import plotting as plotting
 
 num_antennas_per_bs = 4
-used_antennas_per_bs = 3
+used_antennas_per_bs = 4
 use_dir = False 
 
 
@@ -89,6 +89,8 @@ for cfg_fn in cfg_fns:
     mean_errors = []
     std_errors = []
     for iter_number in range(params['exp_details__num_iterations_per_setting']):
+        ######## TRAINING SECTION #########
+
         # generate mobile points, base stations, and angles
         mobiles, bases, angles, phases = data_generation.generate_data(params['data__num_pts'],
                                                                params['data__num_stations'],
@@ -162,16 +164,13 @@ for cfg_fn in cfg_fns:
             model = models.NBPStructuredMLP(trainXs[0].shape[1], params['NN__network_size'][0],
                                             params['NN__network_size'][1], params['data__ndims'],
                                             len(rep_idxs), epsilon=params['NN__epsilon'])
-        else:
-            #angles = angles[:,i].reshape(angles.shape[0],1)
+        elif params['NN__type'] == 'e2e':
             trainXs, trainY, testXs, testY = util.test_train_split(data, angles)
 
+            # train the n base station phase->angle neural nets
             for i in range(params['data__num_stations']):
-
-                print "model ", i
-                #model_lower = models.BaseMLP(np.hstack(trainXs).shape[1], [500,50,200,50],
                 #model_lower = models.BaseMLP(np.hstack(trainXs).shape[1]/3, [200,50],
-                model_lower = models.BaseMLP(np.hstack(trainXs).shape[1], [200,50],
+                model_lower = models.BaseMLP(np.hstack(trainXs).shape[1], [500,50, 200,50],
                                     1, epsilon=params['NN__epsilon'])
 
                 #loss = model_lower.trainModel([trainXs[0][:,i*3:(i+1)*3]], trainY[:,i].reshape(trainY.shape[0],1), [testXs[0][:,i*3:(i+1)*3]], testY[:,i].reshape(testY.shape[0], 1),
@@ -184,36 +183,112 @@ for cfg_fn in cfg_fns:
                 # MC says note cheating :) ....
                 #predY, error = model_lower.testModel([data[:,(i*3):(i+1)*3].astype(np.float32)], angles[:,i].reshape(angles.shape[0], 1).astype(np.float32))
                 predY, error = model_lower.testModel([data.astype(np.float32)], angles[:,i].reshape(angles.shape[0], 1).astype(np.float32))
-                print np.mean(error)
+                print "Phase->Angle NN Error: ", np.mean(error)
 
+                # save angle predictions
+                lower_model_output_l.append(predY)
 
-                lower_model_output_l.append( predY )
+                # save each lower level model
                 lower_model_l.append(model_lower)
 
+            # combine all lower level angle predictions for all the base stations for use as input to upper layer nn
             pred_angles = np.hstack(lower_model_output_l)
 
-        rep_idxs = [comb for comb in itertools.combinations(range(params['data__num_stations']),2)]
-        pred_angles = data_generation.replicate_data(pred_angles, params['data__ndims'],  rep_idxs)
+            # replicate data for input to SMLP
+            rep_idxs = [comb for comb in itertools.combinations(range(params['data__num_stations']),2)]
+            pred_angles = data_generation.replicate_data(pred_angles, params['data__ndims'],  rep_idxs)
 
-        print "next model"
-        trainXs, trainY, testXs, testY = util.test_train_split(pred_angles, mobiles)
+            trainXs, trainY, testXs, testY = util.test_train_split(pred_angles, mobiles)
 
-        model = models.NBPStructuredMLP(trainXs[0].shape[1], params['NN__network_size'][0],
-                                            params['NN__network_size'][1], params['data__ndims'],
-                                            len(rep_idxs), epsilon=params['NN__epsilon'])
+            # upper layer NN model
+            model = models.NBPStructuredMLP(trainXs[0].shape[1], params['NN__network_size'][0],
+                                                params['NN__network_size'][1], params['data__ndims'],
+                                                len(rep_idxs), epsilon=params['NN__epsilon'])
 
-        print "next model"
-        # train model
-        loss = model.trainModel(trainXs, trainY, testXs, testY,
-                                   n_epoch=params['NN__n_epochs'],
-                                   batchsize=params['NN__batchsize'],
-                                   max_flag=params['NN__take_max'],
-                                   verbose=verbose)
+            loss = model.trainModel(trainXs, trainY, testXs, testY,
+                                       n_epoch=params['NN__n_epochs'],
+                                       batchsize=params['NN__batchsize'],
+                                       max_flag=params['NN__take_max'],
+                                       verbose=verbose)
 
-        f = open(dir_name + 'loss_iteration%d.txt' % (iter_number), 'w')
-        f.write("%f" % (loss))
-        f.close()
+            f = open(dir_name + 'loss_iteration%d.txt' % (iter_number), 'w')
+            f.write("%f" % (loss))
+            f.close()
 
+        elif params['NN__type'] == 'e2e-allstructured':
+            # create rep_idxs on a per-base station unit manner
+            rep_idxs = [comb for comb in itertools.combinations(range(params['data__num_stations']),2)]
+            # expand rep_idxs to be on an antenna unit manner
+            tmp = []
+            for x1,x2 in rep_idxs:
+                tmp.append(tuple(range(x1*used_antennas_per_bs,(x1*used_antennas_per_bs)+used_antennas_per_bs)) + tuple(range(x2*used_antennas_per_bs,(x2*used_antennas_per_bs)+used_antennas_per_bs)))
+            rep_idxs = tmp
+
+            # replicate data
+            data = data_generation.replicate_data(data, params['data__ndims'],  rep_idxs)
+
+            print "Data shape: ", data.shape
+            trainXs, trainY, testXs, testY = util.test_train_split(data, angles)
+
+            print "trainXs shape: ", trainXs[0].shape
+
+            # train the n base station phase->angle SMLPs
+            for i in range(params['data__num_stations']):
+                #model_lower = models.BaseMLP(np.hstack(trainXs).shape[1]/3, [200,50],
+
+
+                model_lower = models.NBPStructuredMLP(trainXs[0].shape[1], params['NN__network_size'][0],
+                                                params['NN__network_size'][1], 1,
+                                                len(rep_idxs), unit_per_bs=4, epsilon=params['NN__epsilon'])
+                            
+
+                #loss = model_lower.trainModel([trainXs[0][:,i*3:(i+1)*3]], trainY[:,i].reshape(trainY.shape[0],1), [testXs[0][:,i*3:(i+1)*3]], testY[:,i].reshape(testY.shape[0], 1),
+                loss = model_lower.trainModel(trainXs, trainY[:,i].reshape(trainY.shape[0],1), testXs, testY[:,i].reshape(testY.shape[0], 1),
+                                    n_epoch=params['NN__n_epochs'],
+                                    batchsize=params['NN__batchsize'],
+                                    max_flag=params['NN__take_max'],
+                                    verbose=verbose)
+
+                # MC says note cheating :) ....
+                #predY, error = model_lower.testModel([data[:,(i*3):(i+1)*3].astype(np.float32)], angles[:,i].reshape(angles.shape[0], 1).astype(np.float32))
+                predY, error = model_lower.testModel([data.astype(np.float32)], angles[:,i].reshape(angles.shape[0], 1).astype(np.float32))
+                print "Phase->Angle NN Error: ", np.mean(error)
+
+                # save angle predictions
+                lower_model_output_l.append(predY)
+
+                # save each lower level model
+                lower_model_l.append(model_lower)
+
+            # combine all lower level angle predictions for all the base stations for use as input to upper layer nn
+            pred_angles = np.hstack(lower_model_output_l)
+
+            # replicate data for input to SMLP
+            rep_idxs = [comb for comb in itertools.combinations(range(params['data__num_stations']),2)]
+            pred_angles = data_generation.replicate_data(pred_angles, params['data__ndims'],  rep_idxs)
+
+            trainXs, trainY, testXs, testY = util.test_train_split(pred_angles, mobiles)
+
+            # upper layer NN model
+            model = models.NBPStructuredMLP(trainXs[0].shape[1], params['NN__network_size'][0],
+                                                params['NN__network_size'][1], params['data__ndims'],
+                                                len(rep_idxs), epsilon=params['NN__epsilon'])
+
+            loss = model.trainModel(trainXs, trainY, testXs, testY,
+                                       n_epoch=params['NN__n_epochs'],
+                                       batchsize=params['NN__batchsize'],
+                                       max_flag=params['NN__take_max'],
+                                       verbose=verbose)
+
+            f = open(dir_name + 'loss_iteration%d.txt' % (iter_number), 'w')
+            f.write("%f" % (loss))
+            f.close()
+
+
+
+
+
+        ######## TEST SECTION #########
 
         # generate mobile points, base stations, and angles
         mobiles, bases, angles, phases = data_generation.generate_data(50*50,
@@ -243,17 +318,34 @@ for cfg_fn in cfg_fns:
 
         data = phases
 
+
+        # get angle by running phases through all of the lower level NNs
+        # trainXs, trainY, testXs, testY = util.test_train_split(data, angles, 0.)
         test_lower_model_output_l = []
 
-        trainXs, trainY, testXs, testY = util.test_train_split(data, angles, 0.)
+        
+        if params['NN__type'] == 'e2e-allstructured':
+            # create rep_idxs on a per-base station unit manner
+            rep_idxs = [comb for comb in itertools.combinations(range(params['data__num_stations']),2)]
+            # expand rep_idxs to be on an antenna unit manner
+            tmp = []
+            for x1,x2 in rep_idxs:
+                tmp.append(tuple(range(x1*used_antennas_per_bs,(x1*used_antennas_per_bs)+used_antennas_per_bs)) + tuple(range(x2*used_antennas_per_bs,(x2*used_antennas_per_bs)+used_antennas_per_bs)))
+            rep_idxs = tmp
+
+            # replicate data
+            data = data_generation.replicate_data(data, params['data__ndims'],  rep_idxs)
+
         for i,m in enumerate(lower_model_l):
             # MC says not cheating :) ....
             #predY, error = m.testModel(testXs, testY[:,i].reshape(testY.shape[0],1))
             predY, error = m.testModel([data.astype(np.float32)], angles[:,i].reshape(angles.shape[0], 1).astype(np.float32))
+            test_lower_model_output_l.append(predY)
 
-            test_lower_model_output_l.append( predY )
-
+        # combine all lower level angle predictions for all the base stations for use as input to upper layer nn
         pred_angles = np.hstack(test_lower_model_output_l)
+
+        # replicate data for input to SMLP
         rep_idxs = [comb for comb in itertools.combinations(range(params['data__num_stations']),2)]
         pred_angles = data_generation.replicate_data(pred_angles, params['data__ndims'],  rep_idxs)
 
@@ -269,8 +361,6 @@ for cfg_fn in cfg_fns:
 
         mean_errors.append(np.mean(error))
         std_errors.append(np.std(error))
-
-
 
         plotting.plot_error(testY, predY, error, bases,
                             "Num Stations: %d" % (params['data__num_stations']),

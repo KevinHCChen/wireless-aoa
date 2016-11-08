@@ -18,7 +18,7 @@ import time
 from Convert2Complex import *
 #plt.ion()
 
-used_antennas_per_bs = 1
+used_antennas_per_bs = 4
 
 class HingeMeanSquaredError(function.Function):
 
@@ -147,13 +147,15 @@ class StructuredMLP(chainer.ChainList):
 
 class NBPStructuredMLP():
 
-    def __init__(self, n_in, n_lower, n_upper, n_out, num_pairs, epsilon=0):
+    def __init__(self, n_in, n_lower, n_upper, n_out, num_pairs, unit_per_bs=1, epsilon=0):
         self.epsilon = epsilon
         self.ndim = n_out
         self.lower_models_l = [BaseMLP(n_in/num_pairs, n_lower,self.ndim, epsilon = self.epsilon)
                                for i in range(num_pairs)] 
 
         self.upper_model = BaseMLP(n_lower[-1]*num_pairs, n_upper, self.ndim, epsilon=self.epsilon)
+
+        self.unit_per_bs = unit_per_bs
 
 
     def trainModel(self, trainXs, trainY, testXs, testY, n_epoch=200, batchsize=100, max_flag=False, verbose=False):
@@ -167,11 +169,14 @@ class NBPStructuredMLP():
 
             tmp_trainXs = []
             tmp_testXs = []
-            if self.ndim == 2:
+            if self.ndim == 2 or self.ndim == 1:
                 # tmp_trainXs.append(trainXs[0][:,(i*self.ndim):(i*self.ndim)+self.ndim])
                 # tmp_testXs.append(testXs[0][:,(i*self.ndim):(i*self.ndim)+self.ndim])
-                tmp_trainXs.append(trainXs[0][:,(i*self.ndim)*used_antennas_per_bs:((i*self.ndim)+self.ndim)*used_antennas_per_bs])
-                tmp_testXs.append(testXs[0][:,(i*self.ndim)*used_antennas_per_bs:((i*self.ndim)+self.ndim)*used_antennas_per_bs])
+                # TODO WARNING FIX THIS
+                print "***********************\n***********************\nFIX MEEEEEEEEEEEEEEEE\n***********************\n***********************"
+
+                tmp_trainXs.append(trainXs[0][:,(i*2)*self.unit_per_bs:((i*2)+2)*self.unit_per_bs])
+                tmp_testXs.append(testXs[0][:,(i*2)*self.unit_per_bs:((i*2)+2)*self.unit_per_bs])
             elif self.ndim == 3:
                 tmp_trainXs.append(trainXs[0][:,(i*self.ndim*2):(i*self.ndim*2)+self.ndim*2])
                 tmp_testXs.append(testXs[0][:,(i*self.ndim*2):(i*self.ndim*2)+self.ndim*2])
@@ -223,9 +228,9 @@ class NBPStructuredMLP():
         output_testXs = []
         for i, model in enumerate(self.lower_models_l):
             tmp_testXs = []
-            if self.ndim == 2:
+            if self.ndim == 2 or self.ndim == 1:
                 # tmp_testXs.append(X[0][:,(i*self.ndim):(i*self.ndim)+self.ndim])
-                tmp_testXs.append(X[0][:,(i*self.ndim)*used_antennas_per_bs:((i*self.ndim)+self.ndim)*used_antennas_per_bs])
+                tmp_testXs.append(X[0][:,(i*2)*self.unit_per_bs:((i*2)+2)*self.unit_per_bs])
             elif self.ndim == 3:
                 tmp_testXs.append(X[0][:,(i*self.ndim*2):(i*self.ndim*2)+self.ndim*2])
 
