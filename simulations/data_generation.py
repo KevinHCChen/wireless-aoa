@@ -103,7 +103,7 @@ def generate_from_real_data(parsed_data):
     # true_angles %= 360
 
     angles = []
-    for run_number in range(parsed_data.shape[0]):
+    for run_number in range(parsed_data.shape[1]):
         # xx= 180. - parsed_data[1,run_number,:,:].T.ravel()
         # print xx.shape
         # print xx
@@ -135,6 +135,68 @@ def generate_from_real_data(parsed_data):
     # assert False, 'Snapp, I cant believe this worked'
 
 
+def generate_phases_from_real_data(parsed_data):
+    base_stations = [((-3.58,0), [90.]),((0, 2.726), [180.]), ((3.58,0), [270.])]
+    virt_x=np.tile(np.linspace(-2.5,2.5, 6), 5)
+    virt_y=np.repeat(np.linspace(-1.6,1.6, 5), 6)
+
+    mobiles = np.vstack((virt_x, virt_y)).T
+    mobiles = np.tile(mobiles,(parsed_data.shape[1],1))
+
+
+    ## probably working ##
+    phases = []
+    for run_number in range(parsed_data.shape[1]):
+
+        # this_run_phases = np.vstack(([180. - parsed_data[i,run_number,:,:,:].T.ravel() for i in range(parsed_data.shape[0])]))
+        # this_run_phases = np.hstack(([np.vstack(([180. - parsed_data[i,run_number,:,:,j].T.ravel() for i in range(parsed_data.shape[0])])) for j in range(parsed_data.shape[4])]))
+        # this_run_phases = np.vstack(([180. - parsed_data[i,run_number,:,:,:].T.ravel() for i in range(parsed_data.shape[0])]))
+        this_run_phases = np.vstack(([parsed_data[i,run_number,:,:,:].T.ravel() for i in range(parsed_data.shape[0])]))
+        print this_run_phases.shape
+        this_run_phases = this_run_phases.reshape(this_run_phases.shape[0]*4,-1)
+        phases.append(this_run_phases.T)
+
+
+    phases = np.vstack(phases)
+
+
+    phases = (phases + np.abs(np.min(phases)))/(np.max(phases)+np.abs(np.min(phases)))
+
+    # print phases
+    # print phases.shape
+    # assert False
+
+    ## ------ ##
+
+
+    ## probably NOT working ##
+    '''
+    phases = []
+    for run_number in range(parsed_data.shape[1]):
+
+        # this_run_phases = np.vstack(([180. - parsed_data[i,run_number,:,:,:].T.ravel() for i in range(parsed_data.shape[0])]))
+        # this_run_phases = np.hstack(([np.vstack(([180. - parsed_data[i,run_number,:,:,j].T.ravel() for i in range(parsed_data.shape[0])])) for j in range(parsed_data.shape[4])]))
+        # this_run_phases = np.vstack(([180. - parsed_data[i,run_number,:,:,:].T.ravel() for i in range(parsed_data.shape[0])]))
+        this_run_phases = []
+        for bs_number in range(parsed_data.shape[0]):
+            this_run_phases.append(np.vstack(([parsed_data[bs_number,run_number,:,:,antenna_number].T.ravel() for antenna_number in range(parsed_data.shape[4])])))
+            # print this_run_phases[0].shape
+            # assert False
+
+        this_run_phases = np.hstack((this_run_phases))
+        phases.append(this_run_phases)
+
+
+    phases = np.vstack(phases).T
+
+    # print "Here: ", phases.shape
+    # assert False
+    '''
+    ## ------ ##
+
+
+
+    return mobiles, base_stations, phases
 
 
 
