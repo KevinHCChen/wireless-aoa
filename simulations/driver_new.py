@@ -42,10 +42,40 @@ import plotting as plotting
 
 num_antennas_per_bs = 4
 used_antennas_per_bs = 4
-use_dir = False 
+use_dir = False
 
 def normalize(d, d_min, d_max):
     return  (d + d_min)/(d_max+d_min)
+
+def normalize_cols(d):
+    for i in range(d.shape[1]):
+        d[:,i] = (d[:, i] + np.abs(np.min(d[:,i])))/(np.max(d[:,i]) + np.abs(np.min(d[:,i])))
+    return d
+
+def normalize_cols_data(d, d_min, d_max):
+    for i in range(d.shape[1]):
+        d[:,i] = (d[:, i] + d_min[i])/(d_max[i] + d_min[i])
+    return d
+
+
+def normalize_unit(d):
+    for i in range(d.shape[1]):
+        d[:,i] = (d[:, i])/ np.linalg.norm(d[:,i]) 
+    return d
+
+def normalize_unitAndCol(d, d_min=None, d_max=None):
+    d = normalize_unit(d)
+    if d_min is None:
+        d_min = np.abs(np.min(d, axis=0))
+        d_max= np.max(d, axis=0)
+    d = normalize_cols_data(d, d_min, d_max)
+    return d, d_min, d_max
+
+def zero_mean(d):
+    for i in range(d.shape[1]):
+        d[:,i] = d[:,i] - np.mean(d[:,i])
+    return d 
+
 
 if configfile:
     cfg_fns = [configfile]
@@ -86,13 +116,14 @@ for cfg_fn in cfg_fns:
     df = pd.DataFrame(util.parseParams(params))
 
     """
-    plotting to show the reason for errors - trying normalization now
-    In [116]: plt.plot(tr_data[:,0], 'b')  
-     ...: plt.plot(pred_angles_test[:,0], 'g')
-     ...: plt.plot(pred_angles_tr[:,0], 'c')
-     ...: plt.plot(angles[:,0], 'm')
-     ...: plt.plot(test_data[:,0], 'r')
-     ...: plt.show()
+    In [30]: for i in range(12):
+    ...:     plt.figure()
+    ...:     plt.plot(tr_data[:,i], 'b')
+    ...:     plt.plot(test_data[:,i], 'r')
+    ...:     plt.plot(pred_angles_test[:,i/4], 'g')
+    ...:     plt.plot(pred_angles_tr[:,i/4], 'c')
+    ...:     plt.plot(angles[:,i/4], 'm')
+    ...: plt.show()
     """
 
 
@@ -106,6 +137,7 @@ for cfg_fn in cfg_fns:
 
         mobiles, bases, phases = data_generation.generate_phases_from_real_data(
             np.load('../data/numpy_data/2016-9-20_day1_rawPhase_median.npz')['all_samples'])
+            #np.load('../data/numpy_data/2016-9-24_day3_inside_rawPhase.npz')['all_samples'])
             #np.load('../data/numpy_data/2016-9-20_day1_rawPhase.npz')['all_samples'])
             #np.load('../data/numpy_data/2016-9-21_day2_rawPhase.npz')['all_samples'])
             #np.load('../data/numpy_data/2016-9-21_day2_rawPhase_angle.npz')['all_samples'])
@@ -119,10 +151,23 @@ for cfg_fn in cfg_fns:
         lower_model_output_l = []
 
 
-        data_min = np.abs(np.min(phases))
-        data_max= np.max(phases)
-        data = normalize(phases, data_min, data_max) 
-        data = phases
+        #data = normalize(phases, data_min, data_max)
+        #data = normalize_cols(phases)
+        #data = phases
+        #data = normalize_cols(phases)
+
+        #phases_avg = np.zeros((phases.shape[0], 3))
+        #for i in range(3):
+        #    phases_avg[:,i] = np.mean(phases[:,i*4:(i+1)*4], axis=1)
+        #data, data_min, data_max = normalize_unitAndCol(phases_avg)
+
+        data_min = np.abs(np.min(phases, axis=0))
+        data_max= np.max(phases, axis=0)
+        #data, data_min, data_max = normalize_unitAndCol(phases)
+        #data = normalize_unit(phases)
+        #data = normalize_cols_data(phases, data_min, data_max)
+        data = zero_mean(phases)
+        # just a copy for plotting
         tr_data = np.copy(data)
 
         trainXs, trainY, testXs, testY = util.test_train_split(data, angles)
@@ -130,7 +175,7 @@ for cfg_fn in cfg_fns:
         # train the n base station phase->angle neural nets
         for i in range(params['data__num_stations']):
             # this will use all phase data from all base stations
-            model_lower = models.BaseMLP(np.hstack(trainXs).shape[1], [500,50], 
+            model_lower = models.BaseMLP(np.hstack(trainXs).shape[1], [500,50, 200,50],
                                 1, epsilon=params['NN__epsilon'])
 
             # this model uses only one base station at a time to train - bs models
@@ -165,8 +210,8 @@ for cfg_fn in cfg_fns:
         pred_angles_tr = np.copy(pred_angles)
 
         # replicate data for input to SMLP
-        trainXs, trainY, testXs, testY = util.test_train_split(pred_angles, mobiles)
-        #trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles)
+        #trainXs, trainY, testXs, testY = util.test_train_split(pred_angles, mobiles)
+        trainXs, trainY, testXs, testY = util.test_train_split(angles, mobiles)
 
         # upper layer NN model
         # model = models.NBPStructuredMLP(trainXs[0].shape[1], params['NN__network_size'][0],
@@ -182,6 +227,9 @@ for cfg_fn in cfg_fns:
                                     max_flag=params['NN__take_max'],
                                     verbose=verbose)
 
+        _ , error = model.testModel(testXs, testY)
+        print "Training error upper: ", np.mean(error)
+
         f = open(dir_name + 'loss_iteration%d.txt' % (iter_number), 'w')
         f.write("%f" % (loss))
         f.close()
@@ -194,13 +242,24 @@ for cfg_fn in cfg_fns:
         # generate mobile points, base stations, and angles
         mobiles, bases, phases = data_generation.generate_phases_from_real_data(
             np.load('../data/numpy_data/2016-9-21_day2_rawPhase_median.npz')['all_samples'])
-            #np.load('../data/numpy_data/2016-9-20_day1_rawPhase_median.npz')['all_samples'])
+            #np.load('../data/numpy_data/2016-9-25_day4_inside_rawPhase.npz')['all_samples'])
             #np.load('../data/numpy_data/2016-9-21_day2_rawPhase.npz')['all_samples'])
+            #np.load('../data/numpy_data/2016-9-20_day1_rawPhase_median.npz')['all_samples'])
             #np.load('../data/numpy_data/2016-9-20_day1_rawPhase.npz')['all_samples'])
             #np.load('../data/numpy_data/2016-9-20_day1_rawPhase_angle.npz')['all_samples'])
 
         #data = normalize(phases, data_min, data_max)
-        data = phases
+        #data = phases
+        #data = normalize_unitAndCol(phases, data_min, data_max)
+        # phases_avg = np.zeros((phases.shape[0], 3))
+        # for i in range(3):
+        #     phases_avg[:,i] = np.mean(phases[:,i*4:(i+1)*4], axis=1)
+        # data, _, _ = normalize_unitAndCol(phases_avg, data_min, data_max)
+
+        #data, _, _ = normalize_unitAndCol(phases, data_min, data_max)
+        #data = normalize_unit(phases)
+        #data = normalize_cols_data(phases, data_min, data_max)
+        data = zero_mean(phases)
         test_data = np.copy(data)
 
 
