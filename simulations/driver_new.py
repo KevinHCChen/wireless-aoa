@@ -85,6 +85,16 @@ for cfg_fn in cfg_fns:
 
     df = pd.DataFrame(util.parseParams(params))
 
+    """
+    plotting to show the reason for errors - trying normalization now
+    In [116]: plt.plot(tr_data[:,0], 'b')  
+     ...: plt.plot(pred_angles_test[:,0], 'g')
+     ...: plt.plot(pred_angles_tr[:,0], 'c')
+     ...: plt.plot(angles[:,0], 'm')
+     ...: plt.plot(test_data[:,0], 'r')
+     ...: plt.show()
+    """
+
 
     all_predY = None
     all_error = None
