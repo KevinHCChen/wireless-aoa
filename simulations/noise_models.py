@@ -94,7 +94,7 @@ def add_angle_dependent_noise(data, ndim,  base_idxs=[-1],  noise_params={'noise
                                        scale=noise_params['std'],\
                                        size=(data.shape[0],ndim))
 
-                data_multiplier = nonlinear_effect_function(data, noise_params['k'], noise_params['j'])
+                data_multiplier = nonlinear_effect_function(data[:, (idx*3):(idx*3)+3], noise_params['k'], noise_params['j'])
 
                 gauss_noise = np.multiply(gauss_noise, data_multiplier)
 

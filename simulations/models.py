@@ -18,6 +18,8 @@ import time
 from Convert2Complex import *
 #plt.ion()
 
+
+
 class HingeMeanSquaredError(function.Function):
 
     def __init__(self, eps=0.):
