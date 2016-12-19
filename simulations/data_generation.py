@@ -75,6 +75,7 @@ def gen_basestations(num_bases, ndim, r=4, bs_type="unit"):
     elif bs_type=="structured":
         #bases = [[((4,0), [90.]), ((0,-4), [0.])],[((4,0), [90.]), ((0,4), [0.])]]
         bases = [((4,0), [0.]), ((-4,0), [0.]), ((0,4), [0.])]
+        #bases = [((4,4), [0.]), ((-4,4), [0.]), ((0,4), [0.])]
         #bases = [((4,0), [90.]), ((0,4), [0.]), ((-4,0), [90.]), ((0,4), [0.])]
     elif bs_type=="structured-3D":
         bases = [((4,0,0), [90.,90.]), ((-4,0,0), [90.,90.]), ((0,4,0), [180.,90.])]
@@ -99,8 +100,6 @@ def generate_from_real_data(parsed_data):
 
     mobiles = np.vstack((virt_x, virt_y)).T
     mobiles = np.tile(mobiles,(parsed_data.shape[1],1))
-    # true_angles = get_mobile_angles(base_stations, mobiles, 2)
-    # true_angles %= 360
 
     angles = []
     for run_number in range(parsed_data.shape[1]):
@@ -112,16 +111,6 @@ def generate_from_real_data(parsed_data):
         angles.append(this_run_angles.T)
 
     angles = np.vstack(angles)
-    # angles = angles.T
-    # print angles
-    # print angles.shape
-    # print mobiles
-    # assert False
-
-    # angles = np.vstack(([np.hstack(([180. - parsed_data[i,j,:,:].T.ravel() for i in range(parsed_data.shape[0])]))\
-                                                                           # for j in range(parsed_data.shape[1])]))
-
-    # angles = angles.T
 
 
     angles %= 360
@@ -166,13 +155,9 @@ def generate_phases_from_real_data(parsed_data):
 
 
 
-
-
 def get_angle(mobile_loc, base_loc, base_theta):
     y = mobile_loc[1] -  base_loc[1]
     x = mobile_loc[0] -  base_loc[0]
-    # print "ML: ", mobile_loc
-    # print "BL: ", base_loc
     hyp = euclidean(mobile_loc, base_loc)
 
     if y < 0:
@@ -220,14 +205,7 @@ def get_mobile_angles(bases, mobiles, ndim):
         #   mobile_angles.append([[get_angle(mobile_loc, base[0], base[1][0]) for base in bases] for mobile_loc in mobiles])
         assert mobiles.shape[1]==2, "Mobiles must have 2 columns!"
         mobile_angles.append([[get_angle(mobile_loc, base[0], base[1][0]) for base in bases] for mobile_loc in mobiles])
-        #t1
         angles_output = np.vstack(mobile_angles)
-        #t2
-        # angles_output = np.hstack(mobile_angles)
-        # t3
-        # angles_output = mobile_angles
-        # print "AO: ", angles_output.shape
-        # assert False
     elif ndim == 3:
         mobile_angles = [[get3D_angles(mobile_loc, base[0], base[1]) for base in bases] for mobile_loc in mobiles]
 

@@ -245,6 +245,7 @@ for cfg_fn in cfg_fns:
     df_all = df_all.append(df, ignore_index=True)
 
     print np.mean(mean_errors)
+    print "Error in meter", np.sqrt(np.mean(mean_errors))
 
     # print out warning if figures not saved
     if params['exp_details__save']:

@@ -20,6 +20,7 @@ from Convert2Complex import *
 
 used_antennas_per_bs = 4
 
+
 class HingeMeanSquaredError(function.Function):
 
     def __init__(self, eps=0.):
