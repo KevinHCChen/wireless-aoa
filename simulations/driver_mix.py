@@ -106,30 +106,27 @@ for cfg_fn in cfg_fns:
 
         
 
-        # mobiles, bases, phases = data_generation.generate_phases_from_real_data(np.load('../data/numpy_data/2016-9-20_day1_rawPhase.npz')['all_samples'])
-        # mobiles, bases, angles = data_generation.generate_from_real_data(np.load('../data/numpy_data/2016-9-20_day1.npz')['all_samples'])
-        mobiles, bases, phases = data_generation.generate_phases_from_real_data(np.load('../data/numpy_data/2016-9-20_day1_rawPhase_norm.npz')['all_samples'])
+        ###### WEIRD MIXING #######
+        mobiles, bases, phases_1 = data_generation.generate_phases_from_real_data(np.load('../data/numpy_data/2016-9-20_day1_rawPhase.npz')['all_samples'])
+        mobiles, bases, phases_2 = data_generation.generate_phases_from_real_data(np.load('../data/numpy_data/2016-9-21_day2_rawPhase.npz')['all_samples'])
 
-        # print "1: ", phases.shape
-        # for i in range(3):
-        #     phases[:,i*4:(i+1)*4] -= np.tile(phases[:,i*4],(4,1)).T
-
-        # print "2: ", phases.shape
-
-        # phases = np.hstack((phases[:,1:4],phases[:,5:8],phases[:,9:]))
-        # print "3: ", phases.shape
-
-        phases = zero_mean(phases)
+        all_phases = np.vstack((phases_1, phases_2))
+        all_phases = zero_mean(all_phases)
 
         print "Angles Real 1##########"
         # print angles[:10]
-        print phases[:10]
         angles = data_generation.get_mobile_angles(bases, mobiles, 2)
         angles %= 360
         angles /= 360.
         angles = np.nan_to_num(angles)
-        print "Angles Computer 1##########"
-        print angles[:10]
+
+
+        all_angles = np.vstack((angles, angles))
+        all_mobiles = np.vstack((mobiles, mobiles))
+
+        train_phases, train_angles, train_mobiles, test_phases, test_angles, test_mobiles = util.test_train_split_3(all_phases, all_angles, all_mobiles)
+
+        
 
         # generate mobile points, base stations, and angles
         # mobiles, bases, angles, phases = data_generation.generate_data(params['data__num_pts'],
@@ -174,7 +171,8 @@ for cfg_fn in cfg_fns:
             elif params['data__data_type'] == 'angles':
                 data = angles
 
-        data = phases
+        data = train_phases
+
 
         # for phase offset SMLP
         '''
@@ -225,7 +223,7 @@ for cfg_fn in cfg_fns:
             f.write("%f" % (loss))
             f.close()
         elif params['NN__type'] == 'e2e':
-            trainXs, trainY, testXs, testY = util.test_train_split(data, angles)
+            trainXs, trainY, testXs, testY = util.test_train_split(data, train_angles)
 
             # train the n base station phase->angle neural nets
             for i in range(params['data__num_stations']):
@@ -242,8 +240,8 @@ for cfg_fn in cfg_fns:
 
                 # MC says note cheating :) ....
                 #predY, error = model_lower.testModel([data[:,(i*3):(i+1)*3].astype(np.float32)], angles[:,i].reshape(angles.shape[0], 1).astype(np.float32))
-                predY, error = model_lower.testModel([data.astype(np.float32)], angles[:,i].reshape(angles.shape[0], 1).astype(np.float32))
-                print "ERRORS [Pred, Real]: \n ", np.hstack((predY[:20],angles[:,i].reshape(angles.shape[0], 1).astype(np.float32)[:20]))
+                predY, error = model_lower.testModel([data.astype(np.float32)], train_angles[:,i].reshape(train_angles.shape[0], 1).astype(np.float32))
+                print "ERRORS [Pred, Real]: \n ", np.hstack((predY[:20],train_angles[:,i].reshape(train_angles.shape[0], 1).astype(np.float32)[:20]))
                 print "Phase->Angle NN Error: ", np.mean(error)
 
                 # save angle predictions
@@ -259,7 +257,7 @@ for cfg_fn in cfg_fns:
             rep_idxs = [comb for comb in itertools.combinations(range(params['data__num_stations']),2)]
             pred_angles = data_generation.replicate_data(pred_angles, params['data__ndims'],  rep_idxs)
 
-            trainXs, trainY, testXs, testY = util.test_train_split(pred_angles, mobiles)
+            trainXs, trainY, testXs, testY = util.test_train_split(pred_angles, train_mobiles)
 
             # upper layer NN model
             model = models.NBPStructuredMLP(trainXs[0].shape[1], params['NN__network_size'][0],
@@ -362,16 +360,8 @@ for cfg_fn in cfg_fns:
         #                                                        params ['data__ndims'],
         #                                                        pts_r=3, bs_r=4,
         #                                                        bs_type=params['data__bs_type'], points_type="grid")
-        # mobiles, bases, phases = data_generation.generate_phases_from_real_data(np.load('../data/numpy_data/2016-9-21_day2_rawPhase.npz')['all_samples'])
+        mobiles, bases, phases = data_generation.generate_phases_from_real_data(np.load('../data/numpy_data/2016-9-21_day2_rawPhase.npz')['all_samples'])
         # mobiles, bases, angles = data_generation.generate_from_real_data(np.load('../data/numpy_data/2016-9-21_day2.npz')['all_samples'])
-        mobiles, bases, phases = data_generation.generate_phases_from_real_data(np.load('../data/numpy_data/2016-9-21_day2_rawPhase_norm.npz')['all_samples'])
-
-
-        # for i in range(3):
-        #     phases[:,i*4:(i+1)*4] -= np.tile(phases[:,i*4],(4,1)).T
-
-        # phases = np.hstack((phases[:,1:4],phases[:,5:8],phases[:,9:]))
-
 
         phases = zero_mean(phases)
 
@@ -405,7 +395,7 @@ for cfg_fn in cfg_fns:
             elif params['data__data_type'] == 'angles':
                 data = angles
 
-        data = phases
+        data = test_phases
 
 
         # get angle by running phases through all of the lower level NNs
@@ -431,10 +421,10 @@ for cfg_fn in cfg_fns:
             for i,m in enumerate(lower_model_l):
                 # MC says not cheating :) ....
                 #predY, error = m.testModel(testXs, testY[:,i].reshape(testY.shape[0],1))
-                predY, error = m.testModel([data.astype(np.float32)], angles[:,i].reshape(angles.shape[0], 1).astype(np.float32))
+                predY, error = m.testModel([data.astype(np.float32)], test_angles[:,i].reshape(test_angles.shape[0], 1).astype(np.float32))
                 # print "PRED Y 2:", predY[:20]
                 # print "ACTUAL 2:", angles[:,i].reshape(angles.shape[0], 1).astype(np.float32)[:20]
-                print "ERRORS [Pred, Real]: \n ", np.hstack((predY[:20],angles[:,i].reshape(angles.shape[0], 1).astype(np.float32)[:20]))
+                print "ERRORS [Pred, Real]: \n ", np.hstack((predY[:20], test_angles[:,i].reshape(test_angles.shape[0], 1).astype(np.float32)[:20]))
                 print "Testing Phase->Angle NN Error: ", np.mean(error)
                 test_lower_model_output_l.append(predY)
 
@@ -445,7 +435,7 @@ for cfg_fn in cfg_fns:
             rep_idxs = [comb for comb in itertools.combinations(range(params['data__num_stations']),2)]
             pred_angles = data_generation.replicate_data(pred_angles, params['data__ndims'],  rep_idxs)
 
-            trainXs, trainY, testXs, testY = util.test_train_split(pred_angles, mobiles, 0.)
+            trainXs, trainY, testXs, testY = util.test_train_split(pred_angles, test_mobiles, 0.)
 
             # test model
             predY, error = model.testModel(testXs, testY)
@@ -516,3 +506,4 @@ if not os.path.exists(res_dir_folder):
 
 res_dir_name = "%s/%s__%s.csv" % (res_dir_folder, config.get("exp_details", "setname"), datetime.datetime.now().strftime("%m_%d_%Y_%I:%M:%S%p"))
 df_all.to_csv(res_dir_name)
+

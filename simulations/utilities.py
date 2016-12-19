@@ -58,6 +58,28 @@ def test_train_split(X, Y, training_size=0.8):
     return trainXs, trainY, testXs, testY
 
 
+def test_train_split_3(X, Y, Z, training_size=0.8):
+    trainXs, testXs  = [], []
+
+    idx = np.random.permutation(range(X.shape[0]))
+    tr_idx = idx[:X.shape[0]*training_size]
+    test_idx = idx[X.shape[0]*training_size:]
+
+    # trainXs.append( X[tr_idx,:].astype(np.float32))
+    # testXs.append( X[test_idx,:].astype(np.float32))
+    trainXs = X[tr_idx,:].astype(np.float32)
+    testXs = X[test_idx,:].astype(np.float32)
+
+    # Could be a list??? Comiter thinks so....
+    trainY = Y[tr_idx,:].astype(np.float32)
+    testY = Y[test_idx,:].astype(np.float32)
+
+    trainZ = Z[tr_idx,:].astype(np.float32)
+    testZ = Z[test_idx,:].astype(np.float32)
+
+    return trainXs, trainY, trainZ, testXs, testY, testZ
+
+
 def parseParams(params):
     new_params = {}
     for param,_ in params.iteritems():

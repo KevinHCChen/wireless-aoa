@@ -106,18 +106,19 @@ for cfg_fn in cfg_fns:
 
         
 
-        # mobiles, bases, phases = data_generation.generate_phases_from_real_data(np.load('../data/numpy_data/2016-9-20_day1_rawPhase.npz')['all_samples'])
+        mobiles, bases, phases = data_generation.generate_phases_from_real_data(np.load('../data/numpy_data/2016-9-24_day3_inside_rawPhase.npz')['all_samples'])
         # mobiles, bases, angles = data_generation.generate_from_real_data(np.load('../data/numpy_data/2016-9-20_day1.npz')['all_samples'])
-        mobiles, bases, phases = data_generation.generate_phases_from_real_data(np.load('../data/numpy_data/2016-9-20_day1_rawPhase_norm.npz')['all_samples'])
 
-        # print "1: ", phases.shape
-        # for i in range(3):
-        #     phases[:,i*4:(i+1)*4] -= np.tile(phases[:,i*4],(4,1)).T
 
-        # print "2: ", phases.shape
+        num_repeat_for_more_data_please_work = 20
 
-        # phases = np.hstack((phases[:,1:4],phases[:,5:8],phases[:,9:]))
-        # print "3: ", phases.shape
+        additional_copies_phases = np.repeat(phases, num_repeat_for_more_data_please_work, axis=0)
+        additional_copies_phases += np.random.normal(loc=0, scale=0.05, size=additional_copies_phases.shape)
+
+        mobiles = np.repeat(mobiles, num_repeat_for_more_data_please_work, axis=0)
+
+        phases = additional_copies_phases
+
 
         phases = zero_mean(phases)
 
@@ -130,6 +131,8 @@ for cfg_fn in cfg_fns:
         angles = np.nan_to_num(angles)
         print "Angles Computer 1##########"
         print angles[:10]
+
+        # angles = np.repeat(angles, num_repeat_for_more_data_please_work, axis=0)
 
         # generate mobile points, base stations, and angles
         # mobiles, bases, angles, phases = data_generation.generate_data(params['data__num_pts'],
@@ -225,7 +228,7 @@ for cfg_fn in cfg_fns:
             f.write("%f" % (loss))
             f.close()
         elif params['NN__type'] == 'e2e':
-            trainXs, trainY, testXs, testY = util.test_train_split(data, angles)
+            trainXs, trainY, testXs, testY = util.test_train_split(data, angles, 0.99)
 
             # train the n base station phase->angle neural nets
             for i in range(params['data__num_stations']):
@@ -259,7 +262,7 @@ for cfg_fn in cfg_fns:
             rep_idxs = [comb for comb in itertools.combinations(range(params['data__num_stations']),2)]
             pred_angles = data_generation.replicate_data(pred_angles, params['data__ndims'],  rep_idxs)
 
-            trainXs, trainY, testXs, testY = util.test_train_split(pred_angles, mobiles)
+            trainXs, trainY, testXs, testY = util.test_train_split(pred_angles, mobiles, 0.99)
 
             # upper layer NN model
             model = models.NBPStructuredMLP(trainXs[0].shape[1], params['NN__network_size'][0],
@@ -362,16 +365,8 @@ for cfg_fn in cfg_fns:
         #                                                        params ['data__ndims'],
         #                                                        pts_r=3, bs_r=4,
         #                                                        bs_type=params['data__bs_type'], points_type="grid")
-        # mobiles, bases, phases = data_generation.generate_phases_from_real_data(np.load('../data/numpy_data/2016-9-21_day2_rawPhase.npz')['all_samples'])
+        mobiles, bases, phases = data_generation.generate_phases_from_real_data(np.load('../data/numpy_data/2016-9-25_day4_inside_rawPhase.npz')['all_samples'])
         # mobiles, bases, angles = data_generation.generate_from_real_data(np.load('../data/numpy_data/2016-9-21_day2.npz')['all_samples'])
-        mobiles, bases, phases = data_generation.generate_phases_from_real_data(np.load('../data/numpy_data/2016-9-21_day2_rawPhase_norm.npz')['all_samples'])
-
-
-        # for i in range(3):
-        #     phases[:,i*4:(i+1)*4] -= np.tile(phases[:,i*4],(4,1)).T
-
-        # phases = np.hstack((phases[:,1:4],phases[:,5:8],phases[:,9:]))
-
 
         phases = zero_mean(phases)
 
@@ -379,12 +374,12 @@ for cfg_fn in cfg_fns:
         print "Angles Real 2##########"
         print angles[:10]
         print phases[:10]
-        # angles = data_generation.get_mobile_angles(bases, mobiles, 2)
-        # angles %= 360
-        # angles /= 360.
-        # angles = np.nan_to_num(angles)
-        # print "Angles Computer 2##########"
-        # print angles[:10]
+        angles = data_generation.get_mobile_angles(bases, mobiles, 2)
+        angles %= 360
+        angles /= 360.
+        angles = np.nan_to_num(angles)
+        print "Angles Computer 2##########"
+        print angles[:10]
 
         if params['noise__addnoise_test']:
             angles, phases, mobiles = noise_models.add_noise_dispatcher(angles, phases, mobiles, params['data__data_type'],
