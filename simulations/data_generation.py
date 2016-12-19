@@ -137,6 +137,7 @@ def generate_from_real_data(parsed_data):
 
 def generate_phases_from_real_data(parsed_data):
     base_stations = [((-3.58,0), [90.]),((0, 2.726), [180.]), ((3.58,0), [270.])]
+    base_stations = [((-3.58,2), [90.]),((0, 2.726), [180.]), ((3.58,2), [270.])]
     virt_x=np.tile(np.linspace(-2.5,2.5, 6), 5)
     virt_y=np.repeat(np.linspace(-1.6,1.6, 5), 6)
 
