@@ -173,7 +173,8 @@ for cfg_fn in cfg_fns:
         f.write("Error Standard Deviation: %f\n" % (np.std(error)))
         f.close()
 
-        mean_errors.append(np.mean(error))
+        #mean_errors.append(np.mean(error))
+        mean_errors.append(np.median(error))
         std_errors.append(np.std(error))
 
 
