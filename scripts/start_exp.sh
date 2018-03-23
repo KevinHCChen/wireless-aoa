@@ -9,7 +9,8 @@ DELL_RX=192.168.12.61
 REF=/root/aoa/ones1000.dat
 FREQ=916000000
 RATE=500000
-RX=$2
+#RX=$2
+RX=4
 BURST=2
 
 # sudo ifconfig en5 192.168.12.77 up
@@ -29,7 +30,8 @@ ssh root@$DELL_TX "sysctl -w net.core.rmem_max=50000000"
 echo "Starting RX - Run $1"
 #ssh root@$DELL_RX "sh -c 'nohup  /root/aoa/4rx_to_file \\
 if [ $RX -eq 4 ]; then
-  ssh root@$DELL_RX "sh -c 'nohup  /root/aoa/GEN_rx_to_file --freq=$FREQ --rate=$RATE --gain=25 --run=$1 --runtime 4 --ip1=addr=192.168.11.15  --ip2=addr=192.168.11.16  --ip3=addr=192.168.11.18  --ip4=addr=192.168.11.20 > /dev/null 2>&1 &'"
+  #ssh root@$DELL_RX "sh -c 'nohup  /root/aoa/GEN_rx_to_file --freq=$FREQ --rate=$RATE --gain=25 --run=$1 --runtime 4 --ip1=addr=192.168.11.15  --ip2=addr=192.168.11.16  --ip3=addr=192.168.11.18  --ip4=addr=192.168.11.20 > /dev/null 2>&1 &'"
+  ssh root@$DELL_RX "sh -c 'nohup  /root/aoa/GEN_rx_to_file --freq=$FREQ --rate=$RATE --gain=25 --run=$1 --runtime 4 --ip1=addr=192.168.11.14  --ip2=addr=192.168.11.15  --ip3=addr=192.168.11.16  --ip4=addr=192.168.11.18 > /dev/null 2>&1 &'"
   sleep 2.5
 elif [ $RX -eq 3 ]; then
   ssh root@$DELL_RX "sh -c 'nohup  /root/aoa/GEN_rx_to_file --freq=$FREQ --rate=$RATE --gain=25 --run=$1 --runtime 8 --ip1=addr=192.168.11.20  --ip2=addr=192.168.11.21 --ip3=addr=192.168.11.22 > /dev/null 2>&1 &'"

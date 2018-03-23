@@ -1,3 +1,5 @@
 #!/usr/bin/zsh
 source /home/mcrouse/.zshrc
-python driver_base.py -d ../batch_exp_configs/experiment1_multiple_09022016_1030am/ -s 10 -e 14
+git checkout master
+git pull origin master
+python driver_base.py -d batch_exp_configs/exp2_gaussian_median/ -s 18 -e 21

@@ -168,7 +168,7 @@ for theta in (ANG/360.)*(2.*np.pi):
 plt.legend()
 
 
-
+"""
 if len(RUNS)==1:
     plt.figure(figsize=(8,4));
     plt.title('signal magnitude ('+str(run)+')')
@@ -177,9 +177,12 @@ if len(RUNS)==1:
     plt.legend()
 
     t = input('')
+"""
+t = input('')
+assert False
 
 
-
+"""
 ###
 # if False:
     # scp root@192.168.12.61:/root/aoa/data/*test.dat ../data/testdata/
@@ -191,7 +194,7 @@ if len(RUNS)==1:
 
     for x in raw_samples:
         print np.max(np.abs(x))
-
+"""
 
 
 

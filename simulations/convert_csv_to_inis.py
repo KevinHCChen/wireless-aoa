@@ -43,6 +43,8 @@ with open('experiment_set_csvs/%s.csv' % (config_name), 'rU') as f:
             f.write('# Epsilon is in terms of squared L2\n')
             if row[7] != '':
                 f.write('epsilon: %s\n' % (row[7]))
+            else:
+                f.write('epsilon: .02\n')
 
             f.write('\n')
             f.write('[data]\n')

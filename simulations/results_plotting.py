@@ -8,10 +8,11 @@ import argparse
 def plot_increased_training(data, out_file, exp_name=None):
     nn_sizes = np.sort(data['NN__network_size'].unique())
     net_types = np.sort(data['NN__type'].unique())
+    print nn_sizes
 
-    if exp_name:
-        data = data[data['exp_details__setname'].str.contains(exp_name)]
-        print data.shape
+    #if exp_name:
+    #    data = data[data['exp_details__setname'].str.contains(exp_name)]
+    #    print data.shape
     data_list = []
     for n_type in net_types:
         select = data[data['NN__type'] == n_type]
@@ -37,6 +38,43 @@ def plot_increased_training(data, out_file, exp_name=None):
                 )
     fig = dict(data=data_list, layout=layout)
     py.offline.plot(fig, filename=out_file)
+
+
+def plot_increasing_exp2(data, out_file, exp_name=None):
+    nn_sizes = np.sort(data['NN__network_size'].unique())
+    net_types = np.sort(data['NN__type'].unique())
+    print nn_sizes
+
+    #if exp_name:
+    #    data = data[data['exp_details__setname'].str.contains(exp_name)]
+    #    print data.shape
+    data_list = []
+    for n_type in net_types:
+        select = data[data['NN__type'] == n_type]
+        #nn_sizes = np.sort(select['NN__network_size'].unique())
+        std_sizes = select['std'].unique()
+        
+        for std_size in std_sizes:
+            select2 = select[select['std'] == std_size] 
+            select2 = select2.sort_values(by=['data__num_pts'])
+            if select2.shape[0] > 0:
+                y = select2['mean_err']
+                x = select2['data__num_pts']
+                data_list.append(go.Scatter(
+                    x = x,
+                    y = y,
+                    #y = np.sqrt(y),
+                    name='%s-%s' %(n_type, std_size)
+                ))
+
+
+    layout = dict(title = "%s - Increasing Training Size under Base and Structured Models" % (exp_name),
+                  xaxis = dict(title="Training Data Size"),
+                  yaxis = dict(title="MSE")
+                )
+    fig = dict(data=data_list, layout=layout)
+    py.offline.plot(fig, filename=out_file)
+
 
 def plot_increasing_stations(data, out_file, exp_name=None):
     nn_sizes = np.sort(data['NN__network_size'].unique())
@@ -135,6 +173,12 @@ if __name__ == "__main__":
     exp_names = ['4bs_nooutput_cv0_Explore']
     exp_names = ['structured_500_nooutput_bs3', 'structured_500_nooutput_bs4']
     exp_names = ['increase_base_stations']
+    exp_names = ['Exp1_all']
+    exp_names = ['Exp2']
+    exp_names = ['Exp3']
+    exp_names = ['exp2_gaussian_median']
+    exp_names = ['exp1_perfect_median']
+    exp_names = ['exp3_angledependent_median']
 
     data_l = []
 
@@ -147,11 +191,12 @@ if __name__ == "__main__":
 
     base_dir = "summary_plots/"
     # plot increased training
-    if False:
+    if True:
         for exp in exp_names:
             exp_name = "%s" % (exp)
-            plot_increased_training(data, base_dir + exp_name + "_increasing_training.html", exp_name)
-    if True:
+            #plot_increased_training(data, base_dir + exp_name + "_increasing_training.html", exp_name)
+            plot_increasing_exp2(data, base_dir + exp_name + "_increasing_training.html", exp_name)
+    if False:
         for exp in exp_names:
             exp_name = "%s" % (exp)
             plot_increasing_stations(data, base_dir + exp_name + "_increasing_base_stations.html", exp_name)
